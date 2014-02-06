@@ -1,25 +1,17 @@
 package fr.dmconcept.bob.activities;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.adapters.ProjectAdapter;
@@ -28,10 +20,12 @@ import fr.dmconcept.bob.models.Projects;
 
 public class ProjectListActivity extends ActionBarActivity {
 
+    public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_project_list);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -45,7 +39,7 @@ public class ProjectListActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.project_list, menu);
         return true;
     }
 
@@ -71,7 +65,7 @@ public class ProjectListActivity extends ActionBarActivity {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_project_list, container, false);
             return rootView;
         }
 
@@ -90,10 +84,10 @@ public class ProjectListActivity extends ActionBarActivity {
                     ProjectAdapter adapter = (ProjectAdapter) parent.getAdapter();
                     Project project = adapter.getItem(position);
 
-                    new AlertDialog.Builder(view.getContext())
-                        .setMessage(project.name + " " + project.id)
-                        .show();
-                    // Start the create project activity
+                    // Start the project details activity
+                    Intent intent = new Intent(view.getContext(), ProjectActivity.class);
+                    intent.putExtra(EXTRA_PROJECT_ID, project.id);
+                    startActivity(intent);
 
                 }
             });
