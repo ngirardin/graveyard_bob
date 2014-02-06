@@ -1,5 +1,6 @@
 package fr.dmconcept.bob.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import fr.dmconcept.bob.R;
@@ -17,23 +20,21 @@ import fr.dmconcept.bob.models.Projects;
 
 public class ProjectActivity extends ActionBarActivity {
 
-    // The current project
-    public static Project project;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get the project ID from the Intent
-        Intent intent = getIntent();
-        String projectId = intent.getStringExtra(ProjectListActivity.EXTRA_PROJECT_ID);
-        this.project = Projects.findById(projectId);
-
         setContentView(R.layout.activity_project);
+
+        // Get the intent extra
+        Bundle extras = getIntent().getExtras();
+
+        ProjectFragment projectFragment = new ProjectFragment();
+        projectFragment.setArguments(extras);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new PlaceholderFragment())
+                .add(R.id.container, projectFragment)
                 .commit();
         }
     }
@@ -60,22 +61,65 @@ public class ProjectActivity extends ActionBarActivity {
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * The project fragment
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class ProjectFragment extends Fragment {
 
-        public PlaceholderFragment() {
+        // The current project
+        private Project project;
+
+        public ProjectFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+            // Create the fragment
             View rootView = inflater.inflate(R.layout.fragment_project, container, false);
 
-            TextView projectName = (TextView) rootView.findViewById(R.id.projectName);
-            projectName.setText(project.name);
+            // Get the project ID from the intent
+            String projectId = getArguments().getString(ProjectListActivity.EXTRA_PROJECT_ID);
+            this.project = Projects.findById(projectId);
+
+            updateProjectName(rootView);
+            updateTimeline   (rootView);
 
             return rootView;
+        }
+
+        private void updateProjectName(View view) {
+            ((TextView) view.findViewById(R.id.projectName))
+                .setText(project.name);
+        }
+
+        private void updateTimeline(View view) {
+
+            LinearLayout timeline = (LinearLayout) view.findViewById(R.id.timeline);
+
+            // Create the timeline positions
+            for (int i = 0; i < project.steps.length; i++) {
+
+                Button button = new Button(view.getContext());
+                button.setText(String.valueOf(i + 1));
+                button.setTag(i);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+
+                        Object id = v.getTag();
+
+                        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+                        d.setMessage("Button " + id.toString());
+                        d.show();
+
+                    }
+                });
+
+                timeline.addView(button);
+
+            }
+
         }
 
     }

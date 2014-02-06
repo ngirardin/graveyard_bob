@@ -32,12 +32,12 @@ public class ProjectAdapter extends ArrayAdapter<Project> {
         // Let the adapter create the view
         View view = super.getView(position, convertView, parent);
 
-        Project p = getItem(position);
+        Project project = getItem(position);
 
-        // Update the text (simple_list_item_1's text id is text1
-        TextView textView = (TextView) view.findViewById(android.R.id.text1);
+        String line1 = project.name;
+        String line2 = project.steps.length + " steps - " + project.duration();
 
-        textView.setText(p.name);
+        ((TextView) view.findViewById(android.R.id.text1)).setText(line1 + " / " + line2);
 
         return view;
     }

@@ -81,6 +81,7 @@ public class ProjectListActivity extends ActionBarActivity {
             projectList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                     ProjectAdapter adapter = (ProjectAdapter) parent.getAdapter();
                     Project project = adapter.getItem(position);
 
