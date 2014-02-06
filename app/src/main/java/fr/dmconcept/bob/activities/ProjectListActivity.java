@@ -1,4 +1,4 @@
-package fr.dmconcept.bob;
+package fr.dmconcept.bob.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,11 +21,12 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.adapters.ProjectAdapter;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Projects;
 
-public class MainActivity extends ActionBarActivity {
+public class ProjectListActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,11 +93,13 @@ public class MainActivity extends ActionBarActivity {
                     new AlertDialog.Builder(view.getContext())
                         .setMessage(project.name + " " + project.id)
                         .show();
+                    // Start the create project activity
 
                 }
             });
 
-                    super.onViewCreated(view, savedInstanceState);
+            super.onViewCreated(view, savedInstanceState);
+
         }
 
     }
