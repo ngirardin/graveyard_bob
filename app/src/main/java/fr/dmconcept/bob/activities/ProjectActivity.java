@@ -139,9 +139,6 @@ public class ProjectActivity extends ActionBarActivity {
 
             button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
 
-            // Update the point id text view
-            ((TextView) button.getRootView().findViewById(R.id.pointId)).setText("Point " + (id + 1));
-
         }
 
     }

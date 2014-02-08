@@ -38,13 +38,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/hello_world"
-            android:id="@+id/pointId"
-            android:layout_weight="1" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="Duration"
             android:id="@+id/textView4"
             android:labelFor="@+id/duration" />
