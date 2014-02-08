@@ -82,7 +82,7 @@ public class ProjectActivity extends ActionBarActivity {
             this.project = Projects.findById(projectId);
 
             updateProjectName(rootView);
-            updateTimeline   (rootView);
+            createTimeline(rootView);
 
             return rootView;
         }
@@ -92,9 +92,21 @@ public class ProjectActivity extends ActionBarActivity {
                 .setText(project.name);
         }
 
-        private void updateTimeline(View view) {
+        private void createTimeline(View view) {
 
             LinearLayout timeline = (LinearLayout) view.findViewById(R.id.timeline);
+
+            // Set the listener on the "new" button
+            view
+                .findViewById(R.id.newStep)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+                        d.setMessage("new step");
+                        d.show();
+                    }
+                });
 
             // Create the timeline positions
             for (int i = 0; i < project.steps.length; i++) {
@@ -105,19 +117,27 @@ public class ProjectActivity extends ActionBarActivity {
                 button.setOnClickListener(new View.OnClickListener() {
 
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(View button) {
 
-                        Object id = v.getTag();
+                        // Set the active background on the button
+                        LinearLayout timeline  = (LinearLayout) button.getParent();
+
+                        for (int b = 0; b < timeline.getChildCount(); b++)
+                            timeline.getChildAt(b).setBackgroundResource(android.R.drawable.btn_default);
+
+                        button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+
+                        // Get the button ID
+                        int id = (Integer) button.getTag();
 
                         AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-                        d.setMessage("Button " + id.toString());
+                        d.setMessage("Button " + id);
                         d.show();
 
                     }
                 });
 
                 timeline.addView(button);
-
             }
 
         }
