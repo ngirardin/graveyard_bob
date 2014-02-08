@@ -37,7 +37,7 @@ public class Project {
 
     }
 
-    public int servosCount() {
+    public int getServosCount() {
         if (steps.length == 0)
             return 0;
 

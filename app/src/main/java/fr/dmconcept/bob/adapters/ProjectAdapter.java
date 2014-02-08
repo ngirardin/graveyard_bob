@@ -34,10 +34,9 @@ public class ProjectAdapter extends ArrayAdapter<Project> {
 
         Project project = getItem(position);
 
-        String line1 = project.name;
-        String line2 = project.steps.length + " steps for a duration of " + project.duration() + " ms";
+        String text = project.name + " (" + project.steps.length + " steps for a duration of " + project.duration() + " ms, using " + project.getServosCount() + " servos)";
 
-        ((TextView) view.findViewById(android.R.id.text1)).setText(line1 + " / " + line2);
+        ((TextView) view.findViewById(android.R.id.text1)).setText(text);
 
         return view;
     }
