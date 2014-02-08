@@ -1,7 +1,6 @@
 package fr.dmconcept.bob.activities;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -42,7 +41,6 @@ public class ProjectActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.project, menu);
         return true;
@@ -81,15 +79,14 @@ public class ProjectActivity extends ActionBarActivity {
             String projectId = getArguments().getString(ProjectListActivity.EXTRA_PROJECT_ID);
             this.project = Projects.findById(projectId);
 
-            updateProjectName(rootView);
+            updateTitle();
             createTimeline(rootView);
 
             return rootView;
         }
 
-        private void updateProjectName(View view) {
-            ((TextView) view.findViewById(R.id.projectName))
-                .setText(project.name);
+        private void updateTitle() {
+            getActivity().setTitle(project.name);
         }
 
         private void createTimeline(View view) {
@@ -102,9 +99,9 @@ public class ProjectActivity extends ActionBarActivity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-                        d.setMessage("new step");
-                        d.show();
+                    AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+                    d.setMessage("new step");
+                    d.show();
                     }
                 });
 
@@ -115,30 +112,35 @@ public class ProjectActivity extends ActionBarActivity {
                 button.setText(String.valueOf(i + 1));
                 button.setTag(i);
                 button.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View button) {
-
-                        // Set the active background on the button
-                        LinearLayout timeline  = (LinearLayout) button.getParent();
-
-                        for (int b = 0; b < timeline.getChildCount(); b++)
-                            timeline.getChildAt(b).setBackgroundResource(android.R.drawable.btn_default);
-
-                        button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-
-                        // Get the button ID
-                        int id = (Integer) button.getTag();
-
-                        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-                        d.setMessage("Button " + id);
-                        d.show();
-
+                        selectPosition((Button) button);
                     }
                 });
 
                 timeline.addView(button);
             }
+
+            // Select the first position
+            selectPosition((Button) timeline.getChildAt(0));
+
+        }
+
+        private void selectPosition(Button button) {
+
+            // Get the clicked button ID
+            int id = (Integer) button.getTag();
+
+            // Set the active background on the button
+            LinearLayout timeline = (LinearLayout) button.getParent();
+
+            for (int b = 0; b < timeline.getChildCount(); b++)
+                timeline.getChildAt(b).setBackgroundResource(android.R.drawable.btn_default);
+
+            button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+
+            // Update the point id text view
+            ((TextView) button.getRootView().findViewById(R.id.pointId)).setText("Point " + (id + 1));
 
         }
 

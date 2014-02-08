@@ -35,7 +35,7 @@ public class ProjectAdapter extends ArrayAdapter<Project> {
         Project project = getItem(position);
 
         String line1 = project.name;
-        String line2 = project.steps.length + " steps - " + project.duration();
+        String line2 = project.steps.length + " steps for a duration of " + project.duration() + " ms";
 
         ((TextView) view.findViewById(android.R.id.text1)).setText(line1 + " / " + line2);
 
