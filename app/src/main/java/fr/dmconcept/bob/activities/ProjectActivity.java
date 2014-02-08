@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -83,8 +84,8 @@ public class ProjectActivity extends ActionBarActivity {
             this.project = Projects.findById(projectId);
 
             updateTitle();
-            createTimeline(rootView);
             createPositionSliders(rootView, savedInstanceState);
+            createTimeline(rootView);
 
             return rootView;
         }
@@ -125,9 +126,7 @@ public class ProjectActivity extends ActionBarActivity {
                 timeline.addView(button);
             }
 
-            // Select the first position
             selectPosition((Button) timeline.getChildAt(0));
-
         }
 
         private void selectPosition(Button button) {
@@ -144,8 +143,16 @@ public class ProjectActivity extends ActionBarActivity {
             // Set the selected position button as active
             button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
 
-            // Update the position sliders positions
+            // Update the position sliders
+            View root = button.getRootView();
+
+            TableLayout startPositions = (TableLayout) root.findViewById(R.id.startPositions);
+            TableLayout endPositions   = (TableLayout) root.findViewById(R.id.endPositions  );
+
             Step step = project.steps[positionIndex];
+
+            for (int i = 0; i < step.getServosCount(); i++)
+                ((SeekBar) startPositions.findViewWithTag(i)).setProgress(step.getServo(i));
 
         }
 
@@ -169,11 +176,11 @@ public class ProjectActivity extends ActionBarActivity {
             // Inflate the position slider widget
             TableRow positionSliderRow = (TableRow) inflater.inflate(R.layout.layout_position_sliders, null);
 
-            // Set the servo id
-            positionSliderRow.setTag(servoIndex);
-
             // Update the servo name text
             ((TextView) positionSliderRow.findViewById(R.id.text)).setText("Servo " + (servoIndex + 1));
+
+            // Set a tag to the slider for easier retrieval
+            positionSliderRow.findViewById(R.id.slider).setTag(servoIndex);
 
             // Append the position slider to the parent view
             parent.addView(positionSliderRow);
