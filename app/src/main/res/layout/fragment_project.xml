@@ -61,38 +61,17 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/positions">
+        android:layout_height="fill_parent">
 
         <TableLayout
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_below="@+id/duration"
             android:background="#ffe88b"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/startPositions">
 
-            <TableRow
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:measureWithLargestChild="false">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New Text"
-                    android:id="@+id/textView2" />
-
-                <SeekBar
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/seekBar"
-                    android:progress="50"
-                    android:indeterminate="false"
-                    android:max="100"
-                    android:mirrorForRtl="true"
-                    android:layout_weight="1" />
-
-            </TableRow>
+            <include layout="@layout/layout_position_sliders" />
 
         </TableLayout>
 
@@ -102,24 +81,9 @@
             android:layout_alignParentTop="false"
             android:layout_alignParentRight="false"
             android:background="#ffabd6"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/endPositions">
 
-            <TableRow
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New Text"
-                    android:id="@+id/textView3" />
-
-                <SeekBar
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/seekBar2"
-                    android:layout_weight="1" />
-            </TableRow>
         </TableLayout>
     </LinearLayout>
 

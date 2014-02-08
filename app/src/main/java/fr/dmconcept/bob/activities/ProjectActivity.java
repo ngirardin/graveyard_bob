@@ -11,11 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Projects;
+import fr.dmconcept.bob.models.Step;
 
 public class ProjectActivity extends ActionBarActivity {
 
@@ -81,6 +83,7 @@ public class ProjectActivity extends ActionBarActivity {
 
             updateTitle();
             createTimeline(rootView);
+            createPositionSliders(rootView, savedInstanceState);
 
             return rootView;
         }
@@ -128,16 +131,35 @@ public class ProjectActivity extends ActionBarActivity {
 
         private void selectPosition(Button button) {
 
-            // Get the clicked button ID
-            int id = (Integer) button.getTag();
+            // Get the clicked button position index
+            int positionIndex = (Integer) button.getTag();
 
-            // Set the active background on the button
             LinearLayout timeline = (LinearLayout) button.getParent();
 
+            // Set the default background on all position buttons
             for (int b = 0; b < timeline.getChildCount(); b++)
                 timeline.getChildAt(b).setBackgroundResource(android.R.drawable.btn_default);
 
+            // Set the selected position button as active
             button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+
+            // Update the position sliders positions
+            Step step = project.steps[positionIndex];
+
+        }
+
+        private void createPositionSliders(View view, Bundle savedInstanceState) {
+
+            // Create the positions sliders according to the project servos count
+            TableLayout startPositions = ((TableLayout) view.findViewById(R.id.startPositions));
+            TableLayout endPositions   = ((TableLayout) view.findViewById(R.id.endPositions  ));
+
+            LayoutInflater inflater = getLayoutInflater(savedInstanceState);
+
+            for (int i = 0; i < project.servosCount(); i++) {
+                inflater.inflate(R.layout.layout_position_sliders, startPositions).setTag(i);
+                inflater.inflate(R.layout.layout_position_sliders, endPositions  ).setTag(i);
+            }
 
         }
 

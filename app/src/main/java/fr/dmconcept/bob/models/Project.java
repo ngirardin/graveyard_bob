@@ -37,4 +37,11 @@ public class Project {
 
     }
 
+    public int servosCount() {
+        if (steps.length == 0)
+            return 0;
+
+        return steps[0].getServosCount();
+    }
+
 }

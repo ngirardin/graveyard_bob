@@ -9,6 +9,9 @@ public class Step {
     private int[] servos;
 
     public Step(int duration, int[] servos) {
+
+        assert servos.length > 0;
+
         this.duration = duration;
         this.servos   = servos  ;
     }
@@ -22,6 +25,10 @@ public class Step {
         assert servo < servos.length;
         assert position >= 0  ;
         assert position <= 100;
+    }
+
+    public int getServosCount() {
+        return servos.length;
     }
 
 }
