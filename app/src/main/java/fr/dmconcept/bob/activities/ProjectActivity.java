@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
@@ -155,10 +157,26 @@ public class ProjectActivity extends ActionBarActivity {
 
             LayoutInflater inflater = getLayoutInflater(savedInstanceState);
 
-            for (int i = 0; i < project.getServosCount(); i++) {
-                inflater.inflate(R.layout.layout_position_sliders, startPositions).setTag(i);
-                inflater.inflate(R.layout.layout_position_sliders, endPositions  ).setTag(i);
+            for (int servo = 0; servo < project.getServosCount(); servo++) {
+                createPositionSlider(inflater, startPositions, servo);
+                createPositionSlider(inflater, endPositions  , servo);
             }
+
+        }
+
+        private void createPositionSlider(LayoutInflater inflater, TableLayout parent, int servoIndex) {
+
+            // Inflate the position slider widget
+            TableRow positionSliderRow = (TableRow) inflater.inflate(R.layout.layout_position_sliders, null);
+
+            // Set the servo id
+            positionSliderRow.setTag(servoIndex);
+
+            // Update the servo name text
+            ((TextView) positionSliderRow.findViewById(R.id.text)).setText("Servo " + (servoIndex + 1));
+
+            // Append the position slider to the parent view
+            parent.addView(positionSliderRow);
 
         }
 

@@ -67,11 +67,8 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_below="@+id/duration"
-            android:background="#ffe88b"
             android:layout_weight="1"
             android:id="@+id/startPositions">
-
-            <include layout="@layout/layout_position_sliders" />
 
         </TableLayout>
 
@@ -80,7 +77,6 @@
             android:layout_height="fill_parent"
             android:layout_alignParentTop="false"
             android:layout_alignParentRight="false"
-            android:background="#ffabd6"
             android:layout_weight="1"
             android:id="@+id/endPositions">
 
