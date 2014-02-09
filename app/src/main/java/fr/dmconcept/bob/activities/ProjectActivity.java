@@ -111,8 +111,7 @@ public class ProjectActivity extends ActionBarActivity {
                 });
 
             // Create the timeline positions
-            for (int i = 0; i < project.steps.length; i++) {
-
+            for (int i = 0; i < project.steps.length - 1; i++) {
                 Button button = new Button(view.getContext());
                 button.setText(String.valueOf(i + 1));
                 button.setTag(i);
@@ -144,15 +143,7 @@ public class ProjectActivity extends ActionBarActivity {
             button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
 
             // Update the position sliders
-            View root = button.getRootView();
-
-            TableLayout startPositions = (TableLayout) root.findViewById(R.id.startPositions);
-            TableLayout endPositions   = (TableLayout) root.findViewById(R.id.endPositions  );
-
-            Step step = project.steps[positionIndex];
-
-            for (int i = 0; i < step.getServosCount(); i++)
-                ((SeekBar) startPositions.findViewWithTag(i)).setProgress(step.getServo(i));
+            updatePositionsSliders(positionIndex, button.getRootView());
 
         }
 
@@ -184,6 +175,22 @@ public class ProjectActivity extends ActionBarActivity {
 
             // Append the position slider to the parent view
             parent.addView(positionSliderRow);
+
+        }
+
+        private void updatePositionsSliders(int positionIndex, View root) {
+
+            TableLayout startPositions = (TableLayout) root.findViewById(R.id.startPositions);
+            TableLayout endPositions   = (TableLayout) root.findViewById(R.id.endPositions  );
+
+            Step startStep = project.steps[positionIndex    ];
+            Step endStep   = project.steps[positionIndex + 1];
+
+            for (int i = 0; i < startStep.getServosCount(); i++)
+                    ((SeekBar) startPositions.findViewWithTag(i)).setProgress(startStep.getServo(i));
+
+            for (int i = 0; i < endStep.getServosCount(); i++)
+                    ((SeekBar) endPositions.findViewWithTag(i)).setProgress(endStep.getServo(i));
 
         }
 
