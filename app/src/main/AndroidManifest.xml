@@ -7,19 +7,35 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name="fr.dmconcept.bob.activities.ProjectListActivity"
             android:label="@string/app_name" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- IOIO -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" android:resource="@xml/accessory_filter" />
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/device_filter" />
+
         </activity>
-        <activity
-            android:name="fr.dmconcept.bob.activities.ProjectActivity"
-            android:label="@string/title_activity_project" >
-        </activity>
+
+        <activity android:name="fr.dmconcept.bob.activities.ProjectActivity"></activity>
+        <activity android:name="fr.dmconcept.bob.activities.XoxoActivity"   ></activity>
+
     </application>
+
+    <!-- IOIO Lib -->
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
 </manifest>

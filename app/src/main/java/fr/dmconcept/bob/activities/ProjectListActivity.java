@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -72,9 +71,19 @@ public class ProjectListActivity extends ActionBarActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
 
-            Project[] projects = Projects.all();
+            /**
+             * Listener for the IOIO button
+             */
+            view.findViewById(R.id.startIOIO).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(v.getContext(), XoxoActivity.class));
+                }
+            });
 
             // Populate the list with the projects
+            Project[] projects = Projects.all();
+
             ListView projectList = (ListView) view.findViewById(R.id.projectList);
             projectList.setAdapter(new ProjectAdapter(view.getContext(), projects));
 

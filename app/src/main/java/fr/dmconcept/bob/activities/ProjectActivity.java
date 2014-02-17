@@ -98,18 +98,6 @@ public class ProjectActivity extends ActionBarActivity {
 
             LinearLayout timeline = (LinearLayout) view.findViewById(R.id.timeline);
 
-            // Set the listener on the "new" button
-            view
-                .findViewById(R.id.newStep)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                    AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-                    d.setMessage("new step");
-                    d.show();
-                    }
-                });
-
             // Create the timeline positions
             for (int i = 0; i < project.steps.length - 1; i++) {
                 Button button = new Button(view.getContext());

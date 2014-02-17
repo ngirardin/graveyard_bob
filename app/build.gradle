@@ -2,13 +2,13 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion '19.0.1'
 
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 10
         targetSdkVersion 19
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
     }
     buildTypes {
         release {
@@ -20,4 +20,6 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:18.0.+'
+    compile files('lib/usb.jar')
+    compile files('lib/ioiolibandroid.jar')
 }
