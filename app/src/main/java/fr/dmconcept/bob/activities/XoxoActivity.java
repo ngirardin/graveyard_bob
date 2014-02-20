@@ -1,6 +1,7 @@
 package fr.dmconcept.bob.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,6 +22,8 @@ import ioio.lib.util.android.IOIOActivity;
  * HelloIOIOPower example.
  */
 public class XoxoActivity extends IOIOActivity {
+
+    static final String TAG = "activities.XoxoActivity";
 
     enum Mode { STATIC, LOOP}
 
@@ -56,7 +59,7 @@ public class XoxoActivity extends IOIOActivity {
                 loopStep  = Float.parseFloat(((TextView) findViewById(R.id.editTextStep     )).getText().toString());
                 loopSleep = Integer.parseInt(((TextView) findViewById(R.id.editTextSleep    )).getText().toString());
 
-                System.out.println("***** Loop mode");
+                Log.i(TAG, "Loop mode");
 
             }
         });

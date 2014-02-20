@@ -20,6 +20,8 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:18.0.+'
-    compile files('lib/usb.jar')
-    compile files('lib/ioiolibandroid.jar')
+    compile files('libs/alljoyn.jar')
+    compile files('libs/ioiolibandroid.jar')
+    compile files('libs/usb.jar')
+    compile files('libs/ioiolibandroid-src.zip')
 }

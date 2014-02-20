@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.activities;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -81,6 +80,7 @@ public class ProjectActivity extends ActionBarActivity {
 
             // Get the project ID from the intent
             String projectId = getArguments().getString(ProjectListActivity.EXTRA_PROJECT_ID);
+
             this.project = Projects.findById(projectId);
 
             updateTitle();

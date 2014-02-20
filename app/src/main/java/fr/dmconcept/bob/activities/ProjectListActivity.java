@@ -1,9 +1,9 @@
 package fr.dmconcept.bob.activities;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,22 +17,27 @@ import fr.dmconcept.bob.adapters.ProjectAdapter;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Projects;
 
+// TODO move to Application instead of Activity
 public class ProjectListActivity extends ActionBarActivity {
+
+    public static final String TAG = "bob.activities.ProjctListActivity";
 
     public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_project_list);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new PlaceholderFragment())
-                .commit();
+                    .add(R.id.container, new PlaceholderFragment())
+                    .commit();
         }
-    }
 
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
