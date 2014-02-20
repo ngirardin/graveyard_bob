@@ -3,11 +3,14 @@ package fr.dmconcept.bob.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import fr.dmconcept.bob.R;
 
 public class DBActivity extends Activity {
+
+    public static final String TAG = "activities.DBActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,8 @@ public class DBActivity extends Activity {
         new AlertDialog.Builder(this)
             .setMessage("CAAAAAVE")
             .show();
+
+        Log.i(TAG, "buttonCaveClicked() - Pouce dans le CUL");
 
     }
 
