@@ -36,7 +36,7 @@ public class BobApplication extends Application implements Observable {
         AllJoynThread allJoynRunnable = new AllJoynThread(this);
         Thread allJoynThread = new Thread(allJoynRunnable);
 
-        allJoynThread.start();
+        //XXX allJoynThread.start();
 
     }
 
