@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.models;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class Project {
@@ -13,7 +12,7 @@ public class Project {
         this(
             UUID.randomUUID().toString(),
             name,
-            new Step[]{}
+            new Step[2]
         );
     }
 
