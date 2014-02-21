@@ -7,33 +7,31 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pouce"
-        android:id="@+id/textView" />
+        android:text="mChannelName"
+        android:id="@+id/mChannelName" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="dans"
-        android:id="@+id/textView2" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="le"
-        android:id="@+id/textView3" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="cul"
-        android:id="@+id/textView4" />
+        android:text="mChannelStatus"
+        android:id="@+id/mChannelStatus" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CAVE"
-        android:id="@+id/buttonCave" />
+        android:text="Start"
+        android:id="@+id/mStartButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:id="@+id/mStopButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="List channels"
+        android:id="@+id/buttonListChannels" />
+
 </LinearLayout>
