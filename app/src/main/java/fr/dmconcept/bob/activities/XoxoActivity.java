@@ -43,7 +43,7 @@ public class XoxoActivity extends IOIOActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.xoxo);
+        setContentView(R.layout.activity_xoxo);
 
         /**
          * LOOP
