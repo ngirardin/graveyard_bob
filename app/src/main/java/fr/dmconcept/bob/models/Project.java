@@ -7,19 +7,22 @@ public class Project {
     public String id   ;
     public String name ;
     public Step[] steps;
+    public BoardConfig boardConfigs;
 
-    public Project(String name) {
+    public Project(String name, BoardConfig boardConfig) {
         this(
             UUID.randomUUID().toString(),
             name,
+            boardConfig,
             new Step[2]
         );
     }
 
-    public Project(String id, String name, Step[] steps) {
-        this.id    = id   ;
-        this.name  = name ;
-        this.steps = steps;
+    public Project(String id, String name, BoardConfig boardConfig, Step[] steps) {
+        this.id           = id   ;
+        this.name         = name ;
+        this.steps        = steps;
+        this.boardConfigs = boardConfig;
     }
 
     /**
@@ -29,8 +32,7 @@ public class Project {
 
         int duration = 0;
 
-        for (int i = 0; i < steps.length; i++)
-            duration += steps[i].duration;
+        for (Step step : steps) duration += step.duration;
 
         return duration;
 
