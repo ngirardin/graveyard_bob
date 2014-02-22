@@ -7,9 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import fr.dmconcept.bob.R;
@@ -19,8 +19,20 @@ import fr.dmconcept.bob.models.Step;
 
 public class ProjectActivity extends Activity {
 
+    public static final String TAG = "activities.ProjectListActivity";
+
     // The current project
     private Project mProject;
+
+    // The timeline
+    LinearLayout mTimeline;
+
+    // The duration EditText
+    EditText mDurationEditText;
+
+    // The start and end positions linear layout
+    LinearLayout mStartPositions;
+    LinearLayout mEndPositions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,34 +41,109 @@ public class ProjectActivity extends Activity {
 
         setContentView(R.layout.activity_project);
 
+        mTimeline         = (LinearLayout) findViewById(R.id.timeline        );
+        mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration);
+        mStartPositions   = (LinearLayout) findViewById(R.id.startPositions  );
+        mEndPositions     = (LinearLayout) findViewById(R.id.endPositions    );
+
         // Get the project ID from the intent
         String projectId = getIntent().getStringExtra(ProjectListActivity.EXTRA_PROJECT_ID);
 
-        this.mProject = Projects.findById(projectId);
+        mProject = Projects.findById(projectId);
 
         // Set the project name as the activity title
         setTitle(mProject.name);
 
+        fillTimeline();
         createPositionSliders();
-        createTimeline();
+
+        // Select the first step as active
+        updateActiveStep(0);
+
+    }
+
+    private void fillTimeline() {
+
+        float projectDuration = mProject.duration();
+
+        // Add the buttons to the timeline
+        for (int i = 0; i < mProject.steps.length - 1; i++) {
+
+            Step step = mProject.steps[i];
+
+            float durationRatio = (float) step.duration / projectDuration;
+
+            Button button = new Button(this);
+
+            // Dynamically set the weight on the button according to the duration
+            button.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, durationRatio
+            ));
+
+            // Set the step id as the tag
+            button.setTag(i);
+
+            button.setText(String.valueOf(i + 1));
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View button) {
+                    updateActiveStep((Button) button);
+                }
+            });
+
+            mTimeline.addView(button);
+        }
+
+    }
+
+    private void updateActiveStep(Button button) {
+
+        int stepIndex = (Integer) button.getTag();
+        updateActiveStep(stepIndex);
+
+    }
+
+    private void updateActiveStep(int stepIndex) {
+
+        // Set the default background on all position buttons
+        for (int i = 0; i < mProject.steps.length - 1; i++) {
+
+            View button = mTimeline.getChildAt(i);
+
+            if (i == stepIndex)
+                // Set the current button as selected
+                button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+            else
+                // Restore the default background
+                button.setBackgroundResource(android.R.drawable.btn_default);
+        }
+
+        Step step = mProject.steps[stepIndex];
+
+        // Update the duration editText
+        String durationString = String.valueOf(step.duration);
+        mDurationEditText.setText(durationString);
+
+        //Set the cursor at the end of the edit text
+        mDurationEditText.setSelection(durationString.length());
+
+        // Update the position sliders
+        updatePositionSliders(stepIndex);
 
     }
 
     /**
-     * Create the right quantity of position sliders according to the project servo count
+     * Create the position sliders according to the project servo count
      *
      */
     private void createPositionSliders() {
 
-        // Create the positions sliders according to the project servos count
-        LinearLayout startPositions = ((LinearLayout) findViewById(R.id.startPositions));
-        LinearLayout endPositions   = ((LinearLayout) findViewById(R.id.endPositions  ));
-
         LayoutInflater inflater = getLayoutInflater();
 
         for (int i = 0; i < mProject.getServosCount(); i++) {
-            createPositionSlider(inflater, startPositions, i);
-            createPositionSlider(inflater, endPositions  , i);
+            createPositionSlider(inflater, mStartPositions, i);
+            createPositionSlider(inflater, mEndPositions, i);
         }
 
     }
@@ -84,62 +171,17 @@ public class ProjectActivity extends Activity {
 
     }
 
-    private void createTimeline() {
 
-        LinearLayout timeline = (LinearLayout) findViewById(R.id.timeline);
-
-        // Create the timeline positions
-        for (int i = 0; i < mProject.steps.length - 1; i++) {
-
-            Button button = new Button(this);
-            button.setText(String.valueOf(i + 1));
-            button.setTag(i);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View button) {
-                    selectPosition((Button) button);
-                }
-            });
-
-            timeline.addView(button);
-        }
-
-        selectPosition((Button) timeline.getChildAt(0));
-
-    }
-
-    private void selectPosition(Button button) {
-
-        // Get the clicked button position index
-        int positionIndex = (Integer) button.getTag();
-
-        LinearLayout timeline = (LinearLayout) button.getParent();
-
-        // Set the default background on all position buttons
-        for (int b = 0; b < timeline.getChildCount(); b++)
-            timeline.getChildAt(b).setBackgroundResource(android.R.drawable.btn_default);
-
-        // Set the selected position button as active
-        button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
-
-        // Update the position sliders
-        updatePositionsSliders(positionIndex);
-
-    }
-
-    private void updatePositionsSliders(int positionIndex) {
-
-        TableLayout startPositions = (TableLayout) findViewById(R.id.startPositions);
-        TableLayout endPositions   = (TableLayout) findViewById(R.id.endPositions  );
+    private void updatePositionSliders(int positionIndex) {
 
         Step startStep = mProject.steps[positionIndex    ];
         Step endStep   = mProject.steps[positionIndex + 1];
 
         for (int i = 0; i < startStep.getServosCount(); i++)
-            ((SeekBar) startPositions.findViewWithTag(i)).setProgress(startStep.getServo(i));
+            ((SeekBar) mStartPositions.findViewWithTag(i)).setProgress(startStep.getServo(i));
 
         for (int i = 0; i < endStep.getServosCount(); i++)
-            ((SeekBar) endPositions.findViewWithTag(i)).setProgress(endStep.getServo(i));
+            ((SeekBar) mEndPositions.findViewWithTag(i)).setProgress(endStep.getServo(i));
 
     }
 

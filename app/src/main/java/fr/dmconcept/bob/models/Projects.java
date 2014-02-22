@@ -11,7 +11,7 @@ public abstract class Projects {
                         new Step(1000, new int[] { 0, 50, 100} ),
                         new Step(500 , new int[] {30,  0,  50} ),
                         new Step(2000, new int[] {60,  0,  50} ),
-                        new Step(5000, new int[] {90, 50, 100} )
+                        new Step(0, new int[] {90, 50, 100} )
                     }),
 
 
@@ -23,7 +23,7 @@ public abstract class Projects {
                         new Step(5000, new int[] {20,  80, 100,  50}),
                         new Step(2000, new int[] {40,  60,   0, 100}),
                         new Step(3000, new int[] {60,  40, 100,  50}),
-                        new Step(5000, new int[] {80,  20,   0,   0})
+                        new Step(0, new int[] {80,  20,   0,   0})
                     })
 
     };

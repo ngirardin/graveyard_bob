@@ -14,6 +14,7 @@ public class Project {
             UUID.randomUUID().toString(),
             name,
             boardConfig,
+            //TODO last step duration always == 0
             new Step[2]
         );
     }

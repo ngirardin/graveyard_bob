@@ -40,7 +40,7 @@ public class ProjectListActivity extends ListActivity {
 
                 Project project = getItem(position);
 
-                String text = project.steps.length + " steps - duration " + (project.duration() / 1000) + " s - servo config: TODO";
+                String text = (project.steps.length - 1) + " steps - duration " + (project.duration() / 1000) + " s - servo config: TODO";
 
                 ((TextView) view.findViewById(android.R.id.text1)).setText(project.name);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(text);
