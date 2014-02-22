@@ -2,6 +2,7 @@ package fr.dmconcept.bob.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
@@ -19,25 +21,27 @@ import fr.dmconcept.bob.models.Step;
 
 public class ProjectActivity extends Activity {
 
-    public static final String TAG = "activities.ProjectListActivity";
+    private static final String TAG = "activities.ProjectListActivity";
 
     // The current project
     private Project mProject;
 
     // The timeline
-    LinearLayout mTimeline;
+    private LinearLayout mTimeline;
 
     // The duration EditText
-    EditText mDurationEditText;
+    private EditText mDurationEditText;
 
     // The start and end positions linear layout
-    LinearLayout mStartPositions;
-    LinearLayout mEndPositions;
+    private LinearLayout mStartPositions;
+    private LinearLayout mEndPositions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Log.i(TAG, "onCreate()");
 
         setContentView(R.layout.activity_project);
 
@@ -73,17 +77,18 @@ public class ProjectActivity extends Activity {
 
             float durationRatio = (float) step.duration / projectDuration;
 
-            Button button = new Button(this);
+            ToggleButton button = new ToggleButton(this);
+
+            // Set the step id as the tag
+            button.setTag(i);
 
             // Dynamically set the weight on the button according to the duration
             button.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, durationRatio
             ));
 
-            // Set the step id as the tag
-            button.setTag(i);
-
-            button.setText(String.valueOf(i + 1));
+            button.setTextOff(String.valueOf(i + 1));
+            button.setTextOn(button.getTextOff());
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -92,7 +97,9 @@ public class ProjectActivity extends Activity {
                 }
             });
 
-            mTimeline.addView(button);
+            // Add the button before the "new step" button
+            mTimeline.addView(button, mTimeline.getChildCount() - 1);
+
         }
 
     }
@@ -109,14 +116,15 @@ public class ProjectActivity extends Activity {
         // Set the default background on all position buttons
         for (int i = 0; i < mProject.steps.length - 1; i++) {
 
-            View button = mTimeline.getChildAt(i);
+            ToggleButton button = (ToggleButton) mTimeline.findViewWithTag(i);
+            assert button != null;
 
             if (i == stepIndex)
                 // Set the current button as selected
-                button.setBackgroundColor(getResources().getColor(android.R.color.holo_green_light));
+                button.setChecked(true);
             else
                 // Restore the default background
-                button.setBackgroundResource(android.R.drawable.btn_default);
+                button.setChecked(false);
         }
 
         Step step = mProject.steps[stepIndex];
@@ -161,6 +169,7 @@ public class ProjectActivity extends Activity {
         LinearLayout positionSliderRow = (LinearLayout) inflater.inflate(R.layout.layout_position_sliders, null);
 
         // Update the servo name text
+        assert positionSliderRow != null;
         ((TextView) positionSliderRow.findViewById(R.id.text)).setText("Servo " + (i + 1));
 
         // Set a tag to the slider for easier retrieval
@@ -177,11 +186,19 @@ public class ProjectActivity extends Activity {
         Step startStep = mProject.steps[positionIndex    ];
         Step endStep   = mProject.steps[positionIndex + 1];
 
-        for (int i = 0; i < startStep.getServosCount(); i++)
-            ((SeekBar) mStartPositions.findViewWithTag(i)).setProgress(startStep.getServo(i));
+        // Update the start position seek bar
+        for (int i = 0; i < startStep.getServosCount(); i++) {
+            View position = mStartPositions.findViewWithTag(i);
+            assert position != null;
+            ((SeekBar) position).setProgress(startStep.getServo(i));
+        }
 
-        for (int i = 0; i < endStep.getServosCount(); i++)
-            ((SeekBar) mEndPositions.findViewWithTag(i)).setProgress(endStep.getServo(i));
+        // Update the end position seek bar
+        for (int i = 0; i < endStep.getServosCount(); i++) {
+            View position = mEndPositions.findViewWithTag(i);
+            assert position != null;
+            ((SeekBar) position).setProgress(endStep.getServo(i));
+        }
 
     }
 
@@ -198,10 +215,8 @@ public class ProjectActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+
+        return (id ==  R.id.action_settings) || super.onOptionsItemSelected(item);
     }
 
 }
