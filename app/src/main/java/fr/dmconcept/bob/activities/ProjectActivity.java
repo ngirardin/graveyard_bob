@@ -15,8 +15,8 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import fr.dmconcept.bob.R;
+import fr.dmconcept.bob.dao.ProjectsDataSource;
 import fr.dmconcept.bob.models.Project;
-import fr.dmconcept.bob.models.Projects;
 import fr.dmconcept.bob.models.Step;
 
 public class ProjectActivity extends Activity {
@@ -56,7 +56,7 @@ public class ProjectActivity extends Activity {
         // Get the project ID from the intent
         int projectId = getIntent().getIntExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
 
-        mProject = Projects.findById(projectId);
+        mProject = ProjectsDataSource.findById(projectId);
 
         // Set the project name as the activity title
         setTitle(mProject.getName());

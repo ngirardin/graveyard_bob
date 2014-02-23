@@ -12,8 +12,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import fr.dmconcept.bob.R;
+import fr.dmconcept.bob.dao.ProjectsDataSource;
 import fr.dmconcept.bob.models.Project;
-import fr.dmconcept.bob.models.Projects;
 
 // TODO move to Application instead of Activity
 public class ProjectListActivity extends ListActivity {
@@ -29,7 +29,7 @@ public class ProjectListActivity extends ListActivity {
 
         super.onCreate(savedInstanceState);
 
-        mProjects = Projects.all();
+        mProjects = ProjectsDataSource.all();
 
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
