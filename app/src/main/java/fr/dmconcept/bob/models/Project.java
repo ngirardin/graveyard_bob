@@ -4,26 +4,17 @@ import java.util.UUID;
 
 public class Project {
 
-    public String id   ;
+    public long id;
     public String name ;
-    public Step[] steps;
-    public BoardConfig boardConfigs;
+    public String steps;
+    public long boardConfigsId;
 
-    public Project(String name, BoardConfig boardConfig) {
-        this(
-            UUID.randomUUID().toString(),
-            name,
-            boardConfig,
-            //TODO last step duration always == 0
-            new Step[2]
-        );
-    }
 
-    public Project(String id, String name, BoardConfig boardConfig, Step[] steps) {
-        this.id           = id   ;
-        this.name         = name ;
+    public Project(Long id, String name, long boardConfig, String steps) {
+        this.id           = id;
+        this.name         = name;
         this.steps        = steps;
-        this.boardConfigs = boardConfig;
+        this.boardConfigsId = boardConfig;
     }
 
     /**

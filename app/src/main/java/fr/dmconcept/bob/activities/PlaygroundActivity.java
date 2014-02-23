@@ -8,10 +8,14 @@ import android.util.Log;
 import android.view.View;
 
 import fr.dmconcept.bob.R;
+import fr.dmconcept.bob.dao.ProjectsDataSource;
+import fr.dmconcept.bob.models.Project;
 
 public class PlaygroundActivity extends Activity {
 
     public static final String TAG = "activities.PlaygroundActivity";
+
+    private Project[] projects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +29,8 @@ public class PlaygroundActivity extends Activity {
                buttonCaveClicked();
             }
         });
+
+        this.projects = ProjectsDataSource.all();
     }
 
     private void buttonCaveClicked() {
@@ -41,7 +47,8 @@ public class PlaygroundActivity extends Activity {
                     }
                 })
                 .show();
-
     }
+
+
 
 }
