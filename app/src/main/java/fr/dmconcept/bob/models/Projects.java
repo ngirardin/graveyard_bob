@@ -31,11 +31,7 @@ public abstract class Projects {
         new Project(
             111,
             "First project",
-            new BoardConfig("IOIO 3", new ServoConfig[] {
-                new ServoConfig(3, 1200, 1500, 50),
-                new ServoConfig(4, 1200, 1500, 50),
-                new ServoConfig(5, 1200, 1500, 50),
-            }),
+            BoardConfig.BoardConfigs.all().get(0),
             createSteps(
                 "1000:0,50,100;" +
                 "500:30,0,50;"   +
@@ -47,12 +43,7 @@ public abstract class Projects {
         new Project(
             222,
             "Second project",
-            new BoardConfig("IOIO 4", new ServoConfig[] {
-                new ServoConfig(3, 1350, 1560, 50),
-                new ServoConfig(4, 1350, 1560, 50),
-                new ServoConfig(5, 1350, 1560, 50),
-                new ServoConfig(6, 1350, 1560, 50),
-            }),
+            BoardConfig.BoardConfigs.all().get(0),
             createSteps(
                 "1000:0,100,0,0;"    +
                 "5000:20,80,100,50;" +

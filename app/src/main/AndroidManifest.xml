@@ -60,8 +60,11 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <activity android:name="fr.dmconcept.bob.activities.ProjectActivity" />
-        <activity android:name="fr.dmconcept.bob.activities.XoxoActivity" />
+        <activity android:name=".activities.ProjectActivity" />
+
+        <activity android:name=".activities.XoxoActivity" />
+
+        <activity android:name=".activities.BoardConfigActivity" />
 
         <service
             android:name="fr.dmconcept.bob.alljoyn.AllJoynService"
