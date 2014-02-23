@@ -1,27 +1,28 @@
 package fr.dmconcept.bob.models;
 
+import java.util.ArrayList;
+
 public class BoardConfig {
 
-    private int mId;
+    private Long mId;
     private String mName;
-    private ServoConfig[] mServoConfigs;
+    private ArrayList<ServoConfig> mServoConfigs;
 
 
-    public BoardConfig(String name, ServoConfig[] servoConfig){
+    public BoardConfig(String name, ArrayList<ServoConfig> servoConfig){
 
         this(-1, name, servoConfig);
     }
 
 
-    public BoardConfig(int id, String name, ServoConfig[] servoConfigs){
+    public BoardConfig(long id, String name, ArrayList<ServoConfig> servoConfigs){
 
         this.mId           = id;
         this.mName         = name;
         this.mServoConfigs = servoConfigs;
-
     }
 
-    public int getId(){
+    public long getId(){
         return this.mId;
     }
 
@@ -30,29 +31,20 @@ public class BoardConfig {
     }
 
     public int getServoCount() {
-        return mServoConfigs.length;
+        return this.mServoConfigs.size();
     }
 
-    public static ServoConfig[] getAllServoConfigs(){
-
-        // db query code
-        return null;
+    public ArrayList<ServoConfig> getAllServoConfigs(){
+        return this.mServoConfigs;
     }
 
-    public static ServoConfig getServoConfigByName(String servoConfigName){
-
-        // db query code
-        return null;
+    public void addServoConfig(ServoConfig servoConfig){
+        this.mServoConfigs.add(servoConfig);
     }
 
-    public static void addServoConfig(ServoConfig servoConfig){
+    public void removeServoConfig(String servoConfigName){
 
-        // db query code
-    }
-
-    public static void removeServoConfig(String servoConfigName){
-
-        // db query code
+        // to implement
     }
 
 }

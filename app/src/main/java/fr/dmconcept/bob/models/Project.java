@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Project {
 
     // The project id
-    private Integer mId;
+    private Long mId;
 
     // The project name
     private String mName;
@@ -45,7 +45,7 @@ public class Project {
      * @param boardConfig the project board configuration
      * @param steps the project mSteps (must contain at leat a start and end step)
      */
-    public Project(int id, String name, BoardConfig boardConfig, ArrayList<Step> steps) {
+    public Project(long id, String name, BoardConfig boardConfig, ArrayList<Step> steps) {
 
         assert steps.size() >= 2;
 
@@ -63,7 +63,7 @@ public class Project {
     /**
      * @return the project id
      */
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
