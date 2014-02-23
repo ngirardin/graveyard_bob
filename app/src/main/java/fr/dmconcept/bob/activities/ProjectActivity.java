@@ -29,7 +29,7 @@ public class ProjectActivity extends Activity {
     // The timeline
     private LinearLayout mTimeline;
 
-    // The duration EditText
+    // The getDuration EditText
     private EditText mDurationEditText;
 
     // The start and end positions linear layout
@@ -50,13 +50,16 @@ public class ProjectActivity extends Activity {
         mStartPositions   = (LinearLayout) findViewById(R.id.startPositions  );
         mEndPositions     = (LinearLayout) findViewById(R.id.endPositions    );
 
+        // Register the views event listeners
+        registerEvents();
+
         // Get the project ID from the intent
-        String projectId = getIntent().getStringExtra(ProjectListActivity.EXTRA_PROJECT_ID);
+        int projectId = getIntent().getIntExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
 
         mProject = ProjectsDataSource.findById(projectId);
 
         // Set the project name as the activity title
-        setTitle(mProject.name);
+        setTitle(mProject.getName());
 
         fillTimeline();
         createPositionSliders();
@@ -66,23 +69,46 @@ public class ProjectActivity extends Activity {
 
     }
 
+    private void registerEvents() {
+
+        // Click on the "New step" button
+        findViewById(R.id.buttonNewStep).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Create the new step
+                mProject.addStep();
+
+                // Update the timeline
+                fillTimeline();
+
+                // Select the last period (the last step is the end step)
+                updateActiveStep(mProject.getSteps().size() - 2);
+
+            }
+        });
+
+    }
+
     private void fillTimeline() {
 
-        float projectDuration = mProject.duration();
+        float projectDuration = mProject.getDuration();
+
+        mTimeline.removeAllViews();
 
         // Add the buttons to the timeline
-        for (int i = 0; i < mProject.steps.length - 1; i++) {
+        for (int i = 0; i < mProject.getSteps().size() - 1; i++) {
 
-            Step step = mProject.steps[i];
+            Step step = mProject.getStep(i);
 
-            float durationRatio = (float) step.duration / projectDuration;
+            float durationRatio = (float) step.getDuration() / projectDuration;
 
             ToggleButton button = new ToggleButton(this);
 
             // Set the step id as the tag
             button.setTag(i);
 
-            // Dynamically set the weight on the button according to the duration
+            // Dynamically set the weight on the button according to the getDuration
             button.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, durationRatio
             ));
@@ -98,7 +124,7 @@ public class ProjectActivity extends Activity {
             });
 
             // Add the button before the "new step" button
-            mTimeline.addView(button, mTimeline.getChildCount() - 1);
+            mTimeline.addView(button);
 
         }
 
@@ -113,8 +139,13 @@ public class ProjectActivity extends Activity {
 
     private void updateActiveStep(int stepIndex) {
 
+        Log.i(TAG, "updateActiveStep(" + stepIndex +")");
+
+        int  stepCount = mProject.getSteps().size();
+        Step step      = mProject.getStep(stepIndex);
+
         // Set the default background on all position buttons
-        for (int i = 0; i < mProject.steps.length - 1; i++) {
+        for (int i = 0; i < stepCount - 1; i++) {
 
             ToggleButton button = (ToggleButton) mTimeline.findViewWithTag(i);
             assert button != null;
@@ -127,10 +158,8 @@ public class ProjectActivity extends Activity {
                 button.setChecked(false);
         }
 
-        Step step = mProject.steps[stepIndex];
-
-        // Update the duration editText
-        String durationString = String.valueOf(step.duration);
+        // Update the getDuration editText
+        String durationString = String.valueOf(step.getDuration());
         mDurationEditText.setText(durationString);
 
         //Set the cursor at the end of the edit text
@@ -149,7 +178,7 @@ public class ProjectActivity extends Activity {
 
         LayoutInflater inflater = getLayoutInflater();
 
-        for (int i = 0; i < mProject.getServosCount(); i++) {
+        for (int i = 0; i < mProject.getBoardConfig().getServoCount(); i++) {
             createPositionSlider(inflater, mStartPositions, i);
             createPositionSlider(inflater, mEndPositions, i);
         }
@@ -183,21 +212,23 @@ public class ProjectActivity extends Activity {
 
     private void updatePositionSliders(int positionIndex) {
 
-        Step startStep = mProject.steps[positionIndex    ];
-        Step endStep   = mProject.steps[positionIndex + 1];
+        int servoCount = mProject.getBoardConfig().getServoCount();
+
+        Step startStep = mProject.getStep(positionIndex    );
+        Step endStep   = mProject.getStep(positionIndex + 1);
 
         // Update the start position seek bar
-        for (int i = 0; i < startStep.getServosCount(); i++) {
+        for (int i = 0; i < servoCount; i++) {
             View position = mStartPositions.findViewWithTag(i);
             assert position != null;
-            ((SeekBar) position).setProgress(startStep.getServo(i));
+            ((SeekBar) position).setProgress(startStep.getPosition(i));
         }
 
         // Update the end position seek bar
-        for (int i = 0; i < endStep.getServosCount(); i++) {
+        for (int i = 0; i < servoCount; i++) {
             View position = mEndPositions.findViewWithTag(i);
             assert position != null;
-            ((SeekBar) position).setProgress(endStep.getServo(i));
+            ((SeekBar) position).setProgress(endStep.getPosition(i));
         }
 
     }

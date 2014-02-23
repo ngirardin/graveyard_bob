@@ -40,10 +40,16 @@ public class ProjectListActivity extends ListActivity {
 
                 Project project = getItem(position);
 
-                String text = (project.steps.length - 1) + " steps - duration " + (project.duration() / 1000) + " s - servo config: TODO";
+                int    stepCount   = project.getSteps().size() - 1;
+                int    duration    = project.getDuration() / 1000;
+                String config      = project.getBoardConfig().getName();
 
-                ((TextView) view.findViewById(android.R.id.text1)).setText(project.name);
-                ((TextView) view.findViewById(android.R.id.text2)).setText(text);
+                String line1 = project.getName();
+                String line2 = stepCount + " steps - " + duration + " seconds - servo config: " + config;
+
+                assert view != null;
+                ((TextView) view.findViewById(android.R.id.text1)).setText(line1);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(line2);
 
                 return view;
             }
@@ -59,7 +65,7 @@ public class ProjectListActivity extends ListActivity {
 
         // Start the project details activity
         Intent intent = new Intent(v.getContext(), ProjectActivity.class);
-        intent.putExtra(EXTRA_PROJECT_ID, p.id);
+        intent.putExtra(EXTRA_PROJECT_ID, p.getId());
         startActivity(intent);
     }
 
