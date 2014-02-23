@@ -76,9 +76,14 @@ public class ProjectActivity extends Activity {
             @Override
             public void onClick(View v) {
 
+                // Create the new step
                 mProject.addStep();
 
+                // Update the timeline
                 fillTimeline();
+
+                // Select the last period (the last step is the end step)
+                updateActiveStep(mProject.getSteps().size() - 2);
 
             }
         });
@@ -89,9 +94,7 @@ public class ProjectActivity extends Activity {
 
         float projectDuration = mProject.getDuration();
 
-        // Clear the timeline: remove all children except the add button
-        for (int i = 0; i < mTimeline.getChildCount() - 2; i++)
-            mTimeline.removeViewAt(i);
+        mTimeline.removeAllViews();
 
         // Add the buttons to the timeline
         for (int i = 0; i < mProject.getSteps().size() - 1; i++) {
@@ -121,7 +124,7 @@ public class ProjectActivity extends Activity {
             });
 
             // Add the button before the "new step" button
-            mTimeline.addView(button, mTimeline.getChildCount() - 1);
+            mTimeline.addView(button);
 
         }
 
@@ -135,6 +138,8 @@ public class ProjectActivity extends Activity {
     }
 
     private void updateActiveStep(int stepIndex) {
+
+        Log.i(TAG, "updateActiveStep(" + stepIndex +")");
 
         int  stepCount = mProject.getSteps().size();
         Step step      = mProject.getStep(stepIndex);
