@@ -1,30 +1,66 @@
 package fr.dmconcept.bob.models;
 
+import java.util.ArrayList;
+
 public abstract class Projects {
+
+    //TODO use DB instead
+    private static ArrayList<Step> createSteps(String csvSteps) {
+
+        ArrayList<Step> steps = new ArrayList<Step>();
+
+        for(String csvStep: csvSteps.split(";")) {
+
+            ArrayList<Integer> positions = new ArrayList<Integer>();
+
+            int    duration       = Integer.valueOf(csvStep.split(":")[0]);
+            String splitPositions = csvStep.split(":")[1];
+
+            for (String position: splitPositions.split(","))
+                positions.add(Integer.valueOf(position));
+
+            steps.add(new Step(duration, positions));
+        }
+
+        return steps;
+
+    }
 
     private static final Project[] projects = new Project[] {
 
-        new Project("111",
-                    "First project",
-                    null,
-                    new Step[] {
-                        new Step(1000, new int[] { 0, 50, 100} ),
-                        new Step(500 , new int[] {30,  0,  50} ),
-                        new Step(2000, new int[] {60,  0,  50} ),
-                        new Step(0, new int[] {90, 50, 100} )
-                    }),
+        new Project(
+            111,
+            "First project",
+            new BoardConfig("IOIO 3", new ServoConfig[] {
+                new ServoConfig(3, 1200, 1500, 50),
+                new ServoConfig(4, 1200, 1500, 50),
+                new ServoConfig(5, 1200, 1500, 50),
+            }),
+            createSteps(
+                "1000:0,50,100;" +
+                "500:30,0,50;"   +
+                "2000:60,0,50;"  +
+                "0:90,50,100"
+            )
+        ),
 
-
-        new Project("222",
-                    "Second project",
-                    null,
-                    new Step[] {
-                        new Step(1000, new int[] { 0, 100,   0,   0}),
-                        new Step(5000, new int[] {20,  80, 100,  50}),
-                        new Step(2000, new int[] {40,  60,   0, 100}),
-                        new Step(3000, new int[] {60,  40, 100,  50}),
-                        new Step(0, new int[] {80,  20,   0,   0})
-                    })
+        new Project(
+            222,
+            "Second project",
+            new BoardConfig("IOIO 4", new ServoConfig[] {
+                new ServoConfig(3, 1350, 1560, 50),
+                new ServoConfig(4, 1350, 1560, 50),
+                new ServoConfig(5, 1350, 1560, 50),
+                new ServoConfig(6, 1350, 1560, 50),
+            }),
+            createSteps(
+                "1000:0,100,0,0;"    +
+                "5000:20,80,100,50;" +
+                "2000:40,60,0,100"   +
+                "3000:60,40,100,50"  +
+                "0:80,20,0,0"
+            )
+        )
 
     };
 
@@ -32,11 +68,11 @@ public abstract class Projects {
         return projects;
     }
 
-    public static Project findById(String id) {
+    public static Project findById(int id) {
 
         for (Project p : projects) {
 
-            if (p.id.equals(id))
+            if (p.getId() == id)
                 return p;
 
         }

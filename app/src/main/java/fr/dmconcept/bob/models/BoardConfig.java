@@ -1,59 +1,56 @@
 package fr.dmconcept.bob.models;
 
-/**
- * Created by jo on 21/02/14.
- */
-public abstract class BoardConfig {
+public class BoardConfig {
 
-    private int id;
-    private String name;
-    private ServoConfig[] servoConfigs;
+    private int mId;
+    private String mName;
+    private ServoConfig[] mServoConfigs;
 
 
-    public BoardConfig(int id, String name){
+    public BoardConfig(String name, ServoConfig[] servoConfig){
 
-        this(id, name, null);
+        this(-1, name, servoConfig);
     }
 
 
     public BoardConfig(int id, String name, ServoConfig[] servoConfigs){
 
-        this.id   = id;
-        this.name = name;
+        this.mId           = id;
+        this.mName         = name;
+        this.mServoConfigs = servoConfigs;
 
-        if(servoConfigs.length > 0){
-            for(ServoConfig s:servoConfigs){
-                addServoConfig(s);
-            }
-        }
     }
 
     public int getId(){
-        return this.id;
+        return this.mId;
     }
 
     public String getName(){
-        return this.name;
+        return this.mName;
     }
 
-    public ServoConfig[] getAllServoConfigs(){
+    public int getServoCount() {
+        return mServoConfigs.length;
+    }
+
+    public static ServoConfig[] getAllServoConfigs(){
 
         // db query code
         return null;
     }
 
-    public ServoConfig getServoConfigByName(String servoConfigName){
+    public static ServoConfig getServoConfigByName(String servoConfigName){
 
         // db query code
         return null;
     }
 
-    public void addServoConfig(ServoConfig servoConfig){
+    public static void addServoConfig(ServoConfig servoConfig){
 
         // db query code
     }
 
-    public void removeServoConfig(String servoConfigName){
+    public static void removeServoConfig(String servoConfigName){
 
         // db query code
     }
