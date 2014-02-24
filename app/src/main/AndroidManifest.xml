@@ -17,18 +17,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!-- XXX -->
-        <activity
-            android:name="fr.dmconcept.bob.activities.PlaygroundActivity"
-            android:label="Playground area" >
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-        </activity>
         <activity
             android:name="fr.dmconcept.bob.activities.AlljoynActivity"
             android:label="AllJoyn" >
