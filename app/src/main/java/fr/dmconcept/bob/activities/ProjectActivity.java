@@ -1,23 +1,18 @@
 package fr.dmconcept.bob.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.ToggleButton;
-
+import android.widget.*;
 import fr.dmconcept.bob.R;
-import fr.dmconcept.bob.dao.ProjectsDataSource;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
+import fr.dmconcept.bob.models.dao.ProjectsDao;
 
 public class ProjectActivity extends Activity {
 
@@ -56,7 +51,8 @@ public class ProjectActivity extends Activity {
         // Get the project ID from the intent
         int projectId = getIntent().getIntExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
 
-        mProject = ProjectsDataSource.findById(projectId);
+        // TODO instanciate in BobApplication
+        Project mProject = new ProjectsDao(this).findById(projectId);
 
         // Set the project name as the activity title
         setTitle(mProject.getName());
@@ -263,6 +259,8 @@ public class ProjectActivity extends Activity {
      */
     private void menuBoardConfigClicked() {
 
+        Intent intent = new Intent(this, BoardConfigActivity.class);
+        startActivity(intent);
 
     }
 
