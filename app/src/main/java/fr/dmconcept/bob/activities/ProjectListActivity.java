@@ -59,10 +59,6 @@ public class ProjectListActivity extends ListActivity {
 
         });
 
-        // If no board activity, redirect to the board config activity
-        if (mProjects.isEmpty())
-            startActivity(new Intent(this, BoardConfigActivity.class));
-
     }
 
     @Override

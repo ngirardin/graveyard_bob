@@ -10,12 +10,14 @@ public class BoardConfig {
 
 
     public BoardConfig(String name, ArrayList<ServoConfig> servoConfig){
-
         this(-1, name, servoConfig);
     }
 
 
     public BoardConfig(long id, String name, ArrayList<ServoConfig> servoConfigs){
+
+        // Check that we got at least 1 servo config
+        assert servoConfigs.size() > 0;
 
         this.mId           = id;
         this.mName         = name;
@@ -36,15 +38,6 @@ public class BoardConfig {
 
     public ArrayList<ServoConfig> getAllServoConfigs(){
         return this.mServoConfigs;
-    }
-
-    public void addServoConfig(ServoConfig servoConfig){
-        this.mServoConfigs.add(servoConfig);
-    }
-
-    public void removeServoConfig(String servoConfigName){
-
-        // to implement
     }
 
 }

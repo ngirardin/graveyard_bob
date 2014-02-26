@@ -40,7 +40,7 @@ public class BoardConfigActivity extends Activity {
      */
     private void createBoardConfigRadios() {
 
-        for(BoardConfig boardConfig : mBoardConfigs) {
+        for (BoardConfig boardConfig : mBoardConfigs) {
 
             RadioButton radio = new RadioButton(this);
 

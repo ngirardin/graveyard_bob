@@ -39,7 +39,12 @@ public class BoardConfigDao {
         values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_NAME        , boardConfig.getName());
         values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_SERVO_CONFIG, serializeServoConfigs(boardConfig.getAllServoConfigs()));
 
-        return mDatabase.insert(BobSqliteOpenHelper.BOARDCONFIG_TABLE, null, values);
+        long row = mDatabase.insert(BobSqliteOpenHelper.BOARDCONFIG_TABLE, null, values);
+
+        if (row == -1)
+            throw new RuntimeException("Can't save the board config");
+
+        return row;
     }
 
     public BoardConfig findById(long boardConfigId){
