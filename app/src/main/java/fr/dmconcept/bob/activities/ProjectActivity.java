@@ -9,10 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
-import fr.dmconcept.bob.models.dao.ProjectsDao;
 
 public class ProjectActivity extends Activity {
 
@@ -52,7 +52,7 @@ public class ProjectActivity extends Activity {
         int projectId = getIntent().getIntExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
 
         // TODO instanciate in BobApplication
-        Project mProject = new ProjectsDao(this).findById(projectId);
+        mProject = ((BobApplication) getApplication()).getProjectsDao().findById(projectId);
 
         // Set the project name as the activity title
         setTitle(mProject.getName());

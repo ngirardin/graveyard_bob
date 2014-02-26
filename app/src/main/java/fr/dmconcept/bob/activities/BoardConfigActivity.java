@@ -5,27 +5,33 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.BoardConfig;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class BoardConfigActivity extends Activity {
+
+    private List<BoardConfig> mBoardConfigs;
 
     private RadioGroup mBoardConfigRadioGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        mBoardConfigs = ((BobApplication) getApplication()).getBoardConfigDao().findAll();
 
         setContentView(R.layout.activity_boardconfig);
 
         mBoardConfigRadioGroup = (RadioGroup) findViewById(R.id.boardConfigRadioGroup);
 
         createBoardConfigRadios();
+
     }
 
     /**
@@ -34,8 +40,7 @@ public class BoardConfigActivity extends Activity {
      */
     private void createBoardConfigRadios() {
 
-
-        for(BoardConfig boardConfig : BoardConfig.BoardConfigs.all()) {
+        for(BoardConfig boardConfig : mBoardConfigs) {
 
             RadioButton radio = new RadioButton(this);
 
@@ -47,6 +52,7 @@ public class BoardConfigActivity extends Activity {
 
                 @Override
                 public void onClick(View v) {
+                    //noinspection ConstantConditions
                     new AlertDialog.Builder(v.getContext())
                         .setMessage("Click on " + v.getTag())
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {

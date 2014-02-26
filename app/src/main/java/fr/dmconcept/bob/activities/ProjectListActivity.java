@@ -1,5 +1,6 @@
 package fr.dmconcept.bob.activities;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,10 +11,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
-import fr.dmconcept.bob.dao.ProjectsDataSource;
 import fr.dmconcept.bob.models.Project;
+
+import java.util.ArrayList;
 
 // TODO move to Application instead of Activity
 public class ProjectListActivity extends ListActivity {
@@ -22,14 +24,15 @@ public class ProjectListActivity extends ListActivity {
 
     public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
 
-    Project[] mProjects;
+    ArrayList<Project> mProjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        mProjects = ProjectsDataSource.all();
+        // Get the project list from the DB
+        mProjects = ((BobApplication) getApplication()).getProjectsDao().findAll();
 
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
@@ -56,12 +59,16 @@ public class ProjectListActivity extends ListActivity {
 
         });
 
+        // If no board activity, redirect to the board config activity
+        if (mProjects.isEmpty())
+            startActivity(new Intent(this, BoardConfigActivity.class));
+
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
 
-        Project p = mProjects[position];
+        Project p = mProjects.get(position);
 
         // Start the project details activity
         Intent intent = new Intent(v.getContext(), ProjectActivity.class);
@@ -79,14 +86,24 @@ public class ProjectListActivity extends ListActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+
+        switch (item.getItemId()) {
+
+            case R.id.action_newProject:
+                menuNewProjectClicked();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
+    }
+
+    private void menuNewProjectClicked() {
+
+        new AlertDialog.Builder(this)
+            .setMessage("new project")
+            .show();
     }
 
 }
