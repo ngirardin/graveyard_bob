@@ -115,9 +115,8 @@ public class ProjectListActivity extends ListActivity {
 
     private void menuNewProjectClicked() {
 
-        new AlertDialog.Builder(this)
-            .setMessage("new project")
-            .show();
+        // Start the new project details activity
+        startActivity(new Intent(this, NewProjectActivity.class));
     }
 
 }
