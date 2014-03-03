@@ -52,16 +52,13 @@ public class BoardConfigActivity extends Activity {
             BoardConfig boardConfig = mBoardConfigs.get(i);
 
             RadioButton radio = new RadioButton(this);
-
-            radio.setTag(i);
+            radio.setId(i);
             radio.setText(boardConfig.getName());
             radio.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    //noinspection ConstantConditions
-                    int id = Integer.parseInt(v.getTag().toString());
-                    showBoardConfig(id);
+                    showBoardConfig(mBoardConfigRadioGroup.getCheckedRadioButtonId());
                 }
             });
 
@@ -69,7 +66,8 @@ public class BoardConfigActivity extends Activity {
         }
 
         // Check the first board config radio
-        ((RadioButton) mBoardConfigRadioGroup.getChildAt(0)).setChecked(true);
+        mBoardConfigRadioGroup.check(0);
+
         showBoardConfig(0);
 
     }
