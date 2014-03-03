@@ -7,6 +7,7 @@ import android.util.Log;
 import fr.dmconcept.bob.models.BoardConfig;
 import fr.dmconcept.bob.models.ServoConfig;
 import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
+import fr.dmconcept.bob.models.serializers.ServoConfigSerializer;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ public class BoardConfigDao {
         ContentValues values = new ContentValues();
 
         values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_NAME        , boardConfig.getName());
-        values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_SERVO_CONFIG, serializeServoConfigs(boardConfig.getAllServoConfigs()));
+        values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_SERVO_CONFIG, ServoConfigSerializer.serialize(boardConfig.getServoConfigs()));
 
         long row = mDatabase.insert(BobSqliteOpenHelper.BOARDCONFIG_TABLE, null, values);
 
@@ -53,7 +54,9 @@ public class BoardConfigDao {
 
         Cursor cursor = mDatabase.query(BobSqliteOpenHelper.BOARDCONFIG_TABLE, mAllColumns, BobSqliteOpenHelper.BOARDCONFIG_COL_ID + " = " + boardConfigId, null, null, null, null);
         cursor.moveToFirst();
-        BoardConfig boardConfig = new BoardConfig(cursor.getLong(0), cursor.getString(1), unSerializeServoConfigs(cursor.getString(2)));
+
+        BoardConfig boardConfig = fromCursor(cursor);
+
         cursor.close();
         return boardConfig;
     }
@@ -68,22 +71,20 @@ public class BoardConfigDao {
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
-            BoardConfig boardConfig = new BoardConfig(cursor.getLong(0), cursor.getString(1), unSerializeServoConfigs(cursor.getString(2)));
-            boardConfigs.add(boardConfig);
+            boardConfigs.add(fromCursor(cursor));
             cursor.moveToNext();
         }
 
         cursor.close();
         return boardConfigs;
+
     }
 
-    private String serializeServoConfigs(ArrayList<ServoConfig> servoConfigs){
-        return "";
-    }
+    private BoardConfig fromCursor(Cursor cursor) {
 
+        ArrayList<ServoConfig> servoConfigs= ServoConfigSerializer.deserialize(cursor.getString(2));
+        return new BoardConfig( cursor.getLong(0), cursor.getString(1), servoConfigs);
 
-    private ArrayList<ServoConfig> unSerializeServoConfigs(String servoConfigs){
-        return new ArrayList<ServoConfig>();
     }
 
 }

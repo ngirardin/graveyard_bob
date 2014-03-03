@@ -36,7 +36,7 @@ public class BoardConfig {
         return this.mServoConfigs.size();
     }
 
-    public ArrayList<ServoConfig> getAllServoConfigs(){
+    public ArrayList<ServoConfig> getServoConfigs(){
         return this.mServoConfigs;
     }
 

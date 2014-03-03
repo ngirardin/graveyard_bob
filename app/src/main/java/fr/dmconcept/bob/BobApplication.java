@@ -48,13 +48,17 @@ public class BobApplication extends Application {
 
         Log.i(TAG, "DEBUG MODE - Creating servos config fixtures");
 
-        ArrayList<ServoConfig> servoConfigs1 = new ArrayList<ServoConfig>();
-        servoConfigs1.add(new ServoConfig(3, 1200, 1660, 50));
-        mBoardConfigDao.save(new BoardConfig("Demo port 3"         , servoConfigs1));
+        ArrayList<ServoConfig> servoConfigs1 = new ArrayList<ServoConfig>() {{
+            add(new ServoConfig(3, 1200, 1660, 50));
+        }};
 
-        ArrayList<ServoConfig> servoConfigs2 = new ArrayList<ServoConfig>();
-        servoConfigs2.add(new ServoConfig(4, 1200, 1660, 50));
-        servoConfigs2.add(new ServoConfig(3, 1200, 1660, 50));
+        ArrayList<ServoConfig> servoConfigs2 = new ArrayList<ServoConfig>() {{
+            add(new ServoConfig(3, 1200, 1660, 50));
+            add(new ServoConfig(4, 1200, 1660, 50));
+            add(new ServoConfig(5, 1200, 1660, 50));
+        }};
+
+        mBoardConfigDao.save(new BoardConfig("Demo port 3"         , servoConfigs1));
         mBoardConfigDao.save(new BoardConfig("Demo port 3, 4 and 5", servoConfigs2));
 
         Log.i(TAG, "DEBUG MODE - Creating project...");
