@@ -50,6 +50,8 @@
 
         <activity android:name=".activities.ProjectActivity" />
 
+        <activity android:name=".activities.NewProjectActivity" />
+
         <activity android:name=".activities.XoxoActivity" />
 
         <activity android:name=".activities.BoardConfigActivity" />
