@@ -28,6 +28,11 @@ public class BoardConfig {
         return this.mId;
     }
 
+    public void setId(long id) {
+        assert(id > 0);
+        mId = id;
+    }
+
     public String getName(){
         return this.mName;
     }

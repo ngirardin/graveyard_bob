@@ -5,21 +5,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import fr.dmconcept.bob.models.Project;
-import fr.dmconcept.bob.models.Step;
 import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
+import fr.dmconcept.bob.models.serializers.ProjectStepSerializer;
 
 import java.util.ArrayList;
 
 public class ProjectsDao {
 
     private static final String TAG = "models.dao.ProjectsDao";
-
-    private static final String[] mAllColumns = {
-            BobSqliteOpenHelper.PROJECT_COL_ID,
-            BobSqliteOpenHelper.PROJECT_COL_NAME,
-            BobSqliteOpenHelper.PROJECT_COL_STEPS,
-            BobSqliteOpenHelper.PROJECT_COL_BORD_CONFIG
-    };
 
     private SQLiteDatabase mDatabase;
 
@@ -36,11 +29,13 @@ public class ProjectsDao {
 
     public long save(Project project){
 
+        Log.i(TAG, "save(" + project.getName() + ")");
+
         ContentValues values = new ContentValues();
 
-        values.put(BobSqliteOpenHelper.PROJECT_COL_NAME       , project.getName()                 );
-        values.put(BobSqliteOpenHelper.PROJECT_COL_BORD_CONFIG, project.getBoardConfig().getId()  );
-        values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS      , serializeSteps(project.getSteps()));
+        values.put(BobSqliteOpenHelper.PROJECT_COL_NAME        , project.getName()                 );
+        values.put(BobSqliteOpenHelper.PROJECT_COL_BOARD_CONFIG, project.getBoardConfig().getId()  );
+        values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS       , ProjectStepSerializer.serialize(project.getSteps()));
 
         return mDatabase.insert(BobSqliteOpenHelper.PROJECT_TABLE, null, values);
     }
@@ -50,9 +45,11 @@ public class ProjectsDao {
 
         Log.i(TAG, "findById(" + projectId + ")");
 
-        Cursor cursor = mDatabase.query(BobSqliteOpenHelper.PROJECT_TABLE, mAllColumns, BobSqliteOpenHelper.PROJECT_COL_ID + " = " + projectId, null, null, null, null);
+        Cursor cursor = mDatabase.query(BobSqliteOpenHelper.PROJECT_TABLE, BobSqliteOpenHelper.PROJECT_ALL, BobSqliteOpenHelper.PROJECT_COL_ID + " = " + projectId, null, null, null, null);
         cursor.moveToFirst();
-        Project project = new Project( cursor.getLong(0), cursor.getString(1), mBoardConfigDao.findById(cursor.getLong(2)), unSerializeSteps(cursor.getString(3)));
+
+        Project project = fromCursor(cursor);
+
         cursor.close();
         return project;
     }
@@ -63,12 +60,11 @@ public class ProjectsDao {
         Log.i(TAG, "findAll()");
 
         ArrayList<Project> projects = new ArrayList<Project>();
-        Cursor cursor = mDatabase.query(BobSqliteOpenHelper.PROJECT_TABLE, mAllColumns, null, null, null, null, null);
+        Cursor cursor = mDatabase.query(BobSqliteOpenHelper.PROJECT_TABLE, BobSqliteOpenHelper.PROJECT_ALL, null, null, null, null, null);
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
-            Project project = new Project( cursor.getLong(0), cursor.getString(1), mBoardConfigDao.findById(cursor.getLong(2)), unSerializeSteps(cursor.getString(3)));
-            projects.add(project);
+            projects.add(fromCursor(cursor));
             cursor.moveToNext();
         }
 
@@ -76,13 +72,16 @@ public class ProjectsDao {
         return projects;
     }
 
+    private Project fromCursor(Cursor cursor) {
 
-    private String serializeSteps(ArrayList<Step> steps){
-        return "";
-    }
+        Project project = new Project(
+            cursor.getLong  (0)                        ,           // PROJECT_COL_ID
+            cursor.getString(1)                        ,           // PROJECT_COL_NAME
+            mBoardConfigDao.findById(cursor.getLong(2)),           // PROJECT_COL_BOARD_CONFIG
+            ProjectStepSerializer.deserialize(cursor.getString(3)) // PROJECT_COL_STEPS
+        );
 
-    private ArrayList<Step> unSerializeSteps(String steps){
-        return new ArrayList<Step>();
+        return project;
     }
 
 }

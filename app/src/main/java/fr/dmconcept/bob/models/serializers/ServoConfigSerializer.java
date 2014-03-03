@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.models.serializers;
 
-import android.util.Log;
 import fr.dmconcept.bob.models.ServoConfig;
 
 import java.util.ArrayList;
@@ -40,8 +39,6 @@ public abstract class ServoConfigSerializer {
                 sb.append(";");
 
         }
-
-        Log.i(TAG, "Serialized : " + sb.toString());
 
         return sb.toString();
 

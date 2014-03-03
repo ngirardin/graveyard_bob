@@ -12,10 +12,21 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME    = "project.db";
     private static final int    DATABASE_VERSION = 1;
 
+    /**
+     *
+     * BOARD CONFIG
+     *
+     */
     public static final String BOARDCONFIG_TABLE            = "boardconfig";
     public static final String BOARDCONFIG_COL_ID           = "_id";
     public static final String BOARDCONFIG_COL_NAME         = "name";
     public static final String BOARDCONFIG_COL_SERVO_CONFIG = "servoconfig";
+
+    public static final String[] BOARDCONFIG_ALL = {
+        BOARDCONFIG_COL_ID,
+        BOARDCONFIG_COL_NAME,
+        BOARDCONFIG_COL_SERVO_CONFIG,
+    };
 
     private static final String BOARDCONFIG_CREATE_TABLE =
         "create table " + BOARDCONFIG_TABLE + "(" +
@@ -25,18 +36,30 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
         ");";
 
 
-    public static final String PROJECT_TABLE           = "project";
-    public static final String PROJECT_COL_ID          = "_id";
-    public static final String PROJECT_COL_NAME        = "name";
-    public static final String PROJECT_COL_STEPS       = "steps";
-    public static final String PROJECT_COL_BORD_CONFIG = "config";
+    /**
+     *
+     * PROJECT
+     *
+     */
+    public static final String PROJECT_TABLE            = "project";
+    public static final String PROJECT_COL_ID           = "_id";
+    public static final String PROJECT_COL_NAME         = "name";
+    public static final String PROJECT_COL_BOARD_CONFIG = "config";
+    public static final String PROJECT_COL_STEPS        = "steps";
+
+    public static final String[] PROJECT_ALL = {
+        PROJECT_COL_ID,
+        PROJECT_COL_NAME,
+        PROJECT_COL_BOARD_CONFIG,
+        PROJECT_COL_STEPS,
+    };
 
     private static final String PROJECT_CREATE_TABLE =
         "create table " + PROJECT_TABLE + "(" +
-            PROJECT_COL_ID               + " integer primary key autoincrement, " +
-            PROJECT_COL_NAME             + " text not null, " +
-            PROJECT_COL_STEPS            + " text not null, " +
-            PROJECT_COL_BORD_CONFIG      + " int not null" +
+            PROJECT_COL_ID           + " integer primary key autoincrement, " +
+            PROJECT_COL_NAME         + " text not null, " +
+            PROJECT_COL_BOARD_CONFIG + " int not null, "  +
+            PROJECT_COL_STEPS        + " text not null"   +
         ");";
 
     public BobSqliteOpenHelper(Context context){

@@ -49,7 +49,7 @@ public class ProjectActivity extends Activity {
         registerEvents();
 
         // Get the project ID from the intent
-        int projectId = getIntent().getIntExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
+        long projectId = getIntent().getLongExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
 
         // TODO instanciate in BobApplication
         mProject = ((BobApplication) getApplication()).getProjectsDao().findById(projectId);
