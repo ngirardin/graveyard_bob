@@ -18,6 +18,9 @@ public class ProjectActivity extends Activity {
 
     private static final String TAG = "activities.ProjectListActivity";
 
+    // The intent extra key for the project id
+    public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
+
     // The current project
     private Project mProject;
 
@@ -49,7 +52,7 @@ public class ProjectActivity extends Activity {
         registerEvents();
 
         // Get the project ID from the intent
-        long projectId = getIntent().getLongExtra(ProjectListActivity.EXTRA_PROJECT_ID, -1);
+        long projectId = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1);
 
         // TODO instanciate in BobApplication
         mProject = ((BobApplication) getApplication()).getProjectsDao().findById(projectId);

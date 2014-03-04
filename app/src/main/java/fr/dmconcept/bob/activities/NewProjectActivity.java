@@ -1,6 +1,7 @@
 package fr.dmconcept.bob.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -49,15 +50,23 @@ public class NewProjectActivity extends Activity {
 
                 String projectName = mEditTextName.getText().toString().trim();
 
-                if (projectName.length() == 0){ // validation
+                if (projectName.length() == 0) {
                     mEditTextName.setError("Project name can't be empty");
-                }else{
-                    BoardConfig boardConfig = mBoardConfigs.get(mBoardConfigRadioGroup.getCheckedRadioButtonId()) ;
-                    mProjectsDao.save(new Project(projectName, boardConfig));
-                    finish();
+                    return;
                 }
+
+                // Save the new project
+                BoardConfig boardConfig = mBoardConfigs.get(mBoardConfigRadioGroup.getCheckedRadioButtonId()) ;
+                long projectId = mProjectsDao.save(new Project(projectName, boardConfig));
+
+                // Start the project activity
+                Intent intent = new Intent(v.getContext(), ProjectActivity.class);
+                intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, projectId);
+                startActivity(intent);
+
             }
         });
+
     }
 
 

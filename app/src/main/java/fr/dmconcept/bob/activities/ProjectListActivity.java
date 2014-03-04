@@ -24,8 +24,6 @@ public class ProjectListActivity extends ListActivity {
 
     public static final String TAG = "bob.activities.ProjctListActivity";
 
-    public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
-
     ArrayList<Project> mProjects;
 
     @Override
@@ -86,7 +84,7 @@ public class ProjectListActivity extends ListActivity {
 
         // Start the project details activity
         Intent intent = new Intent(v.getContext(), ProjectActivity.class);
-        intent.putExtra(EXTRA_PROJECT_ID, p.getId());
+        intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, p.getId());
         startActivity(intent);
     }
 
