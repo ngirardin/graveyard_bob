@@ -194,7 +194,7 @@ public class ProjectActivity extends Activity {
     private void createPositionSlider(LayoutInflater inflater, LinearLayout positionLayout, int i) {
 
         // Inflate the position slider widget
-        LinearLayout positionSliderRow = (LinearLayout) inflater.inflate(R.layout.layout_position_sliders, null);
+        LinearLayout positionSliderRow = (LinearLayout) inflater.inflate(R.layout.layout_project_positions, null);
 
         // Update the servo name text
         assert positionSliderRow != null;
