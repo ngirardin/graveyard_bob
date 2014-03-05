@@ -28,18 +28,14 @@ public class BobApplication extends Application {
 
         Log.i(TAG, "onCreate()");
 
-        if (BuildConfig.DEBUG) {
-            Log.i(TAG, "DEBUG MODE - Delete databse");
-            deleteDatabase("project.db");
-        }
-
         mOpenHelper = new BobSqliteOpenHelper(this);
         mDatabase   = mOpenHelper.getWritableDatabase();
 
         mBoardConfigDao = new BoardConfigDao(mDatabase);
         mProjectsDao    = new ProjectDao(mDatabase, mBoardConfigDao);
 
-        if (BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG && mProjectsDao.findAll().size() > 1)
+            // First run, create the fixtures
             createFixtures();
 
         super.onCreate();
