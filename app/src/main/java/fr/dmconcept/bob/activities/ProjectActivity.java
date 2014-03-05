@@ -24,8 +24,11 @@ public class ProjectActivity extends Activity {
     // The intent extra key for the project id
     public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
 
-    // The default step duration
+    // The default step duration for new steps in ms
     private static final int DEFAULT_STEP_DURATION = 2000;
+
+    // The minimum step duration in ms
+    private static final int MIN_STEP_DURATION = 100;
 
     // The project DAO
     private ProjectDao mProjectDao;
@@ -64,23 +67,20 @@ public class ProjectActivity extends Activity {
         mPositions        = (LinearLayout) findViewById(R.id.positions       );
 
         // Register the views event listeners
-        registerNewStepListener();
+        registerViewListeners();
 
         // Set the activity title as the project name
         setTitle(mProject.getName());
 
-        // Fill the timeline with the steps
-        updateTimeline();
-
         // Create the positions
         createPositions();
 
-        // Select the first step as active
-        updateActiveStep(0);
+        // Fill the timeline with the steps
+        updateTimeline();
 
     }
 
-    private void registerNewStepListener() {
+    private void registerViewListeners() {
 
         // Click on the "New step" button
         findViewById(R.id.buttonNewStep).setOnClickListener(new View.OnClickListener() {
@@ -90,11 +90,33 @@ public class ProjectActivity extends Activity {
                 // Create the new step
                 mProject.addStep(DEFAULT_STEP_DURATION);
 
+                // Select the last period (the last step is the end step)
+                mStepIndex = mProject.getSteps().size() - 2;
+
                 // Update the timeline
                 updateTimeline();
 
-                // Select the last period (the last step is the end step)
-                updateActiveStep(mProject.getSteps().size() - 2);
+            }
+        });
+
+        // Duration changed
+        ((EditText) findViewById(R.id.editTextDuration)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+                int newDuration = Integer.valueOf(v.getText().toString());
+
+                if (newDuration == MIN_STEP_DURATION) {
+                    v.setError("The step can't last less than " + MIN_STEP_DURATION + " ms");
+                } else {
+                    // Save the new duration
+                    mProjectDao.saveDuration(mProject, mStepIndex, newDuration);
+
+                    // Redraw the timeline to reflect the new step duration
+                    updateTimeline();
+                }
+
+                return true;
 
             }
         });
@@ -106,6 +128,8 @@ public class ProjectActivity extends Activity {
      * matching their relative length
      */
     private void updateTimeline() {
+
+        Log.i(TAG, "updateTimeline()");
 
         float projectDuration = mProject.getDuration();
 
@@ -134,7 +158,8 @@ public class ProjectActivity extends Activity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View button) {
-                    updateActiveStep(Integer.valueOf(button.getTag().toString()));
+                    mStepIndex = Integer.valueOf(button.getTag().toString());
+                    updateActiveStep();
                 }
             });
 
@@ -143,22 +168,19 @@ public class ProjectActivity extends Activity {
 
         }
 
+        updateActiveStep();
     }
 
 
     /**
      * Enable the step button and update the position to the step value
-     *
-     * @param stepIndex the step
      */
-    private void updateActiveStep(int stepIndex) {
+    private void updateActiveStep() {
 
-        Log.i(TAG, "updateActiveStep(" + stepIndex +")");
-
-        mStepIndex = stepIndex;
+        Log.i(TAG, "updateActiveStep()");
 
         int  stepCount = mProject.getSteps().size();
-        Step step      = mProject.getStep(stepIndex);
+        Step step      = mProject.getStep(mStepIndex);
 
         // Set the default background on all position buttons
         for (int i = 0; i < stepCount - 1; i++) {
@@ -166,7 +188,7 @@ public class ProjectActivity extends Activity {
             ToggleButton button = (ToggleButton) mTimeline.getChildAt(i);
 
             // Set the current button as selected
-            button.setChecked((i == stepIndex));
+            button.setChecked((i == mStepIndex));
         }
 
         // Update the duration editText and position the cursor at the end
@@ -176,6 +198,7 @@ public class ProjectActivity extends Activity {
 
         // Update the position sliders
         updatePositions();
+
     }
 
 
@@ -207,29 +230,16 @@ public class ProjectActivity extends Activity {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 
-            int newValue;
+            int newValue = Integer.parseInt(v.getText().toString());
 
-            try {
-
-                newValue = Integer.parseInt(v.getText().toString());
-
-                if (newValue > 100) {
-                    setInvalid(v);
-                } else {
-                    mSeekbar.setProgress(newValue);
-                    savePosition(newValue);
-                }
-
-            } catch (NumberFormatException e) {
-                setInvalid(v);
+            if (newValue > 100) {
+                v.setError("Position must be between 0 and 100");
+            } else {
+                mSeekbar.setProgress(newValue);
+                savePosition(newValue);
             }
 
             return true;
-        }
-
-        private void setInvalid(TextView v) {
-            v.setError("Position must be between 0 and 100");
-
         }
 
     }

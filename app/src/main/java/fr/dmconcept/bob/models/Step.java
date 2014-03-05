@@ -26,8 +26,19 @@ public class Step {
 
     }
 
+    /**
+     * @return the step duration in ms
+     */
     public int getDuration() {
         return mDuration;
+    }
+
+    /**
+     * @param duration the step duration in ms
+     */
+    public void setDuration(int duration) {
+        assert duration > 0;
+        mDuration = duration;
     }
 
     /**

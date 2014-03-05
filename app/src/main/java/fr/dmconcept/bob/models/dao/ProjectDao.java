@@ -46,12 +46,29 @@ public class ProjectDao {
 
         Log.i(TAG, "savePosition(project: " + project.getId() + ", step: " + stepIndex + ", position: " + positionIndex + ", newValue: " + newValue);
 
+        project.getStep(stepIndex).setPosition(positionIndex, newValue);
+        saveSteps(project);
+
+    }
+
+    public void saveDuration(Project project, int stepIndex, int newDuration) {
+
+        Log.i(TAG, "saveDuration(project: " + project.getId() + ", step: " + stepIndex + ", newDuration: " + newDuration);
+
+        project.getStep(stepIndex).setDuration(newDuration);
+        saveSteps(project);
+
+    }
+
+    private void saveSteps(Project project) {
+
         long s = SystemClock.elapsedRealtime();
 
-        project.getStep(stepIndex).setPosition(positionIndex, newValue);
-
         ContentValues values = new ContentValues();
-        values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS, ProjectStepSerializer.serialize(project.getSteps()));
+
+        String serializedSteps = ProjectStepSerializer.serialize(project.getSteps());
+
+        values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS, serializedSteps);
 
         int updated = mDatabase.update(
             BobSqliteOpenHelper.PROJECT_TABLE,
@@ -59,9 +76,11 @@ public class ProjectDao {
             BobSqliteOpenHelper.PROJECT_COL_ID + "=?",
             new String[] { String.valueOf(project.getId()) }
         );
+
+        // Check that we updated 1 row
         assert(updated == 1);
 
-        Log.d(TAG, "savePosition() in " + (SystemClock.elapsedRealtime() - s) + " ms");
+        Log.d(TAG, "save(project: " + project.getId()+ ") took " + (SystemClock.elapsedRealtime() - s) + " ms");
 
     }
 
