@@ -3,6 +3,7 @@ package fr.dmconcept.bob.models.dao;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.SystemClock;
 import android.util.Log;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
@@ -10,15 +11,15 @@ import fr.dmconcept.bob.models.serializers.ProjectStepSerializer;
 
 import java.util.ArrayList;
 
-public class ProjectsDao {
+public class ProjectDao {
 
-    private static final String TAG = "models.dao.ProjectsDao";
+    private static final String TAG = "models.dao.ProjectDao";
 
     private SQLiteDatabase mDatabase;
 
     private BoardConfigDao mBoardConfigDao;
 
-    public ProjectsDao(SQLiteDatabase database, BoardConfigDao boardConfigDao) {
+    public ProjectDao(SQLiteDatabase database, BoardConfigDao boardConfigDao) {
 
         Log.i(TAG, "ProjectDao()");
 
@@ -27,9 +28,9 @@ public class ProjectsDao {
         mBoardConfigDao = boardConfigDao;
     }
 
-    public long save(Project project){
+    public long create(Project project){
 
-        Log.i(TAG, "save(" + project.getName() + ")");
+        Log.i(TAG, "create(" + project.getName() + ")");
 
         ContentValues values = new ContentValues();
 
@@ -40,6 +41,29 @@ public class ProjectsDao {
         return mDatabase.insert(BobSqliteOpenHelper.PROJECT_TABLE, null, values);
     }
 
+
+    public void savePosition(Project project, int stepIndex, int positionIndex, int newValue) {
+
+        Log.i(TAG, "savePosition(project: " + project.getId() + ", step: " + stepIndex + ", position: " + positionIndex + ", newValue: " + newValue);
+
+        long s = SystemClock.elapsedRealtime();
+
+        project.getStep(stepIndex).setPosition(positionIndex, newValue);
+
+        ContentValues values = new ContentValues();
+        values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS, ProjectStepSerializer.serialize(project.getSteps()));
+
+        int updated = mDatabase.update(
+            BobSqliteOpenHelper.PROJECT_TABLE,
+            values,
+            BobSqliteOpenHelper.PROJECT_COL_ID + "=?",
+            new String[] { String.valueOf(project.getId()) }
+        );
+        assert(updated == 1);
+
+        Log.d(TAG, "savePosition() in " + (SystemClock.elapsedRealtime() - s) + " ms");
+
+    }
 
     public Project findById(long projectId){
 
@@ -74,14 +98,13 @@ public class ProjectsDao {
 
     private Project fromCursor(Cursor cursor) {
 
-        Project project = new Project(
+        return new Project(
             cursor.getLong  (0)                        ,           // PROJECT_COL_ID
             cursor.getString(1)                        ,           // PROJECT_COL_NAME
             mBoardConfigDao.findById(cursor.getLong(2)),           // PROJECT_COL_BOARD_CONFIG
             ProjectStepSerializer.deserialize(cursor.getString(3)) // PROJECT_COL_STEPS
         );
 
-        return project;
     }
 
 }

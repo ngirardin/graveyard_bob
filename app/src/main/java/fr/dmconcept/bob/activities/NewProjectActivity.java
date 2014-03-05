@@ -12,7 +12,7 @@ import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.BoardConfig;
 import fr.dmconcept.bob.models.Project;
-import fr.dmconcept.bob.models.dao.ProjectsDao;
+import fr.dmconcept.bob.models.dao.ProjectDao;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class NewProjectActivity extends Activity {
 
     private List<BoardConfig> mBoardConfigs;
     private RadioGroup mBoardConfigRadioGroup;
-    private ProjectsDao mProjectsDao;
+    private ProjectDao mProjectsDao;
     private EditText mEditTextName;
 
 
@@ -57,7 +57,7 @@ public class NewProjectActivity extends Activity {
 
                 // Save the new project
                 BoardConfig boardConfig = mBoardConfigs.get(mBoardConfigRadioGroup.getCheckedRadioButtonId()) ;
-                long projectId = mProjectsDao.save(new Project(projectName, boardConfig));
+                long projectId = mProjectsDao.create(new Project(projectName, boardConfig));
 
                 // Start the project activity
                 Intent intent = new Intent(v.getContext(), ProjectActivity.class);

@@ -50,7 +50,7 @@ public class ProjectListActivity extends ListActivity {
                 String config      = project.getBoardConfig().getName();
 
                 String line1 = project.getName();
-                String line2 = stepCount + " steps - " + duration + " seconds - servo config: " + config;
+                String line2 = stepCount + " steps in " + duration + " seconds using " + config;
 
                 assert view != null;
                 ((TextView) view.findViewById(android.R.id.text1)).setText(line1);

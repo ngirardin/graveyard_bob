@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +13,9 @@ import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
+import fr.dmconcept.bob.models.dao.ProjectDao;
+
+import java.util.ArrayList;
 
 public class ProjectActivity extends Activity {
 
@@ -21,8 +24,17 @@ public class ProjectActivity extends Activity {
     // The intent extra key for the project id
     public final static String EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId";
 
+    // The default step duration
+    private static final int DEFAULT_STEP_DURATION = 2000;
+
+    // The project DAO
+    private ProjectDao mProjectDao;
+
     // The current project
     private Project mProject;
+
+    // The active step index
+    private int mStepIndex;
 
     // The timeline
     private LinearLayout mTimeline;
@@ -30,9 +42,8 @@ public class ProjectActivity extends Activity {
     // The getDuration EditText
     private EditText mDurationEditText;
 
-    // The start and end positions linear layout
-    private LinearLayout mStartPositions;
-    private LinearLayout mEndPositions;
+    // The start and end positions layout
+    private LinearLayout mPositions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,32 +54,33 @@ public class ProjectActivity extends Activity {
 
         setContentView(R.layout.activity_project);
 
+        // Get the project from the DB according to the intent extra id
+        long projectId = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1);
+        mProjectDao = ((BobApplication) getApplication()).getProjectsDao();
+        mProject    = mProjectDao.findById(projectId);
+
         mTimeline         = (LinearLayout) findViewById(R.id.timeline        );
         mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration);
-        mStartPositions   = (LinearLayout) findViewById(R.id.startPositions  );
-        mEndPositions     = (LinearLayout) findViewById(R.id.endPositions    );
+        mPositions        = (LinearLayout) findViewById(R.id.positions       );
 
         // Register the views event listeners
-        registerEvents();
+        registerNewStepListener();
 
-        // Get the project ID from the intent
-        long projectId = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1);
-
-        // TODO instanciate in BobApplication
-        mProject = ((BobApplication) getApplication()).getProjectsDao().findById(projectId);
-
-        // Set the project name as the activity title
+        // Set the activity title as the project name
         setTitle(mProject.getName());
 
-        fillTimeline();
-        createPositionSliders();
+        // Fill the timeline with the steps
+        updateTimeline();
+
+        // Create the positions
+        createPositions();
 
         // Select the first step as active
         updateActiveStep(0);
 
     }
 
-    private void registerEvents() {
+    private void registerNewStepListener() {
 
         // Click on the "New step" button
         findViewById(R.id.buttonNewStep).setOnClickListener(new View.OnClickListener() {
@@ -76,10 +88,10 @@ public class ProjectActivity extends Activity {
             public void onClick(View v) {
 
                 // Create the new step
-                mProject.addStep();
+                mProject.addStep(DEFAULT_STEP_DURATION);
 
                 // Update the timeline
-                fillTimeline();
+                updateTimeline();
 
                 // Select the last period (the last step is the end step)
                 updateActiveStep(mProject.getSteps().size() - 2);
@@ -89,7 +101,11 @@ public class ProjectActivity extends Activity {
 
     }
 
-    private void fillTimeline() {
+    /**
+     * Delete all the timeline steps and create them with a width
+     * matching their relative length
+     */
+    private void updateTimeline() {
 
         float projectDuration = mProject.getDuration();
 
@@ -104,13 +120,13 @@ public class ProjectActivity extends Activity {
 
             ToggleButton button = new ToggleButton(this);
 
-            // Set the step id as the tag
-            button.setTag(i);
-
             // Dynamically set the weight on the button according to the getDuration
             button.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, durationRatio
             ));
+
+            // Set the step id as the tag
+            button.setTag(i);
 
             button.setTextOff(String.valueOf(i + 1));
             button.setTextOn(button.getTextOff());
@@ -118,7 +134,7 @@ public class ProjectActivity extends Activity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View button) {
-                    updateActiveStep((Button) button);
+                    updateActiveStep(Integer.valueOf(button.getTag().toString()));
                 }
             });
 
@@ -129,16 +145,17 @@ public class ProjectActivity extends Activity {
 
     }
 
-    private void updateActiveStep(Button button) {
 
-        int stepIndex = (Integer) button.getTag();
-        updateActiveStep(stepIndex);
-
-    }
-
+    /**
+     * Enable the step button and update the position to the step value
+     *
+     * @param stepIndex the step
+     */
     private void updateActiveStep(int stepIndex) {
 
         Log.i(TAG, "updateActiveStep(" + stepIndex +")");
+
+        mStepIndex = stepIndex;
 
         int  stepCount = mProject.getSteps().size();
         Step step      = mProject.getStep(stepIndex);
@@ -146,88 +163,155 @@ public class ProjectActivity extends Activity {
         // Set the default background on all position buttons
         for (int i = 0; i < stepCount - 1; i++) {
 
-            ToggleButton button = (ToggleButton) mTimeline.findViewWithTag(i);
-            assert button != null;
+            ToggleButton button = (ToggleButton) mTimeline.getChildAt(i);
 
-            if (i == stepIndex)
-                // Set the current button as selected
-                button.setChecked(true);
-            else
-                // Restore the default background
-                button.setChecked(false);
+            // Set the current button as selected
+            button.setChecked((i == stepIndex));
         }
 
-        // Update the getDuration editText
+        // Update the duration editText and position the cursor at the end
         String durationString = String.valueOf(step.getDuration());
         mDurationEditText.setText(durationString);
-
-        //Set the cursor at the end of the edit text
         mDurationEditText.setSelection(durationString.length());
 
         // Update the position sliders
-        updatePositionSliders(stepIndex);
+        updatePositions();
+    }
+
+
+    private class PositionListener {
+
+        int stepIndex;
+        int positionIndex;
+
+        PositionListener(int step, int position) {
+            stepIndex     = step;
+            positionIndex = position;
+        }
+
+        void savePosition(int newValue) {
+            mProjectDao.savePosition(mProject, stepIndex, positionIndex, newValue);
+        }
 
     }
 
-    /**
-     * Create the position sliders according to the project servo count
-     *
-     */
-    private void createPositionSliders() {
+    private class PositionTextEditorActionListener extends PositionListener implements TextView.OnEditorActionListener {
 
-        LayoutInflater inflater = getLayoutInflater();
+        SeekBar mSeekbar;
+
+        PositionTextEditorActionListener(SeekBar seekbar, int step, int position) {
+            super(step, position);
+            mSeekbar = seekbar;
+        }
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+            int newValue;
+
+            try {
+
+                newValue = Integer.parseInt(v.getText().toString());
+
+                if (newValue > 100) {
+                    setInvalid(v);
+                } else {
+                    mSeekbar.setProgress(newValue);
+                    savePosition(newValue);
+                }
+
+            } catch (NumberFormatException e) {
+                setInvalid(v);
+            }
+
+            return true;
+        }
+
+        private void setInvalid(TextView v) {
+            v.setError("Position must be between 0 and 100");
+
+        }
+
+    }
+
+    private class PositionSeekbarChangeListener extends PositionListener implements SeekBar.OnSeekBarChangeListener {
+
+        EditText editText;
+
+        PositionSeekbarChangeListener(EditText editText, int step, int position) {
+            super(step, position);
+            this.editText = editText;
+        }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            if (!fromUser)
+                return;
+
+            // Update the percentage text
+            editText.setText(String.valueOf(progress));
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            savePosition(seekBar.getProgress());
+        }
+    }
+
+    /**
+     * Create the positions
+     */
+    private void createPositions() {
 
         for (int i = 0; i < mProject.getBoardConfig().getServoCount(); i++) {
-            createPositionSlider(inflater, mStartPositions, i);
-            createPositionSlider(inflater, mEndPositions, i);
+
+            // Inflate the position layout
+            LinearLayout positionLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.layout_project_positions, null);
+
+            EditText editPercentageLeft  = (EditText) positionLayout.findViewById(R.id.editPercentageLeft);
+            SeekBar  seekbarLeft         = (SeekBar ) positionLayout.findViewById(R.id.seekbarLeft );
+            SeekBar  seekbarRight        = (SeekBar ) positionLayout.findViewById(R.id.seekbarRight);
+            EditText editPercentageRight = (EditText) positionLayout.findViewById(R.id.editPercentageRight);
+
+            // Set the listeners on the widgets
+            editPercentageLeft .setOnEditorActionListener(new PositionTextEditorActionListener(seekbarLeft, mStepIndex, i));
+            seekbarLeft        .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageLeft , mStepIndex, i));
+            seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, mStepIndex + 1, i));
+            editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , mStepIndex + 1, i));
+
+            // Set the position index text
+            ((TextView) positionLayout.findViewById(R.id.textPositionIndex)).setText("Servo " + (i + 1));
+
+            // Append the position slider to the parent view
+            mPositions.addView(positionLayout);
         }
 
     }
 
-    /**
-     * Create a position slider
-     *
-     * @param inflater the layout inflater
-     * @param positionLayout the position slider table linearLayout
-     * @param i the servo index
-     */
-    private void createPositionSlider(LayoutInflater inflater, LinearLayout positionLayout, int i) {
 
-        // Inflate the position slider widget
-        LinearLayout positionSliderRow = (LinearLayout) inflater.inflate(R.layout.layout_project_positions, null);
+    private void updatePositions() {
 
-        // Update the servo name text
-        assert positionSliderRow != null;
-        ((TextView) positionSliderRow.findViewById(R.id.text)).setText("Servo " + (i + 1));
+        ArrayList<Integer> startPositions = mProject.getStep(mStepIndex    ).getPositions();
+        ArrayList<Integer> endPositions   = mProject.getStep(mStepIndex + 1).getPositions();
 
-        // Set a tag to the slider for easier retrieval
-        positionSliderRow.findViewById(R.id.slider).setTag(i);
+        for (int i = 0; i < mProject.getBoardConfig().getServoCount() ; i++) {
 
-        // Append the position slider to the parent view
-        positionLayout.addView(positionSliderRow);
+            Integer startPosition = startPositions.get(i);
+            Integer endPosition   = endPositions  .get(i);
 
-    }
+            LinearLayout positionLayout = (LinearLayout) mPositions.getChildAt(i);
 
+            ((EditText) positionLayout.findViewById(R.id.editPercentageLeft )).setText    (startPosition.toString());
+            ((SeekBar ) positionLayout.findViewById(R.id.seekbarLeft        )).setProgress(startPosition           );
 
-    private void updatePositionSliders(int positionIndex) {
+            ((SeekBar ) positionLayout.findViewById(R.id.seekbarRight       )).setProgress(endPosition             );
+            ((EditText) positionLayout.findViewById(R.id.editPercentageRight)).setText    (endPosition.toString()  );
 
-        int servoCount = mProject.getBoardConfig().getServoCount();
-
-        Step startStep = mProject.getStep(positionIndex    );
-        Step endStep   = mProject.getStep(positionIndex + 1);
-
-        // Update the start position seek bar
-        for (int i = 0; i < servoCount; i++) {
-            View position = mStartPositions.findViewWithTag(i);
-            assert position != null;
-            ((SeekBar) position).setProgress(startStep.getPosition(i));
-        }
-
-        // Update the end position seek bar
-        for (int i = 0; i < servoCount; i++) {
-            View position = mEndPositions.findViewWithTag(i);
-            assert position != null;
-            ((SeekBar) position).setProgress(endStep.getPosition(i));
         }
 
     }
@@ -243,9 +327,6 @@ public class ProjectActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-
-            case R.id.action_settings:
-                return true;
 
             case R.id.action_boardConfig:
                 menuBoardConfigClicked();

@@ -6,8 +6,9 @@ import android.util.Log;
 import fr.dmconcept.bob.models.BoardConfig;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.ServoConfig;
+import fr.dmconcept.bob.models.Step;
 import fr.dmconcept.bob.models.dao.BoardConfigDao;
-import fr.dmconcept.bob.models.dao.ProjectsDao;
+import fr.dmconcept.bob.models.dao.ProjectDao;
 import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class BobApplication extends Application {
     SQLiteDatabase      mDatabase;
 
     BoardConfigDao mBoardConfigDao;
-    ProjectsDao    mProjectsDao;
+    ProjectDao mProjectsDao;
 
     @Override
     public void onCreate() {
@@ -36,7 +37,7 @@ public class BobApplication extends Application {
         mDatabase   = mOpenHelper.getWritableDatabase();
 
         mBoardConfigDao = new BoardConfigDao(mDatabase);
-        mProjectsDao    = new ProjectsDao   (mDatabase, mBoardConfigDao);
+        mProjectsDao    = new ProjectDao(mDatabase, mBoardConfigDao);
 
         if (BuildConfig.DEBUG)
             createFixtures();
@@ -51,6 +52,7 @@ public class BobApplication extends Application {
 
         ArrayList<ServoConfig> servoConfigs1 = new ArrayList<ServoConfig>() {{
             add(new ServoConfig(3, 1200, 1660, 50));
+            add(new ServoConfig(4, 1200, 1660, 50));
         }};
 
         ArrayList<ServoConfig> servoConfigs2 = new ArrayList<ServoConfig>() {{
@@ -59,21 +61,36 @@ public class BobApplication extends Application {
             add(new ServoConfig(5, 1200, 1660, 50));
         }};
 
-        BoardConfig config1 = new BoardConfig("Demo port 3"         , servoConfigs1);
-        BoardConfig config2 = new BoardConfig("Demo port 3, 4 and 5", servoConfigs2);
+        BoardConfig config1 = new BoardConfig("Servos on port 3 and 4"  , servoConfigs1);
+        BoardConfig config2 = new BoardConfig("Servos on port 3, 4 and 5", servoConfigs2);
 
         config1.setId(mBoardConfigDao.save(config1));
         config2.setId(mBoardConfigDao.save(config2));
 
         Log.i(TAG, "DEBUG MODE - Creating project...");
 
-        mProjectsDao.save(new Project("Demo project", config1));
+        Project project = new Project(-1, "Demo project", config1, new ArrayList<Step>() {{
+            add(new Step(2000, new ArrayList<Integer>() {{
+                add(  0);
+                add(100);
+            }}));
+            add(new Step(4000, new ArrayList<Integer>() {{
+                add(100);
+                add(  0);
+            }}));
+            add(new Step(0, new ArrayList<Integer>() {{
+                add( 50);
+                add( 50);
+            }}));
+        }});
+
+        mProjectsDao.create(project);
 
         Log.i(TAG, "DEBUG MODE - Fixtures creation done");
 
     }
 
-    public ProjectsDao getProjectsDao() {
+    public ProjectDao getProjectsDao() {
         return mProjectsDao;
     }
 

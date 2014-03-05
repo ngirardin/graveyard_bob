@@ -16,7 +16,6 @@ public class Project {
     // The project board config
     private BoardConfig  mBoardConfig;
 
-
     /**
      * Create a new project with a start and end step
      *
@@ -27,14 +26,8 @@ public class Project {
 
         this(-1, name, boardConfig, new ArrayList<Step>());
 
-        int servos = boardConfig.getServoCount();
-
-        // Start step
-        mSteps.add(new Step(servos));
-
-        // End step with a 0 ms getDuration
-        mSteps.add(new Step(servos, 0));
-
+        addStep(2000);
+        addStep(0);
     }
 
     /**
@@ -114,8 +107,15 @@ public class Project {
     /**
      * Create a new step at the end of the project
      */
-    public void addStep() {
-        mSteps.add(new Step(mBoardConfig.getServoCount()));
+    public void addStep(int duration) {
+
+        ArrayList<Integer> positions = new ArrayList<Integer>();
+
+        for(ServoConfig ignored : mBoardConfig.getServoConfigs())
+            positions.add(50);
+
+        mSteps.add(new Step(duration, positions));
+
     }
 
 }

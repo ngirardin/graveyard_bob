@@ -35,71 +35,43 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginTop="@dimen/activity_vertical_margin">
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Duration:"
-            android:labelFor="@+id/editTextDuration"/>
+            android:layout_weight="1"
+            android:text="Start"/>
 
         <EditText
-            android:layout_width="80dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="number"
-            android:ems="10"
+            android:ems="4"
             android:id="@+id/editTextDuration"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ms"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_weight="1"
+            android:text="End"/>
+
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:baselineAligned="false">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/startPositions"
-            android:layout_weight="1"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:focusable="false">
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Start postion"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/endPositions"
-            android:layout_weight="1">
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="End position"
-                android:gravity="center_horizontal"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_marginBottom="@dimen/activity_vertical_margin" />
-        </LinearLayout>
-
+        android:layout_height="fill_parent"
+        android:id="@+id/positions">
     </LinearLayout>
 
 </LinearLayout>
