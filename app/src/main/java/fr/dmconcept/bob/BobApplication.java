@@ -34,7 +34,7 @@ public class BobApplication extends Application {
         mBoardConfigDao = new BoardConfigDao(mDatabase);
         mProjectsDao    = new ProjectDao(mDatabase, mBoardConfigDao);
 
-        if (BuildConfig.DEBUG && mProjectsDao.findAll().size() > 1)
+        if (BuildConfig.DEBUG && mProjectsDao.findAll().size() == 0)
             // First run, create the fixtures
             createFixtures();
 
@@ -47,8 +47,9 @@ public class BobApplication extends Application {
         Log.i(TAG, "DEBUG MODE - Creating servos config fixtures");
 
         ArrayList<ServoConfig> servoConfigs1 = new ArrayList<ServoConfig>() {{
-            add(new ServoConfig(3, 1200, 1660, 50));
-            add(new ServoConfig(4, 1200, 1660, 50));
+
+            add(new ServoConfig(3, 556, 2472, 50));
+            add(new ServoConfig(4, 556, 2472, 50));
         }};
 
         ArrayList<ServoConfig> servoConfigs2 = new ArrayList<ServoConfig>() {{

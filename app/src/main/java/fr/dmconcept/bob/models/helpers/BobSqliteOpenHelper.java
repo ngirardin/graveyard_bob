@@ -9,7 +9,7 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "models.helpers.BobSqliteOpenHelper";
 
-    private static final String DATABASE_NAME    = "project.db";
+    public  static final String DATABASE_NAME    = "project.db";
     private static final int    DATABASE_VERSION = 1;
 
     /**

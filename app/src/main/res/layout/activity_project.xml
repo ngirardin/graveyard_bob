@@ -41,11 +41,12 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginBottom="@dimen/activity_vertical_margin">
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Start"/>
+            android:text="Start"
+            android:id="@+id/buttonStart"/>
 
         <EditText
             android:layout_width="wrap_content"
@@ -59,12 +60,12 @@
             android:layout_height="wrap_content"
             android:text="ms"/>
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
             android:layout_weight="1"
-            android:text="End"/>
+            android:text="End"
+            android:id="@+id/buttonEnd"/>
 
     </LinearLayout>
 

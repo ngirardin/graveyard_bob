@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,10 +13,12 @@ import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
 import fr.dmconcept.bob.models.dao.ProjectDao;
+import ioio.lib.util.IOIOLooper;
+import ioio.lib.util.android.IOIOActivity;
 
 import java.util.ArrayList;
 
-public class ProjectActivity extends Activity {
+public class ProjectActivity extends IOIOActivity {
 
     private static final String TAG = "activities.ProjectListActivity";
 
@@ -38,6 +39,9 @@ public class ProjectActivity extends Activity {
 
     // The active step index
     private int mStepIndex;
+
+    // The positions consumed by the IOIO Looper
+    protected ArrayList<Integer> mIoioPositions;
 
     // The timeline
     private LinearLayout mTimeline;
@@ -118,6 +122,23 @@ public class ProjectActivity extends Activity {
 
                 return true;
 
+            }
+
+        });
+
+        // Click on the start or end buttons
+        findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setIOIOPosition(0);
+            }
+        });
+
+        findViewById(R.id.buttonEnd).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                setIOIOPosition(1);
             }
         });
 
@@ -324,6 +345,18 @@ public class ProjectActivity extends Activity {
 
         }
 
+    }
+
+    ProjectActivityIOIOLooper mIoioLooper;
+
+    @Override
+    protected IOIOLooper createIOIOLooper() {
+        mIoioLooper =  new ProjectActivityIOIOLooper(this, mProject.getBoardConfig());
+        return mIoioLooper;
+    }
+
+    private void setIOIOPosition(int stepOffset) {
+        mIoioPositions = new ArrayList<Integer>(mProject.getStep(mStepIndex + stepOffset).getPositions());
     }
 
     @Override
