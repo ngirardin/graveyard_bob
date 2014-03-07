@@ -2,9 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="fr.dmconcept.bob.activities.ProjectListActivity">
 
-    <item android:id="@+id/action_newProject"
-        android:title="New project"
+    <item
+        android:id="@+id/action_boardConfig"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:showAsAction="ifRoom"
+        android:title="Set the board configuration"/>
+
+    <item
+        android:id="@+id/action_newProject"
         android:icon="@android:drawable/ic_menu_add"
-        android:showAsAction="ifRoom"/>
+        android:showAsAction="ifRoom"
+        android:title="New project"/>
 
 </menu>

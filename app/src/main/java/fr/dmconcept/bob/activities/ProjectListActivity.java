@@ -22,7 +22,7 @@ import java.util.ArrayList;
 // TODO move to Application instead of Activity
 public class ProjectListActivity extends ListActivity {
 
-    public static final String TAG = "bob.activities.ProjctListActivity";
+    public static final String TAG = "activities.ProjctListActivity";
 
     ArrayList<Project> mProjects;
 
@@ -101,6 +101,10 @@ public class ProjectListActivity extends ListActivity {
 
         switch (item.getItemId()) {
 
+            case R.id.action_boardConfig:
+                menuBoardConfigClicked();
+                return true;
+
             case R.id.action_newProject:
                 menuNewProjectClicked();
                 return true;
@@ -111,9 +115,18 @@ public class ProjectListActivity extends ListActivity {
 
     }
 
-    private void menuNewProjectClicked() {
+    /**
+     * Show the board config activity
+     */
+    private void menuBoardConfigClicked() {
+        Intent intent = new Intent(this, BoardConfigActivity.class);
+        startActivity(intent);
+    }
 
-        // Start the new project details activity
+    /**
+     * Show the new project activity
+     */
+    private void menuNewProjectClicked() {
         startActivity(new Intent(this, NewProjectActivity.class));
     }
 

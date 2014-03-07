@@ -28,6 +28,8 @@ public class BobApplication extends Application {
 
         Log.i(TAG, "onCreate()");
 
+        deleteDatabase(BobSqliteOpenHelper.DATABASE_NAME);
+
         mOpenHelper = new BobSqliteOpenHelper(this);
         mDatabase   = mOpenHelper.getWritableDatabase();
 
@@ -48,14 +50,14 @@ public class BobApplication extends Application {
 
         ArrayList<ServoConfig> servoConfigs1 = new ArrayList<ServoConfig>() {{
 
-            add(new ServoConfig(3, 556, 2472, 50));
-            add(new ServoConfig(4, 556, 2472, 50));
+            add(new ServoConfig(3, 557, 2472, 50));
+            add(new ServoConfig(4, 557, 2472, 50));
         }};
 
         ArrayList<ServoConfig> servoConfigs2 = new ArrayList<ServoConfig>() {{
-            add(new ServoConfig(3, 1200, 1660, 50));
-            add(new ServoConfig(4, 1200, 1660, 50));
-            add(new ServoConfig(5, 1200, 1660, 50));
+            add(new ServoConfig(3, 557, 2472, 50));
+            add(new ServoConfig(4, 557, 2472, 50));
+            add(new ServoConfig(5, 557, 2472, 50));
         }};
 
         BoardConfig config1 = new BoardConfig("Servos on port 3 and 4"  , servoConfigs1);
@@ -68,12 +70,12 @@ public class BobApplication extends Application {
 
         Project project = new Project(-1, "Demo project", config1, new ArrayList<Step>() {{
             add(new Step(2000, new ArrayList<Integer>() {{
-                add(  0);
-                add(100);
+                add(10);
+                add(80);
             }}));
             add(new Step(4000, new ArrayList<Integer>() {{
-                add(100);
-                add(  0);
+                add(90);
+                add(20);
             }}));
             add(new Step(0, new ArrayList<Integer>() {{
                 add( 50);

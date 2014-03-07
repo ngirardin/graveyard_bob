@@ -63,6 +63,12 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/buttonPlayStep"
+            android:background="@android:drawable/ic_media_play"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="End"
             android:id="@+id/buttonEnd"/>

@@ -75,7 +75,6 @@
     <orderEntry type="library" exported="" name="ioiolibandroid" level="project" />
     <orderEntry type="library" exported="" name="alljoyn" level="project" />
     <orderEntry type="library" exported="" name="usb" level="project" />
-    <orderEntry type="library" exported="" name="ioiolibandroid-src" level="project" />
   </component>
 </module>
 

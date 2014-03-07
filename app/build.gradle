@@ -24,5 +24,4 @@ dependencies {
     compile files('libs/alljoyn.jar')
     compile files('libs/ioiolibandroid.jar')
     compile files('libs/usb.jar')
-    compile files('libs/ioiolibandroid-src.zip')
 }

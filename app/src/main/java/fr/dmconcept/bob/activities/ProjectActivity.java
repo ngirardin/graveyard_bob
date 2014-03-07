@@ -1,15 +1,14 @@
 package fr.dmconcept.bob.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.R;
+import fr.dmconcept.bob.ioio.IoioQueue;
+import fr.dmconcept.bob.ioio.ProjectActivityIOIOLooper;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
 import fr.dmconcept.bob.models.dao.ProjectDao;
@@ -41,7 +40,7 @@ public class ProjectActivity extends IOIOActivity {
     private int mStepIndex;
 
     // The positions consumed by the IOIO Looper
-    protected ArrayList<Integer> mIoioPositions;
+    public IoioQueue ioioQueue = new IoioQueue();
 
     // The timeline
     private LinearLayout mTimeline;
@@ -94,6 +93,9 @@ public class ProjectActivity extends IOIOActivity {
                 // Create the new step
                 mProject.addStep(DEFAULT_STEP_DURATION);
 
+                // Save it
+                mProjectDao.saveSteps(mProject);
+
                 // Select the last period (the last step is the end step)
                 mStepIndex = mProject.getSteps().size() - 2;
 
@@ -126,19 +128,26 @@ public class ProjectActivity extends IOIOActivity {
 
         });
 
+        // Click on the "Play step" button
+        findViewById(R.id.buttonPlayStep).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ioioQueue.playStep(mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
+            }
+        });
+
         // Click on the start or end buttons
         findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setIOIOPosition(0);
+                ioioQueue.playStart(mProject.getStep(mStepIndex));
             }
         });
 
         findViewById(R.id.buttonEnd).setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                setIOIOPosition(1);
+                ioioQueue.playEnd(mProject.getStep(mStepIndex + 1));
             }
         });
 
@@ -355,10 +364,7 @@ public class ProjectActivity extends IOIOActivity {
         return mIoioLooper;
     }
 
-    private void setIOIOPosition(int stepOffset) {
-        mIoioPositions = new ArrayList<Integer>(mProject.getStep(mStepIndex + stepOffset).getPositions());
-    }
-
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -371,24 +377,11 @@ public class ProjectActivity extends IOIOActivity {
 
         switch (item.getItemId()) {
 
-            case R.id.action_boardConfig:
-                menuBoardConfigClicked();
-                return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
-
-    /**
-     * Show the board config activity
-     */
-    private void menuBoardConfigClicked() {
-
-        Intent intent = new Intent(this, BoardConfigActivity.class);
-        startActivity(intent);
-
-    }
+    */
 
 }
