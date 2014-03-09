@@ -1,4 +1,4 @@
-package fr.dmconcept.bob;
+package fr.dmconcept.bob.communications;
 
 public class NoInterfaceException extends Exception {
 
