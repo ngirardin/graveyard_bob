@@ -16,6 +16,8 @@ import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.BuildConfig;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
+import fr.dmconcept.bob.models.dao.ProjectDao;
+import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
 
 import java.util.ArrayList;
 
@@ -31,20 +33,15 @@ public class ProjectListActivity extends ListActivity {
 
         super.onCreate(savedInstanceState);
 
-        checkExpirationDate();
-
         // Get the project list from the DB
         mProjects = ((BobApplication) getApplication()).getProjectsDao().findAll();
 
-    /***
-     * XXX
-     */
+    /****/
+        //TODO remove me
     Intent intent = new Intent(this, ProjectActivity.class);
     intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, mProjects.get(0).getId());
     startActivity(intent);
-    /***
-     * XXX
-     */
+    /****/
 
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
@@ -71,20 +68,6 @@ public class ProjectListActivity extends ListActivity {
 
         });
 
-    }
-
-    private void checkExpirationDate(){
-        if (!BuildConfig.DEBUG && System.currentTimeMillis() > 1394200800) { // expires on 07/03/2014 0:00:00
-            new AlertDialog.Builder(this)
-                    .setMessage("Version de démo expirée")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            ProjectListActivity.this.finish();
-                        }
-                    })
-                    .create()
-                    .show();
-        }
     }
 
     @Override

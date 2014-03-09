@@ -28,7 +28,10 @@ public class BobApplication extends Application {
 
         Log.i(TAG, "onCreate()");
 
+    /****/
+        //TODO remove me
         deleteDatabase(BobSqliteOpenHelper.DATABASE_NAME);
+    /****/
 
         mOpenHelper = new BobSqliteOpenHelper(this);
         mDatabase   = mOpenHelper.getWritableDatabase();
@@ -77,9 +80,13 @@ public class BobApplication extends Application {
                 add(90);
                 add(20);
             }}));
+            add(new Step(6000, new ArrayList<Integer>() {{
+                add( 0);
+                add(100);
+            }}));
             add(new Step(0, new ArrayList<Integer>() {{
-                add( 50);
-                add( 50);
+                add(100);
+                add(  0);
             }}));
         }});
 
