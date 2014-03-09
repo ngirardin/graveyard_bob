@@ -5,13 +5,13 @@
     <item
         android:id="@+id/action_boardConfig"
         android:icon="@android:drawable/ic_menu_manage"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="Set the board configuration"/>
 
     <item
         android:id="@+id/action_newProject"
         android:icon="@android:drawable/ic_menu_add"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="New project"/>
 
 </menu>

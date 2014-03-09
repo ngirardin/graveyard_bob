@@ -1,23 +1,27 @@
 package fr.dmconcept.bob.activities;
 
+import android.accounts.NetworkErrorException;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import fr.dmconcept.bob.BobApplication;
+import fr.dmconcept.bob.BobCommunication;
+import fr.dmconcept.bob.NoInterfaceException;
 import fr.dmconcept.bob.R;
-import fr.dmconcept.bob.ioio.IoioQueue;
-import fr.dmconcept.bob.ioio.ProjectActivityIOIOLooper;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
 import fr.dmconcept.bob.models.dao.ProjectDao;
-import ioio.lib.util.IOIOLooper;
-import ioio.lib.util.android.IOIOActivity;
 
 import java.util.ArrayList;
 
-public class ProjectActivity extends IOIOActivity {
+public class ProjectActivity extends ActionBarActivity {
 
     private static final String TAG = "activities.ProjectListActivity";
 
@@ -30,6 +34,9 @@ public class ProjectActivity extends IOIOActivity {
     // The minimum step duration in ms
     private static final int MIN_STEP_DURATION = 100;
 
+    // The communication layer with the server
+    private BobCommunication mCommunication;
+
     // The project DAO
     private ProjectDao mProjectDao;
 
@@ -38,9 +45,6 @@ public class ProjectActivity extends IOIOActivity {
 
     // The active step index
     private int mStepIndex;
-
-    // The positions consumed by the IOIO Looper
-    public IoioQueue ioioQueue = new IoioQueue();
 
     // The timeline
     private LinearLayout mTimeline;
@@ -59,6 +63,8 @@ public class ProjectActivity extends IOIOActivity {
         Log.i(TAG, "onCreate()");
 
         setContentView(R.layout.activity_project);
+
+        mCommunication = new BobCommunication(this);
 
         // Get the project from the DB according to the intent extra id
         long projectId = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1);
@@ -132,7 +138,7 @@ public class ProjectActivity extends IOIOActivity {
         findViewById(R.id.buttonPlayStep).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ioioQueue.playStep(mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
+                playWholeStep();
             }
         });
 
@@ -140,14 +146,14 @@ public class ProjectActivity extends IOIOActivity {
         findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ioioQueue.playStart(mProject.getStep(mStepIndex));
+                playStartStep();
             }
         });
 
         findViewById(R.id.buttonEnd).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ioioQueue.playEnd(mProject.getStep(mStepIndex + 1));
+                playEndStep();
             }
         });
 
@@ -231,7 +237,6 @@ public class ProjectActivity extends IOIOActivity {
 
     }
 
-
     private class PositionListener {
 
         int stepIndex;
@@ -295,6 +300,7 @@ public class ProjectActivity extends IOIOActivity {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
+            // Do nothing
         }
 
         @Override
@@ -356,15 +362,6 @@ public class ProjectActivity extends IOIOActivity {
 
     }
 
-    ProjectActivityIOIOLooper mIoioLooper;
-
-    @Override
-    protected IOIOLooper createIOIOLooper() {
-        mIoioLooper =  new ProjectActivityIOIOLooper(this, mProject.getBoardConfig());
-        return mIoioLooper;
-    }
-
-    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -377,11 +374,98 @@ public class ProjectActivity extends IOIOActivity {
 
         switch (item.getItemId()) {
 
+            case R.id.action_playProject:
+                playProject();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
-    */
+
+    private void playStartStep() {
+
+        Log.i(TAG, "playStartStep()");
+
+        try {
+            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex));
+        } catch (NetworkErrorException e) {
+            showNetworkErrorDialog();
+        } catch (NoInterfaceException e) {
+            showNoInterfaceDialog();
+        }
+    }
+
+    private void playEndStep() {
+
+        Log.i(TAG, "playEndStep()");
+
+        try {
+            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex + 1));
+        } catch (NetworkErrorException e) {
+            showNetworkErrorDialog();
+        } catch (NoInterfaceException e) {
+            showNoInterfaceDialog();
+        }
+    }
+
+    private void playWholeStep() {
+
+        Log.i(TAG, "playWholeStep()");
+
+        try {
+            mCommunication.sendSteps(mProject.getBoardConfig(), mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
+        } catch (NetworkErrorException e) {
+            showNetworkErrorDialog();
+        } catch (NoInterfaceException e) {
+            showNoInterfaceDialog();
+        }
+    }
+
+    private void playProject() {
+
+        Log.i(TAG, "playProject()");
+
+        try {
+            mCommunication.sendSteps(mProject);
+        } catch (NetworkErrorException e) {
+            showNetworkErrorDialog();
+        } catch (NoInterfaceException e) {
+            showNoInterfaceDialog();
+        }
+    }
+
+    private void showNetworkErrorDialog() {
+        buildErrorDialog("Connection error", "The board can't be contacted. Make sur that the Bob Server app is running.")
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            })
+            .show();
+    }
+
+    private void showNoInterfaceDialog() {
+        buildErrorDialog("Connection error", "This app needs a network connection.")
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    // Exit the app
+                    finish();
+                }
+            })
+            .show();
+
+    }
+
+    private AlertDialog.Builder buildErrorDialog(String title, String message) {
+        return new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setMessage(message);
+    }
 
 }

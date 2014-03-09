@@ -36,6 +36,16 @@ public class ProjectListActivity extends ListActivity {
         // Get the project list from the DB
         mProjects = ((BobApplication) getApplication()).getProjectsDao().findAll();
 
+    /***
+     * XXX
+     */
+    Intent intent = new Intent(this, ProjectActivity.class);
+    intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, mProjects.get(0).getId());
+    startActivity(intent);
+    /***
+     * XXX
+     */
+
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
             @Override
