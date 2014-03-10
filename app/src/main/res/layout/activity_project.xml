@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/buttonPlayStep"
-            android:background="@android:drawable/ic_media_play"/>
+            android:text="Play"/>
 
         <Button
             android:layout_width="wrap_content"
