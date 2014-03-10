@@ -22,6 +22,6 @@
         android:icon="@android:drawable/ic_menu_add"
         bob:showAsAction="ifRoom"
         android:showAsAction="ifRoom"
-        android:title="Add a stepPlay the project"/>
+        android:title="Add a new step"/>
 
 </menu>
