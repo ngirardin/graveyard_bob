@@ -45,6 +45,7 @@ public class Project {
         // Check that the all the steps contains the same servo
         // count as defined in the project's board config
         for(Step s: steps)
+            //TODO ain't working nah?
             assert s.getPositions().size() == boardConfig.getServoCount();
 
         this.mId = id   ;
