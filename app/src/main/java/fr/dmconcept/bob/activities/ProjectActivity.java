@@ -399,6 +399,7 @@ public class ProjectActivity extends ActionBarActivity {
 
         try {
             mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex));
+            Toast.makeText(this, "Playing the start position.", Toast.LENGTH_SHORT).show();
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -412,6 +413,7 @@ public class ProjectActivity extends ActionBarActivity {
 
         try {
             mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex + 1));
+            Toast.makeText(this, "Playing the end position.", Toast.LENGTH_SHORT).show();
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -425,6 +427,7 @@ public class ProjectActivity extends ActionBarActivity {
 
         try {
             mCommunication.sendSteps(mProject.getBoardConfig(), mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
+            Toast.makeText(this, "Playing the step.", Toast.LENGTH_SHORT).show();
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -438,6 +441,7 @@ public class ProjectActivity extends ActionBarActivity {
 
         try {
             mCommunication.sendSteps(mProject);
+            Toast.makeText(this, "Playing the project.", Toast.LENGTH_SHORT).show();
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
