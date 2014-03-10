@@ -225,7 +225,6 @@ public class ProjectActivity extends ActionBarActivity {
 
         void savePosition(int newValue) {
             int step = mStepIndex + stepOffset;
-            Toast.makeText(ProjectActivity.this, "Saving step " + step + ", position " + positionIndex + " to " + newValue + "%", Toast.LENGTH_SHORT).show();
             mProjectDao.savePosition(mProject, step, positionIndex, newValue);
         }
 
@@ -370,18 +369,12 @@ public class ProjectActivity extends ActionBarActivity {
 
     private void deleteStep() {
 
-        //TOOD implement
-        new AlertDialog.Builder(this)
-            .setTitle("Delete step")
-            .setMessage("Step deletion not (yet) implemented")
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-            .show();
+        mProject.removeStep(mStepIndex);
+        mProjectDao.saveSteps(mProject);
 
+        mStepIndex--;
+
+        updateTimeline();
     }
 
     private void newStep() {

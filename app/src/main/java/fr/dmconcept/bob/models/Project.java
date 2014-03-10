@@ -1,8 +1,12 @@
 package fr.dmconcept.bob.models;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class Project {
+
+    private static final String TAG = "models.Project";
 
     // The project id
     private Long mId;
@@ -110,6 +114,8 @@ public class Project {
      */
     public void addStep(int duration) {
 
+        Log.i(TAG, "addStep(" + duration + ")");
+
         ArrayList<Integer> positions = new ArrayList<Integer>();
 
         for(ServoConfig ignored : mBoardConfig.getServoConfigs())
@@ -120,6 +126,20 @@ public class Project {
 
         // Add the new step
         mSteps.add(new Step(0, positions));
+
+    }
+
+    public void removeStep(int i) {
+
+        Log.i(TAG, "removeStep(" + i + ")");
+
+        mSteps.remove(i);
+
+        // If the last step is removed, set the last step duration to 0
+        if (i == mSteps.size()) {
+            Log.i(TAG, "removeStep() - Removing last step setting the new last step duration to 0");
+            mSteps.get(mSteps.size() -1).setDuration(0);
+        }
 
     }
 
