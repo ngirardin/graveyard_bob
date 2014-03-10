@@ -331,7 +331,7 @@ public class ProjectActivity extends ActionBarActivity {
             editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , mStepIndex + 1, i));
 
             // Set the position index text
-            ((TextView) positionLayout.findViewById(R.id.textPositionIndex)).setText("Servo " + (i + 1));
+            ((TextView) positionLayout.findViewById(R.id.textPositionIndex)).setText(String.valueOf(i + 1));
 
             // Append the position slider to the parent view
             mPositions.addView(positionLayout);
