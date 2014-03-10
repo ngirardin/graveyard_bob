@@ -91,26 +91,6 @@ public class ProjectActivity extends ActionBarActivity {
 
     private void registerViewListeners() {
 
-        // Click on the "New step" button
-        findViewById(R.id.buttonNewStep).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // Create the new step
-                mProject.addStep(DEFAULT_STEP_DURATION);
-
-                // Save it
-                mProjectDao.saveSteps(mProject);
-
-                // Select the last period (the last step is the end step)
-                mStepIndex = mProject.getSteps().size() - 2;
-
-                // Update the timeline
-                updateTimeline();
-
-            }
-        });
-
         // Duration changed
         ((EditText) findViewById(R.id.editTextDuration)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -330,15 +310,11 @@ public class ProjectActivity extends ActionBarActivity {
             seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, mStepIndex + 1, i));
             editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , mStepIndex + 1, i));
 
-            // Set the position index text
-            ((TextView) positionLayout.findViewById(R.id.textPositionIndex)).setText(String.valueOf(i + 1));
-
             // Append the position slider to the parent view
             mPositions.addView(positionLayout);
         }
 
     }
-
 
     private void updatePositions() {
 
@@ -375,6 +351,10 @@ public class ProjectActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
 
+            case R.id.action_newStep:
+                newStep();
+                return true;
+
             case R.id.action_playProject:
                 playProject();
                 return true;
@@ -382,6 +362,22 @@ public class ProjectActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+
+    }
+
+    private void newStep() {
+
+        // Create the new step
+        mProject.addStep(DEFAULT_STEP_DURATION);
+
+        // Save it
+        mProjectDao.saveSteps(mProject);
+
+        // Select the last period (the last step is the end step)
+        mStepIndex = mProject.getSteps().size() - 2;
+
+        // Update the timeline
+        updateTimeline();
 
     }
 

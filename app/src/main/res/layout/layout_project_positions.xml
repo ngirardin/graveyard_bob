@@ -27,24 +27,14 @@
         android:max="100"
         android:mirrorForRtl="true"
         android:layout_weight="1"
-        android:id="@+id/seekbarLeft"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textPositionIndex"
-        android:layout_gravity="center_vertical"/>
+        android:id="@+id/seekbarLeft"/>
 
     <SeekBar
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:max="100"
         android:layout_weight="1"
-        android:id="@+id/seekbarRight"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"/>
+        android:id="@+id/seekbarRight"/>
 
     <EditText
         android:layout_width="wrap_content"

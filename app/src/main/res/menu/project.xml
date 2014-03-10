@@ -11,4 +11,12 @@
         android:title="Play the project"
         android:titleCondensed="Play project"/>
 
+    <item
+        android:id="@+id/action_newStep"
+        android:icon="@android:drawable/ic_menu_add"
+        bob:showAsAction="ifRoom"
+        android:showAsAction="ifRoom"
+        android:title="Play the project"
+        android:titleCondensed="Play project"/>
+
 </menu>
