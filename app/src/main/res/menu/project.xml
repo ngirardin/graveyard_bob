@@ -8,15 +8,20 @@
         android:icon="@android:drawable/ic_media_play"
         bob:showAsAction="ifRoom"
         android:showAsAction="ifRoom"
-        android:title="Play the project"
-        android:titleCondensed="Play project"/>
+        android:title="Play the project"/>
 
     <item
-        android:id="@+id/action_newStep"
+        android:id="@+id/action_deleteStep"
+        android:icon="@android:drawable/ic_menu_delete"
+        bob:showAsAction="ifRoom"
+        android:showAsAction="ifRoom"
+        android:title="Remove the step"/>
+
+    <item
+        android:id="@+id/action_addStep"
         android:icon="@android:drawable/ic_menu_add"
         bob:showAsAction="ifRoom"
         android:showAsAction="ifRoom"
-        android:title="Play the project"
-        android:titleCondensed="Play project"/>
+        android:title="Add a stepPlay the project"/>
 
 </menu>

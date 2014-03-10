@@ -351,17 +351,37 @@ public class ProjectActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
 
-            case R.id.action_newStep:
-                newStep();
-                return true;
-
             case R.id.action_playProject:
                 playProject();
+                return true;
+
+            case R.id.action_deleteStep:
+                deleteStep();
+                return true;
+
+            case R.id.action_addStep:
+                newStep();
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+
+    }
+
+    private void deleteStep() {
+
+        //TOOD implement
+        new AlertDialog.Builder(this)
+            .setTitle("Delete step")
+            .setMessage("Step deletion not (yet) implemented")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+            .show();
 
     }
 

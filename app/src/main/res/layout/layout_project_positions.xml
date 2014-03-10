@@ -25,7 +25,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:max="100"
-        android:mirrorForRtl="true"
         android:layout_weight="1"
         android:id="@+id/seekbarLeft"/>
 
