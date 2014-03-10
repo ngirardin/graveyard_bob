@@ -398,8 +398,8 @@ public class ProjectActivity extends ActionBarActivity {
         Log.i(TAG, "playStartStep()");
 
         try {
-            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex));
             Toast.makeText(this, "Playing the start position.", Toast.LENGTH_SHORT).show();
+            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex));
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -412,8 +412,8 @@ public class ProjectActivity extends ActionBarActivity {
         Log.i(TAG, "playEndStep()");
 
         try {
-            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex + 1));
             Toast.makeText(this, "Playing the end position.", Toast.LENGTH_SHORT).show();
+            mCommunication.sendStep(mProject.getBoardConfig(), mProject.getStep(mStepIndex + 1));
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -426,8 +426,8 @@ public class ProjectActivity extends ActionBarActivity {
         Log.i(TAG, "playWholeStep()");
 
         try {
-            mCommunication.sendSteps(mProject.getBoardConfig(), mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
             Toast.makeText(this, "Playing the step.", Toast.LENGTH_SHORT).show();
+            mCommunication.sendSteps(mProject.getBoardConfig(), mProject.getStep(mStepIndex), mProject.getStep(mStepIndex + 1));
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
@@ -440,8 +440,8 @@ public class ProjectActivity extends ActionBarActivity {
         Log.i(TAG, "playProject()");
 
         try {
-            mCommunication.sendSteps(mProject);
             Toast.makeText(this, "Playing the project.", Toast.LENGTH_SHORT).show();
+            mCommunication.sendSteps(mProject);
         } catch (NetworkErrorException e) {
             showNetworkErrorDialog();
         } catch (NoInterfaceException e) {
