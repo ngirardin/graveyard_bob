@@ -10,12 +10,10 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
     private static final String TAG = "models.helpers.BobSqliteOpenHelper";
 
     public  static final String DATABASE_NAME    = "project.db";
-    private static final int    DATABASE_VERSION = 1;
+    private static final int    DATABASE_VERSION = 2;
 
     /**
-     *
      * BOARD CONFIG
-     *
      */
     public static final String BOARDCONFIG_TABLE            = "boardconfig";
     public static final String BOARDCONFIG_COL_ID           = "_id";
@@ -37,9 +35,7 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
 
 
     /**
-     *
      * PROJECT
-     *
      */
     public static final String PROJECT_TABLE            = "project";
     public static final String PROJECT_COL_ID           = "_id";
@@ -79,7 +75,7 @@ public class BobSqliteOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion){
 
-        Log.i(TAG, "onUpgrade(database, "+ oldVersion + ", " + newVersion + ")");
+        Log.i(TAG, "onUpgrade(database, " + oldVersion + ", " + newVersion + ")");
 
         database.execSQL("DROP TABLE IF EXISTS " + BOARDCONFIG_TABLE + ";");
         database.execSQL("DROP TABLE IF EXISTS " + PROJECT_TABLE     + ";");
