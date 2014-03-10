@@ -45,7 +45,7 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
 
             result.setError(e.getMessage());
 
-            Log.e(TAG, "doInBackground() - Request error, stack trace below");
+            Log.i(TAG, "doInBackground() - Request error, stack trace below");
             e.printStackTrace();
         }
 
