@@ -1,8 +1,6 @@
 package fr.dmconcept.bob.activities;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,15 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import fr.dmconcept.bob.BobApplication;
-import fr.dmconcept.bob.BuildConfig;
 import fr.dmconcept.bob.R;
 import fr.dmconcept.bob.models.Project;
-import fr.dmconcept.bob.models.dao.ProjectDao;
-import fr.dmconcept.bob.models.helpers.BobSqliteOpenHelper;
 
 import java.util.ArrayList;
 
-// TODO move to Application instead of Activity
 public class ProjectListActivity extends ListActivity {
 
     public static final String TAG = "activities.ProjctListActivity";
@@ -36,13 +30,6 @@ public class ProjectListActivity extends ListActivity {
         // Get the project list from the DB
         mProjects = ((BobApplication) getApplication()).getProjectsDao().findAll();
 
-    /****/
-        //TODO remove me
-    Intent intent = new Intent(this, ProjectActivity.class);
-    intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, mProjects.get(0).getId());
-    startActivity(intent);
-    /****/
-
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
             @Override
@@ -52,16 +39,9 @@ public class ProjectListActivity extends ListActivity {
 
                 Project project = getItem(position);
 
-                int    stepCount   = project.getSteps().size() - 1;
-                int    duration    = project.getDuration() / 1000;
-                String config      = project.getBoardConfig().getName();
-
-                String line1 = project.getName();
-                String line2 = stepCount + " steps in " + duration + " seconds using " + config;
-
                 assert view != null;
-                ((TextView) view.findViewById(android.R.id.text1)).setText(line1);
-                ((TextView) view.findViewById(android.R.id.text2)).setText(line2);
+                ((TextView) view.findViewById(android.R.id.text1)).setText(project.getName());
+                ((TextView) view.findViewById(android.R.id.text2)).setText(project.getBoardConfig().getName());
 
                 return view;
             }
