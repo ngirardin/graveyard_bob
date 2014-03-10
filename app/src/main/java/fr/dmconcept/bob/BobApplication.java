@@ -28,11 +28,6 @@ public class BobApplication extends Application {
 
         Log.i(TAG, "onCreate()");
 
-    /****/
-        //TODO remove me
-        deleteDatabase(BobSqliteOpenHelper.DATABASE_NAME);
-    /****/
-
         mOpenHelper = new BobSqliteOpenHelper(this);
         mDatabase   = mOpenHelper.getWritableDatabase();
 
