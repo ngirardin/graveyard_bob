@@ -115,7 +115,11 @@ public class Project {
         for(ServoConfig ignored : mBoardConfig.getServoConfigs())
             positions.add(50);
 
-        mSteps.add(new Step(duration, positions));
+        // Set the length on the last step
+        mSteps.get(mSteps.size() - 1).setDuration(duration);
+
+        // Add the new step
+        mSteps.add(new Step(0, positions));
 
     }
 
