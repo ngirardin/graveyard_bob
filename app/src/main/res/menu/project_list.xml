@@ -6,13 +6,15 @@
     <item
         android:id="@+id/action_boardConfig"
         android:icon="@android:drawable/ic_menu_manage"
-        bob:showAsAction="always"
+        android:showAsAction="ifRoom"
+        bob:showAsAction="ifRoom"
         android:title="Manage the board configurations"/>
 
     <item
         android:id="@+id/action_newProject"
         android:icon="@android:drawable/ic_menu_add"
-        bob:showAsAction="always"
+        android:showAsAction="ifRoom"
+        bob:showAsAction="ifRoom"
         android:title="New project"/>
 
 </menu>
