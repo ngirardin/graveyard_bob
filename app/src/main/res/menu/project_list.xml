@@ -1,17 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bob="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="fr.dmconcept.bob.activities.ProjectListActivity">
+    tools:context=".activities.ProjectListActivity">
 
     <item
         android:id="@+id/action_boardConfig"
         android:icon="@android:drawable/ic_menu_manage"
-        android:showAsAction="always"
-        android:title="Set the board configuration"/>
+        bob:showAsAction="always"
+        android:title="Manage the board configurations"/>
 
     <item
         android:id="@+id/action_newProject"
         android:icon="@android:drawable/ic_menu_add"
-        android:showAsAction="always"
+        bob:showAsAction="always"
         android:title="New project"/>
 
 </menu>
