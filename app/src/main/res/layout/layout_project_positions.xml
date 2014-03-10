@@ -2,10 +2,11 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.ProjectActivity"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    tools:context=".activities.ProjectActivity">
+    android:paddingBottom="10dp">
 
     <EditText
         android:layout_width="wrap_content"
