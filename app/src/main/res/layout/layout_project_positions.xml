@@ -10,7 +10,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="3"
+        android:width="55dp"
         android:numeric="integer"
         android:id="@+id/editPercentageLeft"
         android:inputType="number"/>
@@ -23,7 +23,6 @@
     <SeekBar
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:indeterminate="false"
         android:max="100"
         android:mirrorForRtl="true"
         android:layout_weight="1"
@@ -40,9 +39,7 @@
     <SeekBar
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:indeterminate="false"
         android:max="100"
-        android:mirrorForRtl="true"
         android:layout_weight="1"
         android:id="@+id/seekbarRight"
         android:layout_marginLeft="8dp"
@@ -51,7 +48,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="3"
+        android:width="55dp"
         android:numeric="integer"
         android:textAlignment="textEnd"
         android:id="@+id/editPercentageRight"
