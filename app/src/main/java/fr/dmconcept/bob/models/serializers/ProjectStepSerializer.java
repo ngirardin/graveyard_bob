@@ -20,6 +20,8 @@ public abstract class ProjectStepSerializer {
      */
     public static String serialize(ArrayList<Step> projectSteps){
 
+        Log.i(TAG, "seralize() - Serializing " + projectSteps.size());
+
         StringBuilder sb = new StringBuilder();
 
         Iterator<Step> it = projectSteps.iterator();
@@ -48,7 +50,11 @@ public abstract class ProjectStepSerializer {
 
         }
 
-        return sb.toString();
+        String serialized = sb.toString();
+
+        Log.i(TAG, "serialize() - result: " + serialized);
+
+        return serialized;
 
     }
 
@@ -79,6 +85,8 @@ public abstract class ProjectStepSerializer {
 
             steps.add(new Step(duration, positions));
         }
+
+        Log.i(TAG, "deserialize() - Result: " + steps.size() + " steps");
 
         return steps;
     }
