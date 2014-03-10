@@ -96,6 +96,7 @@ public class ProjectActivity extends ActionBarActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 
+                @SuppressWarnings("ConstantConditions")
                 int newDuration = Integer.valueOf(v.getText().toString());
 
                 if (newDuration == MIN_STEP_DURATION) {
@@ -175,7 +176,7 @@ public class ProjectActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View button) {
                     mStepIndex = Integer.valueOf(button.getTag().toString());
-                    updateActiveStep();
+                    setActiveTimelineStep();
                 }
             });
 
@@ -184,28 +185,23 @@ public class ProjectActivity extends ActionBarActivity {
 
         }
 
-        updateActiveStep();
+        setActiveTimelineStep();
     }
-
 
     /**
      * Enable the step button and update the position to the step value
      */
-    private void updateActiveStep() {
+    private void setActiveTimelineStep() {
 
-        Log.i(TAG, "updateActiveStep()");
+        Log.i(TAG, "setActiveTimelineStep()");
 
         int  stepCount = mProject.getSteps().size();
         Step step      = mProject.getStep(mStepIndex);
 
         // Set the default background on all position buttons
-        for (int i = 0; i < stepCount - 1; i++) {
-
-            ToggleButton button = (ToggleButton) mTimeline.getChildAt(i);
-
+        for (int i = 0; i < stepCount - 1; i++)
             // Set the current button as selected
-            button.setChecked((i == mStepIndex));
-        }
+            ((ToggleButton) mTimeline.getChildAt(i)).setChecked(i == mStepIndex);
 
         // Update the duration editText and position the cursor at the end
         String durationString = String.valueOf(step.getDuration());
@@ -219,16 +215,18 @@ public class ProjectActivity extends ActionBarActivity {
 
     private class PositionListener {
 
-        int stepIndex;
+        int stepOffset;
         int positionIndex;
 
         PositionListener(int step, int position) {
-            stepIndex     = step;
+            stepOffset = step;
             positionIndex = position;
         }
 
         void savePosition(int newValue) {
-            mProjectDao.savePosition(mProject, stepIndex, positionIndex, newValue);
+            int step = mStepIndex + stepOffset;
+            Toast.makeText(ProjectActivity.this, "Saving step " + step + ", position " + positionIndex + " to " + newValue + "%", Toast.LENGTH_SHORT).show();
+            mProjectDao.savePosition(mProject, step, positionIndex, newValue);
         }
 
     }
@@ -276,6 +274,7 @@ public class ProjectActivity extends ActionBarActivity {
 
             // Update the percentage text
             editText.setText(String.valueOf(progress));
+
         }
 
         @Override
@@ -305,10 +304,10 @@ public class ProjectActivity extends ActionBarActivity {
             EditText editPercentageRight = (EditText) positionLayout.findViewById(R.id.editPercentageRight);
 
             // Set the listeners on the widgets
-            editPercentageLeft .setOnEditorActionListener(new PositionTextEditorActionListener(seekbarLeft, mStepIndex, i));
-            seekbarLeft        .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageLeft , mStepIndex, i));
-            seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, mStepIndex + 1, i));
-            editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , mStepIndex + 1, i));
+            editPercentageLeft .setOnEditorActionListener(new PositionTextEditorActionListener(seekbarLeft, 0, i));
+            seekbarLeft        .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageLeft , 0, i));
+            seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, 1, i));
+            editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , 1, i));
 
             // Append the position slider to the parent view
             mPositions.addView(positionLayout);
