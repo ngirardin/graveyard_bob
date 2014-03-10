@@ -4,10 +4,17 @@
     tools:context=".activities.ProjectActivity">
 
     <item
-        android:id="@+id/action_playProject"
+        android:id="@+id/action_playStep"
         android:icon="@android:drawable/ic_media_play"
-        bob:showAsAction="ifRoom"
-        android:showAsAction="ifRoom"
+        bob:showAsAction="always"
+        android:showAsAction="always"
+        android:title="Play the step"/>
+
+    <item
+        android:id="@+id/action_playProject"
+        android:icon="@android:drawable/ic_media_ff"
+        bob:showAsAction="always"
+        android:showAsAction="always"
         android:title="Play the project"/>
 
     <item
@@ -20,8 +27,8 @@
     <item
         android:id="@+id/action_addStep"
         android:icon="@android:drawable/ic_menu_add"
-        bob:showAsAction="ifRoom"
-        android:showAsAction="ifRoom"
+        bob:showAsAction="always"
+        android:showAsAction="always"
         android:title="Add a new step"/>
 
 </menu>

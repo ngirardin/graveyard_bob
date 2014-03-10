@@ -115,14 +115,6 @@ public class ProjectActivity extends ActionBarActivity {
 
         });
 
-        // Click on the "Play step" button
-        findViewById(R.id.buttonPlayStep).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playWholeStep();
-            }
-        });
-
         // Click on the start or end buttons
         findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -348,6 +340,10 @@ public class ProjectActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
+
+            case R.id.action_playStep:
+                playWholeStep();
+                return true;
 
             case R.id.action_playProject:
                 playProject();
