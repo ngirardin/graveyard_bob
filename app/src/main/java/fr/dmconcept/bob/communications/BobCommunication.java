@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import fr.dmconcept.bob.BobApplication;
 import fr.dmconcept.bob.models.BoardConfig;
 import fr.dmconcept.bob.models.Project;
 import fr.dmconcept.bob.models.Step;
@@ -23,12 +24,10 @@ public class BobCommunication {
 
     private static final int PORT = 8000;
 
-    private static final String mHost = "192.168.0.36";
+    BobApplication mApplication;
 
-    Context mContext;
-
-    public BobCommunication(Context context) {
-        this.mContext = context;
+    public BobCommunication(BobApplication application) {
+        this.mApplication = application;
     }
 
     public void sendStep(BoardConfig boardConfig, Step step) throws NetworkErrorException, NoInterfaceException {
@@ -71,7 +70,7 @@ public class BobCommunication {
 
         try {
 
-            SendStepResult result = new SendStepsAsyncTask(mHost, PORT).execute(input).get();
+            SendStepResult result = new SendStepsAsyncTask(mApplication.getServerIP(), PORT).execute(input).get();
 
             if (result.isError())
                 throw new NetworkErrorException();
@@ -86,7 +85,7 @@ public class BobCommunication {
 
     private boolean isNetworkAvailable() {
 
-        ConnectivityManager connMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) mApplication.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 

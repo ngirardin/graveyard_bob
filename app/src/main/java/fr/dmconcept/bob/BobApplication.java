@@ -23,6 +23,9 @@ public class BobApplication extends Application {
     BoardConfigDao mBoardConfigDao;
     ProjectDao mProjectsDao;
 
+    // The server IP address
+    String mServerIP;
+
     @Override
     public void onCreate() {
 
@@ -107,6 +110,15 @@ public class BobApplication extends Application {
 
     public BoardConfigDao getBoardConfigDao() {
         return mBoardConfigDao;
+    }
+
+    public String getServerIP() {
+        return mServerIP;
+    }
+
+    public void setServerIP(String ip) {
+        Log.i(TAG, "setServerIP(" + ip + ")");
+        mServerIP = ip;
     }
 
     @Override

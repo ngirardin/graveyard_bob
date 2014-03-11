@@ -34,6 +34,9 @@ public class ProjectActivity extends ActionBarActivity {
     // The minimum step duration in ms
     private static final int MIN_STEP_DURATION = 100;
 
+    // The bob application
+    private BobApplication mApplication;
+
     // The communication layer with the server
     private BobCommunication mCommunication;
 
@@ -64,11 +67,13 @@ public class ProjectActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_project);
 
-        mCommunication = new BobCommunication(this);
+        mApplication   = (BobApplication) getApplication();
+
+        mCommunication = new BobCommunication(mApplication);
 
         // Get the project from the DB according to the intent extra id
         long projectId = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1);
-        mProjectDao = ((BobApplication) getApplication()).getProjectsDao();
+        mProjectDao = mApplication.getProjectsDao();
         mProject    = mProjectDao.findById(projectId);
 
         mTimeline         = (LinearLayout) findViewById(R.id.timeline        );

@@ -1,8 +1,6 @@
 package fr.dmconcept.bob.activities;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -22,6 +20,8 @@ public class ProjectListActivity extends ListActivity {
 
     public static final String TAG = "activities.ProjctListActivity";
 
+    BobApplication mApplication;
+
     ArrayList<Project> mProjects;
 
     @Override
@@ -29,19 +29,10 @@ public class ProjectListActivity extends ListActivity {
 
         super.onCreate(savedInstanceState);
 
-        new AlertDialog.Builder(this)
-            .setTitle("TODO")
-            .setMessage("TODO add server IP dialog")
-            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            })
-            .show();
+        mApplication = (BobApplication) getApplication();
 
         // Get the project list from the DB
-        mProjects = ((BobApplication) getApplication()).getProjectsDao().findAll();
+        mProjects = mApplication.getProjectsDao().findAll();
 
         setListAdapter(new ArrayAdapter<Project>(this, android.R.layout.simple_list_item_2, android.R.id.text1, mProjects) {
 
