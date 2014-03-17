@@ -1,8 +1,10 @@
 package fr.dmconcept.bob.activities.dialogs;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.TextView;
 import fr.dmconcept.bob.BobApplication;
@@ -11,7 +13,7 @@ import fr.dmconcept.bob.activities.ProjectListActivity;
 
 import java.util.regex.Pattern;
 
-public class SetServerIPDialog extends Activity {
+public class SetServerIPDialog extends ActionBarActivity {
 
     private static final String TAG = "activities.dialogs.SetServerIPDialog";
 
