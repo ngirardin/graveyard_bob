@@ -19,6 +19,8 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
 
     private static final String TAG = "communication.SendSteps";
 
+    private static final String RESPONSE_OK = "BOB";
+
     private String mHost;
 
     private int mPort;
@@ -52,7 +54,7 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
 
     }
 
-    private String sendRequest(SendStepInput input) throws IOException {
+    private void sendRequest(SendStepInput input) throws IOException {
 
         Log.i(TAG, "sendRequest()");
 
@@ -70,12 +72,17 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
 
         int status = response.getStatusLine().getStatusCode();
 
-        Log.d(TAG, "sendRequest() <- HTTP " + status);
-
-        if (status != HttpStatus.SC_OK)
+        if (status != HttpStatus.SC_OK) {
+            Log.d(TAG, "sendRequest() <- HTTP " + status);
             throw new RuntimeException("HTTP " + status);
+        }
 
-        return readIt(response.getEntity().getContent());
+        String body = readIt(response.getEntity().getContent());
+
+        Log.d(TAG, "sendRequest() <- HTTP " + status + " - " + body);
+
+        if (!body.equals(RESPONSE_OK))
+            throw new RuntimeException("Invalid response: " + body);
 
     }
 
