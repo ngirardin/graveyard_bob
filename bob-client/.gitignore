@@ -4,3 +4,6 @@
 .DS_Store
 .idea/
 *.un~
+app/project/project
+app/project/target
+app/target
