@@ -2,8 +2,7 @@ package fr.dmconcept.bob.client.communications;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import fr.dmconcept.bob.client.models.serializers.ProjectStepSerializer;
-import fr.dmconcept.bob.client.models.serializers.ServoConfigSerializer;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -14,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
+import fr.dmconcept.bob.client.models.serializers.ProjectStepSerializer;
+import fr.dmconcept.bob.client.models.serializers.ServoConfigSerializer;
 
 class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> {
 
@@ -32,8 +34,6 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
 
     @Override
     protected SendStepResult doInBackground(SendStepInput... params) {
-
-        Log.i(TAG, "doInBackground()");
 
         SendStepResult result = new SendStepResult();
 
@@ -66,7 +66,7 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
         Log.i(TAG, "sendRequest() -> " + url);
 
         HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost   = new HttpPost(url);
+        HttpPost httpPost     = new HttpPost(url);
 
         HttpResponse response = httpClient.execute(httpPost);
 

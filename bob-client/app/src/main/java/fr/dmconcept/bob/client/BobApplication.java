@@ -3,6 +3,9 @@ package fr.dmconcept.bob.client;
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+
+import java.util.ArrayList;
+
 import fr.dmconcept.bob.client.models.BoardConfig;
 import fr.dmconcept.bob.client.models.Project;
 import fr.dmconcept.bob.client.models.ServoConfig;
@@ -11,20 +14,17 @@ import fr.dmconcept.bob.client.models.dao.BoardConfigDao;
 import fr.dmconcept.bob.client.models.dao.ProjectDao;
 import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper;
 
-import java.util.ArrayList;
-
 public class BobApplication extends Application {
 
     private static final String TAG = "BobApplication";
+
+    public static final String PREFERENCES_SERVER_IP = "sever_ip";
 
     BobSqliteOpenHelper mOpenHelper;
     SQLiteDatabase      mDatabase;
 
     BoardConfigDao mBoardConfigDao;
     ProjectDao mProjectsDao;
-
-    // The server IP address
-    String mServerIP;
 
     @Override
     public void onCreate() {
@@ -110,15 +110,6 @@ public class BobApplication extends Application {
 
     public BoardConfigDao getBoardConfigDao() {
         return mBoardConfigDao;
-    }
-
-    public String getServerIP() {
-        return mServerIP;
-    }
-
-    public void setServerIP(String ip) {
-        Log.i(TAG, "setServerIP(" + ip + ")");
-        mServerIP = ip;
     }
 
     @Override
