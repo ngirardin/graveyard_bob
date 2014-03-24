@@ -10,6 +10,7 @@ import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper;
 import fr.dmconcept.bob.client.models.serializers.ProjectStepSerializer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectDao {
 
@@ -97,7 +98,7 @@ public class ProjectDao {
     }
 
 
-    public ArrayList<Project> findAll(){
+    public List<Project> findAll(){
 
         Log.i(TAG, "findAll()");
 
@@ -112,6 +113,7 @@ public class ProjectDao {
 
         cursor.close();
         return projects;
+
     }
 
     private Project fromCursor(Cursor cursor) {
