@@ -9,10 +9,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 
 import fr.dmconcept.bob.client.models.serializers.ProjectStepSerializer;
 import fr.dmconcept.bob.client.models.serializers.ServoConfigSerializer;
@@ -77,7 +76,8 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
             throw new RuntimeException("HTTP " + status);
         }
 
-        String body = readIt(response.getEntity().getContent());
+        String body = readLine(response);
+
 
         Log.d(TAG, "sendRequest() <- HTTP " + status + " - " + body);
 
@@ -87,12 +87,9 @@ class SendStepsAsyncTask extends AsyncTask<SendStepInput, Void, SendStepResult> 
     }
 
     // Reads an InputStream and converts it to a String.
-    private String readIt(InputStream stream) throws IOException {
-        Reader reader;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] buffer = new char[1024];
-        reader.read(buffer);
-        return new String(buffer);
+    private String readLine(HttpResponse response) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+        return reader.readLine();
     }
 
 }
