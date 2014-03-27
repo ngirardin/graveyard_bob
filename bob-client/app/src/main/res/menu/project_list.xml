@@ -1,5 +1,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bob="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.ProjectListActivity">
 
@@ -7,14 +6,12 @@
         android:id="@+id/action_boardConfig"
         android:icon="@android:drawable/ic_menu_manage"
         android:showAsAction="ifRoom"
-        bob:showAsAction="ifRoom"
         android:title="Manage the board configurations"/>
 
     <item
         android:id="@+id/action_newProject"
         android:icon="@android:drawable/ic_menu_add"
         android:showAsAction="ifRoom"
-        bob:showAsAction="ifRoom"
         android:title="New project"/>
 
 </menu>

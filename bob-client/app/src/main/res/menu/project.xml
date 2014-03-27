@@ -1,33 +1,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bob="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.ProjectActivity">
 
     <item
         android:id="@+id/action_playStep"
         android:icon="@android:drawable/ic_media_play"
-        bob:showAsAction="always"
         android:showAsAction="always"
         android:title="Play the step"/>
 
     <item
         android:id="@+id/action_playProject"
         android:icon="@android:drawable/ic_media_ff"
-        bob:showAsAction="always"
         android:showAsAction="always"
         android:title="Play the project"/>
 
     <item
         android:id="@+id/action_deleteStep"
         android:icon="@android:drawable/ic_menu_delete"
-        bob:showAsAction="ifRoom"
         android:showAsAction="ifRoom"
         android:title="Remove the step"/>
 
     <item
         android:id="@+id/action_addStep"
         android:icon="@android:drawable/ic_menu_add"
-        bob:showAsAction="always"
         android:showAsAction="always"
         android:title="Add a new step"/>
 
