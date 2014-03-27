@@ -23,7 +23,7 @@ class ProjectListActivity extends ListActivity {
 
   lazy val application = getApplication.getPackageName
 
-  def log(message: String) = Log.i(application, TAG + " " + message)
+  def log(message: String) = Log.i(application, s"$TAG message")
 
   var mApplication: BobApplication = null
 

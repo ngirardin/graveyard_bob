@@ -12,10 +12,8 @@ import java.util.regex.Pattern
 
 object ServerIPSelectionActivity {
 
-  val TAG       = "activities.activities.ServerIPSelectionActivity"
+  val TAG       = ".activities.ServerIPSelectionActivity"
   val IP_REGEXP = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
-
-  def log(message: String) = Log.i(TAG, message)
 
 }
 
@@ -62,6 +60,10 @@ class ServerIPSelectionActivity extends DialogFragment { //with TypedViewHolder
 */
 
 class ServerIPSelectionActivity extends Activity /* with TypedViewHolder */ {
+
+  lazy val application = getApplication.getPackageName
+
+  def log(message: String) = Log.i(application, s"$TAG message")
 
   var preferences: SharedPreferences = null
 
