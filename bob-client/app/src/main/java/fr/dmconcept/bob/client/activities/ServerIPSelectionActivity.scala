@@ -1,14 +1,15 @@
-package fr.dmconcept.bob.client.activities.activities
+package fr.dmconcept.bob.client.activities
 
 import ServerIPSelectionActivity._
 import android.app.Activity
 import android.content.{Context, SharedPreferences}
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.TextView
+import android.view.{KeyEvent, View}
+import android.widget.{Toast, Button, TextView}
 import fr.dmconcept.bob.client.{BobApplication, R}
 import java.util.regex.Pattern
+import android.view.View.OnLongClickListener
 
 object ServerIPSelectionActivity {
 
@@ -89,9 +90,7 @@ class ServerIPSelectionActivity extends Activity /* with TypedViewHolder */ {
       log(s"onCreate() - No IP stored in preferences")
     }
 
-    findViewById(R.id.buttonConnect)
-
-      .setOnClickListener(new View.OnClickListener() {
+    findViewById(R.id.buttonConnect).asInstanceOf[Button].setOnClickListener(new View.OnClickListener() {
 
       override def onClick(v: View) {
 
