@@ -1,21 +1,17 @@
 package fr.dmconcept.bob.client.activities
 
-import android.app.{AlertDialog, ListActivity}
-
-import android.content.{DialogInterface, Intent}
+import ProjectListActivity.TAG
+import android.app.ListActivity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view._
 import android.widget._
-import fr.dmconcept.bob.client.activities.BoardConfigActivity
+import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.models.Project
-import fr.dmconcept.bob.client.{R, BobApplication}
-import android.widget.AdapterView.AdapterContextMenuInfo
-import android.content.DialogInterface.OnClickListener
-import android.view.ContextMenu.ContextMenuInfo
-import ProjectListActivity.TAG
 import fr.dmconcept.bob.client.models.dao.ProjectDao
-import fr.dmconcept.bob.client.activities.activities.ServerIPSelectionActivity
+
 
 object ProjectListActivity {
 
@@ -27,7 +23,7 @@ class ProjectListActivity extends ListActivity {
 
   lazy val application = getApplication.getPackageName
 
-  def log(message: String) = Log.i(s"application", s"$TAG $message")
+  def log(message: String) = Log.i(application, TAG + " " + message)
 
   var mApplication: BobApplication = null
 
@@ -81,6 +77,7 @@ class ProjectListActivity extends ListActivity {
 
   }
 
+  /*
   override def onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo) {
 
     super.onCreateContextMenu(menu, v, menuInfo)
@@ -109,6 +106,7 @@ class ProjectListActivity extends ListActivity {
         Toast.makeText(getBaseContext, "clone", Toast.LENGTH_LONG).show()
       }
 
+      //TODO implement deletion
       case R.id.action_delete => {
 
         new AlertDialog.Builder(this)
@@ -140,7 +138,7 @@ class ProjectListActivity extends ListActivity {
     return true
 
   }
-
+  */
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
 
@@ -170,7 +168,5 @@ class ProjectListActivity extends ListActivity {
     }
 
   }
-
-
 
 }

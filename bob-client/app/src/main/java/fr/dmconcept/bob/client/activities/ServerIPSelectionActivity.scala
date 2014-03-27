@@ -5,11 +5,10 @@ import android.app.Activity
 import android.content.{Context, SharedPreferences}
 import android.os.Bundle
 import android.util.Log
-import android.view.{KeyEvent, View}
-import android.widget.{Toast, Button, TextView}
+import android.view.View
+import android.widget.{Button, TextView}
 import fr.dmconcept.bob.client.{BobApplication, R}
 import java.util.regex.Pattern
-import android.view.View.OnLongClickListener
 
 object ServerIPSelectionActivity {
 
@@ -84,10 +83,12 @@ class ServerIPSelectionActivity extends Activity /* with TypedViewHolder */ {
       val ip = preferences.getString(BobApplication.PREFERENCES_SERVER_IP, "")
       mEditTextIP.setText(ip)
 
-      log(s"onCreate() - IP stored in preference: $ip")
+      // TODO use string interpolation
+      log("onCreate() - IP stored in preference: ")
+      log(ip)
 
     } else {
-      log(s"onCreate() - No IP stored in preferences")
+      log("onCreate() - No IP stored in preferences")
     }
 
     findViewById(R.id.buttonConnect).asInstanceOf[Button].setOnClickListener(new View.OnClickListener() {
@@ -99,7 +100,7 @@ class ServerIPSelectionActivity extends Activity /* with TypedViewHolder */ {
         // Check that the IP is not empty and a valid ip
         if (ip.length() > 0 && !IP_REGEXP.matcher(ip).matches()) {
           mEditTextIP.setError("Invalid IP address")
-          log(s"onClickListener - Invalid IP $ip")
+          log("onClickListener - Invalid IP " + ip)
           return
         }
 
@@ -108,7 +109,9 @@ class ServerIPSelectionActivity extends Activity /* with TypedViewHolder */ {
           .putString(BobApplication.PREFERENCES_SERVER_IP, ip)
           .apply()
 
-        log(s"clickListener - IP updated to $ip")
+        // TODO use scala interpolation
+        log("clickListener - IP updated to ")
+        log(ip)
 
         // Start the project list activity
         finish()

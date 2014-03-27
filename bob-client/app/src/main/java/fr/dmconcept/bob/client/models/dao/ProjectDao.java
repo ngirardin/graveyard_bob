@@ -127,4 +127,10 @@ public class ProjectDao {
 
     }
 
+    public void delete(Project p) {
+        //TODO implement delete
+        Log.i(TAG, "------- TODO delte(" + p.getName() + ") TODO --------");
+    }
+
+
 }

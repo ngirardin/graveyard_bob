@@ -1,10 +1,10 @@
 package fr.dmconcept.bob.client.activities;
 
 import android.accounts.NetworkErrorException;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -21,7 +21,7 @@ import fr.dmconcept.bob.client.models.dao.ProjectDao;
 
 import java.util.ArrayList;
 
-public class ProjectActivity extends ActionBarActivity {
+public class ProjectActivity extends Activity {
 
     private static final String TAG = "activities.ProjectListActivity";
 
