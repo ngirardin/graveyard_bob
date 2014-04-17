@@ -2,18 +2,17 @@ package fr.dmconcept.bob.client
 
 import android.app.Application
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
 import fr.dmconcept.bob.client.models.dao.{ProjectDao, BoardConfigDao}
 import fr.dmconcept.bob.client.models.{Step, Project, ServoConfig, BoardConfig}
 import java.util.UUID
-import BobApplication.TAG
+import BobApplication._
 
-object BobApplication {
-
-  val TAG = "BobApplication"
+object BobApplication extends BobLogger {
 
   val PREFERENCES_SERVER_IP = "sever_ip"
+
+  val TAG = "BobApplication"
 
 }
 
@@ -26,40 +25,31 @@ class BobApplication extends Application {
 
   override def onCreate() {
 
-    Log.i(TAG, "onCreate()")
+    log("onCreate()", "Application starting")
 
-    if (BuildConfig.DEBUG && mProjectsDao.findAll().isEmpty)
-        // First run, create the fixtures
-        createFixtures()
+    if (/*BuildConfig.DEBUG && */ mProjectsDao.findAll().isEmpty)
+      firstRun()
 
     super.onCreate()
 
   }
 
-  def createFixtures() {
+  private def firstRun() {
 
-    Log.i(TAG, "DEBUG MODE - Creating servos config fixtures...")
+    log("onCreate()", "First run - Creating the servos config fixtures...")
+
+    def servoConfigs(servoPins: Range): Vector[ServoConfig] = servoPins.map(
+      ServoConfig(_, (558, 2472))
+    ).toVector
 
     val configs = List(
-      BoardConfig("Servos on pins 3 and 4", Vector(
-        ServoConfig(3, (558, 2472)),
-        ServoConfig(4, (558, 2472))
-      )),
-
-      BoardConfig("Servos on pins 3 to 9", Vector(
-        ServoConfig(3, (558, 2472)),
-        ServoConfig(4, (558, 2472)),
-        ServoConfig(5, (558, 2472)),
-        ServoConfig(6, (558, 2472)),
-        ServoConfig(7, (558, 2472)),
-        ServoConfig(8, (558, 2472)),
-        ServoConfig(9, (558, 2472))
-      ))
+      BoardConfig("Servos on pins 3 and 4", servoConfigs(3 to 4)),
+      BoardConfig("Servos on pins 3 to 9" , servoConfigs(3 to 9))
     )
 
     configs.foreach(mBoardConfigDao.save)
 
-    Log.i(TAG, "DEBUG MODE - Creating project fixtures...")
+    log("onCreate()", "First run - Creating the project fixtures...")
 
     // Project 1
     mProjectsDao.create(
@@ -81,11 +71,13 @@ class BobApplication extends Application {
       ))
     )
 
-    Log.i(TAG, "DEBUG MODE - Fixtures creation done")
+    log("onCreate", "First run - Fixtures creation done")
 
   }
 
   override def onTerminate() {
+
+    log("onTerminate()", "Closing DB and open helper")
 
     // Close the database and the DB helper
     mDatabase.close()
