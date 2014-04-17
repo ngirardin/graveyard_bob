@@ -7,11 +7,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view._
 import android.widget._
-import fr.dmconcept.bob.client.BobApplication
-import fr.dmconcept.bob.client.R
+import fr.dmconcept.bob.client.{BobApplication, R}
 import fr.dmconcept.bob.client.models.Project
 import fr.dmconcept.bob.client.models.dao.ProjectDao
-
 
 object ProjectListActivity {
 
@@ -36,7 +34,7 @@ class ProjectListActivity extends ListActivity {
     mApplication = getApplication.asInstanceOf[BobApplication]
 
     // Get the project list from the DB
-    mProjectDao = mApplication.getProjectsDao
+    mProjectDao = mApplication.mProjectsDao
 
     // Show the Server IP Selection activity
     startActivity(new Intent(this, classOf[ServerIPSelectionActivity]))
@@ -44,7 +42,7 @@ class ProjectListActivity extends ListActivity {
     // Enable the context menu on the list
     registerForContextMenu(getListView)
 
-    val projects = mProjectDao.findAll()
+    val projects : Array[Project] = mProjectDao.findAll().toArray
 
     setListAdapter(new ArrayAdapter[Project](this, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
 
@@ -54,8 +52,8 @@ class ProjectListActivity extends ListActivity {
 
         val project = getItem(position)
 
-        view.findViewById(android.R.id.text1).asInstanceOf[TextView].setText(project.getName)
-        view.findViewById(android.R.id.text2).asInstanceOf[TextView].setText(project.getBoardConfig.getName)
+        view.findViewById(android.R.id.text1).asInstanceOf[TextView].setText(project.name)
+        view.findViewById(android.R.id.text2).asInstanceOf[TextView].setText(project.boardConfig.name)
 
         view
       }
@@ -72,7 +70,7 @@ class ProjectListActivity extends ListActivity {
     // Start the project details activity
     startActivity(
       new Intent(listView.getContext, classOf[ProjectActivity])
-        .putExtra(ProjectActivity.EXTRA_PROJECT_ID, project.getId)
+        .putExtra(ProjectActivity.EXTRA_PROJECT_ID, project.id)
     )
 
   }

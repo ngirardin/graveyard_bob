@@ -14,7 +14,7 @@
     />
 
     <application
-        android:name=".BobApplication"
+        android:name="main.scala.fr.dmconcept.bob.client.activities.BobApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name">
@@ -38,9 +38,9 @@
             android:parentActivityName=".activities.ProjectListActivity">
         </activity>
 
-        <activity android:name=".activities.NewProjectActivity" />
+        <activity android:name="main.scala.fr.dmconcept.bob.client.activities.NewProjectActivity" />
 
-        <activity android:name=".activities.BoardConfigActivity" />
+        <activity android:name="main.scala.fr.dmconcept.bob.client.activities.BoardConfigActivity" />
 
     </application>
 

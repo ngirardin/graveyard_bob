@@ -13,14 +13,13 @@ import fr.dmconcept.bob.client.R;
 import fr.dmconcept.bob.client.models.BoardConfig;
 import fr.dmconcept.bob.client.models.Project;
 import fr.dmconcept.bob.client.models.dao.ProjectDao;
-
-import java.util.List;
+import scala.collection.immutable.Vector;
 
 public class NewProjectActivity extends Activity {
 
     private static final String TAG = "activities.NewProjectActivity";
 
-    private List<BoardConfig> mBoardConfigs;
+    private Vector<BoardConfig> mBoardConfigs;
     private RadioGroup mBoardConfigRadioGroup;
     private ProjectDao mProjectsDao;
     private EditText mEditTextName;
@@ -39,8 +38,8 @@ public class NewProjectActivity extends Activity {
 
         mBoardConfigRadioGroup = (RadioGroup) findViewById(R.id.boardConfigRadioGroup);
         mEditTextName          = (EditText)findViewById(R.id.editTextName);
-        mBoardConfigs          = app.getBoardConfigDao().findAll();
-        mProjectsDao           = app.getProjectsDao();
+        mBoardConfigs          = app.mBoardConfigDao().findAll();
+        mProjectsDao           = app.mProjectsDao();
 
         createBoardConfigRadios();
 
@@ -56,12 +55,12 @@ public class NewProjectActivity extends Activity {
                 }
 
                 // Save the new project
-                BoardConfig boardConfig = mBoardConfigs.get(mBoardConfigRadioGroup.getCheckedRadioButtonId()) ;
-                long projectId = mProjectsDao.create(new Project(projectName, boardConfig));
+                BoardConfig boardConfig = mBoardConfigs.apply(mBoardConfigRadioGroup.getCheckedRadioButtonId()) ;
+                long projectId = mProjectsDao.create(Project.apply(projectName, boardConfig));
 
                 // Start the project activity
                 Intent intent = new Intent(v.getContext(), ProjectActivity.class);
-                intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID, projectId);
+                intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID(), projectId);
                 startActivity(intent);
 
             }
@@ -77,11 +76,11 @@ public class NewProjectActivity extends Activity {
 
         for (int i = 0; i < mBoardConfigs.size(); i++) {
 
-            BoardConfig boardConfig = mBoardConfigs.get(i);
+            BoardConfig boardConfig = mBoardConfigs.apply(i);
 
             RadioButton radio = new RadioButton(this);
             radio.setId(i);
-            radio.setText(boardConfig.getName());
+            radio.setText(boardConfig.name());
 
             mBoardConfigRadioGroup.addView(radio);
         }

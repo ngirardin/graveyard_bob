@@ -12,6 +12,9 @@ import fr.dmconcept.bob.client.BobApplication;
 import fr.dmconcept.bob.client.R;
 import fr.dmconcept.bob.client.models.BoardConfig;
 import fr.dmconcept.bob.client.models.ServoConfig;
+import scala.Function1;
+import scala.collection.immutable.Vector;
+import scala.runtime.AbstractFunction1;
 
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class BoardConfigActivity extends Activity {
 
     private static final String TAG = "activities.BoardConfigActivity";
 
-    private List<BoardConfig> mBoardConfigs;
+    private Vector<BoardConfig> mBoardConfigs;
 
     private RadioGroup mBoardConfigRadioGroup;
 
@@ -35,7 +38,7 @@ public class BoardConfigActivity extends Activity {
         mBoardConfigRadioGroup = (RadioGroup  ) findViewById(R.id.boardConfigRadioGroup);
         mBoardConfigDetails    = (LinearLayout) findViewById(R.id.boardConfigDetails);
 
-        mBoardConfigs = ((BobApplication) getApplication()).getBoardConfigDao().findAll();
+        mBoardConfigs = ((BobApplication) getApplication()).mBoardConfigDao().findAll();
 
         createBoardConfigRadios();
 
@@ -49,11 +52,11 @@ public class BoardConfigActivity extends Activity {
 
         for (int i = 0; i < mBoardConfigs.size(); i++) {
 
-            BoardConfig boardConfig = mBoardConfigs.get(i);
+            BoardConfig boardConfig = mBoardConfigs.apply(i);
 
             RadioButton radio = new RadioButton(this);
             radio.setId(i);
-            radio.setText(boardConfig.getName());
+            radio.setText(boardConfig.name());
             radio.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -81,7 +84,7 @@ public class BoardConfigActivity extends Activity {
 
         Log.i(TAG, "showBoardConfig(" + i + ")");
 
-        BoardConfig boardConfig = mBoardConfigs.get(i);
+        BoardConfig boardConfig = mBoardConfigs.apply(i);
 
         // Clear the board config layout
         mBoardConfigDetails.removeAllViews();
@@ -94,19 +97,24 @@ public class BoardConfigActivity extends Activity {
         ((TextView) headerLayout.findViewById(R.id.textStart)).setText("Start timing");
         ((TextView) headerLayout.findViewById(R.id.textEnd  )).setText("End timing"  );
 
-        for (ServoConfig servoConfig: boardConfig.getServoConfigs()) {
+        boardConfig.servoConfigs().foreach(new AbstractFunction1<ServoConfig, String>() {
 
-            // Inflate the board config details layout
-            LinearLayout detailsLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.layout_boardconfig_details, null);
+            @Override
+            public String apply(ServoConfig servoConfig) {
 
-            ((TextView) detailsLayout.findViewById(R.id.textPort )).setText(String.valueOf(servoConfig.port     ));
-            ((TextView) detailsLayout.findViewById(R.id.textServo)).setText(String.valueOf(servoConfig.start    ));
-            ((TextView) detailsLayout.findViewById(R.id.textStart)).setText(String.valueOf(servoConfig.end      ));
-            ((TextView) detailsLayout.findViewById(R.id.textEnd  )).setText(String.valueOf(servoConfig.frequency));
+                // Inflate the board config details layout
+                LinearLayout detailsLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.layout_boardconfig_details, null);
 
-            mBoardConfigDetails.addView(detailsLayout);
+                ((TextView) detailsLayout.findViewById(R.id.textPort)).setText(String.valueOf(servoConfig.port()));
+                ((TextView) detailsLayout.findViewById(R.id.textServo)).setText(String.valueOf(servoConfig.timings()._1()));
+                ((TextView) detailsLayout.findViewById(R.id.textStart)).setText(String.valueOf(servoConfig.timings()._2()));
 
-        }
+                mBoardConfigDetails.addView(detailsLayout);
+
+                return "TODO";
+            }
+
+        });
 
     }
 
