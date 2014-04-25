@@ -45,7 +45,10 @@ class ProjectActivity extends Activity {
   lazy val mPositions        : LinearLayout = findViewById(R.id.positions       ).asInstanceOf[LinearLayout]
 
   // The current project
-  var mProject: Project = null
+  lazy val mProject: Project = {
+    val projectId = getIntent.getStringExtra(EXTRA_PROJECT_ID)
+    mApplication.projectsDao.findById(projectId)
+  }
 
   // The active step index
   var mStepIndex: Int = 0
@@ -105,7 +108,7 @@ class ProjectActivity extends Activity {
 //    mCommunication = new BobCommunication(mApplication)
 
     // Get the project from the DB according to the intent extra id
-    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
+//    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
 
 //    mTimeline         = (LinearLayout) findViewById(R.id.timeline        )
 //    mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration)

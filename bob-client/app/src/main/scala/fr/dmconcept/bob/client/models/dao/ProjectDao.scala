@@ -40,6 +40,7 @@ case class ProjectDao(
 
     val values = new ContentValues()
 
+    values.put(BobSqliteOpenHelper.PROJECT_COL_ID          , project.id            )
     values.put(BobSqliteOpenHelper.PROJECT_COL_NAME        , project.name          )
     values.put(BobSqliteOpenHelper.PROJECT_COL_BOARD_CONFIG, project.boardConfig.id)
     values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS       , serializeSteps(project))
@@ -92,19 +93,19 @@ case class ProjectDao(
   }
   */
 
-  def findById(id: Long): Project = {
+  def findById(id: String): Project = {
 
     val now = SystemClock.elapsedRealtime()
 
     val cursor: Cursor = database.query(
-      BobSqliteOpenHelper.PROJECT_TABLE,
-      BobSqliteOpenHelper.PROJECT_ALL,
-      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = '$id'",
-      null,
+      BobSqliteOpenHelper.PROJECT_TABLE,            // table
+      BobSqliteOpenHelper.PROJECT_ALL,              // columns
+      BobSqliteOpenHelper.PROJECT_COL_ID + " = ?", // selection
+      Array(id),                                    // selectionArgs
       null,
       null,
       null
-    ).ensuring(_.getCount == 1, "The request returned more than 1 project")
+    ).ensuring(_.getCount == 1, s"The request returned more than 1 project")
 
     cursor.moveToFirst()
 
