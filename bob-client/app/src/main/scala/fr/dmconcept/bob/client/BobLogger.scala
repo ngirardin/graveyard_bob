@@ -4,7 +4,7 @@ import android.util.Log
 
 trait BobLogger {
 
-  abstract val TAG: String
+  val TAG: String
 
   def log(method: String, message: String) = Log.i("BobClient", s"$TAG.$method $message")
 

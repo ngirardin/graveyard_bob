@@ -1,17 +1,18 @@
 package fr.dmconcept.bob.client.models.dao
 
-import android.util.Log
-import BoardConfigDao._
-import android.database.sqlite.SQLiteDatabase
 import fr.dmconcept.bob.client.models.{ServoConfig, BoardConfig}
 import android.content.ContentValues
 import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
 import android.database.Cursor
 import scala.util.parsing.json.{JSONObject, JSONArray, JSON}
+import fr.dmconcept.bob.client.BobLogger
+import android.os.SystemClock
+import BoardConfigDao.log
+import android.database.sqlite.SQLiteDatabase
 
-object BoardConfigDao {
+object BoardConfigDao extends BobLogger {
 
-  final val TAG = "models.dao.BoardConfigDao"
+  val TAG = "models.dao.BoardConfigDao"
 
 }
 
@@ -19,30 +20,39 @@ case class BoardConfigDao(database: SQLiteDatabase) {
 
   def save(boardConfig: BoardConfig) {
 
-    Log.i(TAG, s"save(${boardConfig.name})")
+    val now = SystemClock.elapsedRealtime()
 
     val values = new ContentValues()
 
-    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_ID          , boardConfig.id          )
-    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_NAME        , boardConfig.name        )
-    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_SERVO_CONFIG, {
-      val list: List[Map[String, Any]] = boardConfig.servoConfigs.map(_.serialize).toList
-      JSONArray(list).toString()
-    })
+    val servoConfigs = {
+      JSONArray(
+        boardConfig.servoConfigs.toList.map(sc => JSONObject(sc.serialize))
+      ).toString()
+    }
+
+    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_ID          , boardConfig.id  )
+    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_NAME        , boardConfig.name)
+    values.put(BobSqliteOpenHelper.BOARDCONFIG_COL_SERVO_CONFIG, servoConfigs    )
 
     database
       .insert(BobSqliteOpenHelper.BOARDCONFIG_TABLE, null, values)
       .ensuring(_ > -1, "Can't save the board config")
+
+    log(s"save()", {
+      val elapsed = SystemClock.elapsedRealtime() - now
+      s"values: $values took $elapsed ms"
+    })
+
   }
 
   def findById(id: String): BoardConfig = {
 
-    Log.i(TAG, s"findById($id)")
+    val now = SystemClock.elapsedRealtime()
 
     val cursor = database.query(
       BobSqliteOpenHelper.BOARDCONFIG_TABLE,
       BobSqliteOpenHelper.BOARDCONFIG_ALL  ,
-      s"${BobSqliteOpenHelper.BOARDCONFIG_COL_ID} = $id",
+      s"${BobSqliteOpenHelper.BOARDCONFIG_COL_ID} = '$id'",
       null,
       null,
       null,
@@ -51,11 +61,16 @@ case class BoardConfigDao(database: SQLiteDatabase) {
 
     cursor
       .moveToFirst()
-      .ensuring(true, "Can't move to the first record")
+      .ensuring(cond = true, "Can't move to the first record")
 
     val boardConfig = fromCursor(cursor)
 
     cursor.close()
+
+    log(s"findById($id)", {
+      val elapsed = SystemClock.elapsedRealtime() - now
+      s"took $elapsed ms"
+    })
 
     boardConfig
 
@@ -63,7 +78,7 @@ case class BoardConfigDao(database: SQLiteDatabase) {
 
   def findAll(): Vector[BoardConfig] = {
 
-    Log.i(TAG, "findAll()")
+    val now = SystemClock.elapsedRealtime()
 
     val cursor = database.query(
       BobSqliteOpenHelper.BOARDCONFIG_TABLE,
@@ -77,7 +92,7 @@ case class BoardConfigDao(database: SQLiteDatabase) {
 
     cursor
       .moveToFirst()
-      .ensuring(true, "Can't move to the first record")
+      .ensuring(cond = true, "Can't move to the first record")
 
     var boardConfigs = Vector[BoardConfig]()
 
@@ -88,24 +103,34 @@ case class BoardConfigDao(database: SQLiteDatabase) {
 
     cursor.close()
 
+    log(s"findAll()", {
+      val elapsed = SystemClock.elapsedRealtime()
+      s"took $elapsed ms"
+    })
+
     boardConfigs
 
   }
 
   private def fromCursor(cursor: Cursor): BoardConfig = {
 
-    val id           = cursor.getString(0)
-    val name         = cursor.getString(1)
-    val servoConfigs = JSON.parseFull(cursor.getString(2)) match {
+    val id               = cursor.getString(0)
+    val name             = cursor.getString(1)
+    val jsonServoConfigs = cursor.getString(2)
 
-      case Some(arr: JSONArray) => arr.list.asInstanceOf[List[JSONObject]].map { j: JSONObject =>
-        ServoConfig.deserialize(j.obj)
-      }.toVector
+    //TODO remove
+    log(s"fromCursor()", s"Columns values are: id=$id, name=$name, jsonServoConfigs=$jsonServoConfigs")
 
-      case None                  => throw new RuntimeException("Can't deserialize the servo configs")
-    }
-
-    BoardConfig(id, name, servoConfigs)
+    BoardConfig(id, name, {
+      JSON.parseFull(jsonServoConfigs)
+        .getOrElse(throw new RuntimeException(s"Can't deserialize the servo configs: $jsonServoConfigs"))
+        .asInstanceOf[List[Map[String, Any]]]
+        .map {
+        servoConfigMap: Map[String, Any] =>
+          ServoConfig.deserialize(servoConfigMap)
+        }
+        .toVector
+    })
 
   }
 

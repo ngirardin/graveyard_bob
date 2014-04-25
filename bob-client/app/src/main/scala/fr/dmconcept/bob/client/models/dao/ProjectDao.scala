@@ -3,18 +3,16 @@ package fr.dmconcept.bob.client.models.dao
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
-import ProjectDao.log
 import fr.dmconcept.bob.client.models.{Step, Project}
 import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
-import scala.util.parsing.json.{JSON, JSONArray}
+import scala.util.parsing.json.{JSONObject, JSON, JSONArray}
 import android.os.SystemClock
+import fr.dmconcept.bob.client.BobLogger
+import ProjectDao.log
 
-object ProjectDao {
+object ProjectDao extends BobLogger {
 
-  private final val TAG = "models.dao.ProjectDao"
-
-  def log(msg: String) = Log.i(TAG, msg)
+  val TAG = "models.dao.ProjectDao"
 
 }
 
@@ -26,22 +24,27 @@ case class ProjectDao(
 
 ) {
 
-  private def serializeSteps(project: Project): String = JSONArray(project.steps.map(_.serialize).toList).toString
+  private def serializeSteps(project: Project): String = JSONArray(
+    project.steps.toList.map(s => JSONObject(s.serialize))
+  ).toString()
 
-  private def deserializeSteps(serialized: String): Vector[Step] = JSON
-    .parseFull(serialized).asInstanceOf[JSONArray].list.asInstanceOf[List[Map[String, Any]]]
-    .map { s: Map[String, Any] => Step.deserialize(s)}
+  private def deserializeSteps(jsonSteps: String): Vector[Step] =
+    JSON
+    .parseFull(jsonSteps)
+    .getOrElse(throw new RuntimeException(s"Can't deserialize the steps: $jsonSteps"))
+    .asInstanceOf[List[Map[String,Any]]]
+    .map { jsonStep: Map[String, Any] => Step.deserialize(jsonStep)}
     .toVector
 
-  def create(project: Project): Long = {
-
-    log("create({$project.name})")
+  def create(project: Project) {
 
     val values = new ContentValues()
 
     values.put(BobSqliteOpenHelper.PROJECT_COL_NAME        , project.name          )
     values.put(BobSqliteOpenHelper.PROJECT_COL_BOARD_CONFIG, project.boardConfig.id)
     values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS       , serializeSteps(project))
+
+    log(s"create()", values.toString)
 
     database.insert(BobSqliteOpenHelper.PROJECT_TABLE, null, values)
 
@@ -58,13 +61,13 @@ case class ProjectDao(
     database.update(
       BobSqliteOpenHelper.PROJECT_TABLE,
       values,
-      s"${BobSqliteOpenHelper.PROJECT_COL_ID} =?",
+      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = ?",
       Array(project.id)
     ).ensuring(_ == 1, s"The database.update() method didn't returned 1")
 
     val elapsed = SystemClock.elapsedRealtime() - now
 
-    log(s"save(project ${project.id} took $elapsed ms")
+    log(s"saveSteps()", s"$values took $elapsed ms")
 
   }
 
@@ -96,7 +99,7 @@ case class ProjectDao(
     val cursor: Cursor = database.query(
       BobSqliteOpenHelper.PROJECT_TABLE,
       BobSqliteOpenHelper.PROJECT_ALL,
-      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = $id",
+      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = '$id'",
       null,
       null,
       null,
@@ -111,7 +114,7 @@ case class ProjectDao(
 
     val elapsed = SystemClock.elapsedRealtime() - now
 
-    log("findById($id) took $elapsed ms")
+    log(s"findById($id)", s"took $elapsed ms")
 
     project
 
@@ -135,15 +138,15 @@ case class ProjectDao(
 
     var projects: Vector[Project] =  Vector[Project]()
 
-    while (!cursor.isAfterLast()) {
+    while (!cursor.isAfterLast) {
         projects = projects :+ fromCursor(cursor)
-        cursor.moveToNext();
+        cursor.moveToNext()
     }
 
-    cursor.close();
+    cursor.close()
 
     val elapsed = SystemClock.elapsedRealtime() - now
-    log("findById($id) took $elapsed ms")
+    log(s"findAll()", s"took $elapsed ms")
 
     projects
 

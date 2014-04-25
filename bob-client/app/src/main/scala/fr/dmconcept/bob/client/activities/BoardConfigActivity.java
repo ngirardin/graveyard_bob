@@ -3,7 +3,6 @@ package fr.dmconcept.bob.client.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -12,11 +11,8 @@ import fr.dmconcept.bob.client.BobApplication;
 import fr.dmconcept.bob.client.R;
 import fr.dmconcept.bob.client.models.BoardConfig;
 import fr.dmconcept.bob.client.models.ServoConfig;
-import scala.Function1;
 import scala.collection.immutable.Vector;
 import scala.runtime.AbstractFunction1;
-
-import java.util.List;
 
 public class BoardConfigActivity extends Activity {
 
@@ -38,7 +34,7 @@ public class BoardConfigActivity extends Activity {
         mBoardConfigRadioGroup = (RadioGroup  ) findViewById(R.id.boardConfigRadioGroup);
         mBoardConfigDetails    = (LinearLayout) findViewById(R.id.boardConfigDetails);
 
-        mBoardConfigs = ((BobApplication) getApplication()).mBoardConfigDao().findAll();
+        mBoardConfigs = ((BobApplication) getApplication()).boardConfigDao().findAll();
 
         createBoardConfigRadios();
 
@@ -57,13 +53,7 @@ public class BoardConfigActivity extends Activity {
             RadioButton radio = new RadioButton(this);
             radio.setId(i);
             radio.setText(boardConfig.name());
-            radio.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    showBoardConfig(mBoardConfigRadioGroup.getCheckedRadioButtonId());
-                }
-            });
+            radio.setOnClickListener(v -> showBoardConfig(mBoardConfigRadioGroup.getCheckedRadioButtonId()));
 
             mBoardConfigRadioGroup.addView(radio);
         }

@@ -71,7 +71,7 @@ class ProjectActivity extends Activity {
               val steps = mProject.steps.updated(mStepIndex, step)
               val project = mProject.copy(steps = steps)
 
-              mApplication.mProjectsDao.saveSteps(project)
+              mApplication.projectsDao.saveSteps(project)
 
               // Redraw the timeline to reflect the new step duration
               updateTimeline()
@@ -105,7 +105,7 @@ class ProjectActivity extends Activity {
 //    mCommunication = new BobCommunication(mApplication)
 
     // Get the project from the DB according to the intent extra id
-    val projectId: Long = getIntent().getLongExtra(EXTRA_PROJECT_ID, -1)
+    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
 
 //    mTimeline         = (LinearLayout) findViewById(R.id.timeline        )
 //    mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration)
@@ -142,7 +142,7 @@ class ProjectActivity extends Activity {
 
       val step: Step = mProject.steps(i)
 
-      val durationRatio: Float = (step.duration / projectDuration).toFloat
+      val durationRatio: Float = step.duration / projectDuration
 
       val button: ToggleButton = new ToggleButton(this)
 
@@ -159,7 +159,7 @@ class ProjectActivity extends Activity {
       button.setOnClickListener(new View.OnClickListener() {
 
         override def onClick(button: View) {
-          mStepIndex = button.getTag().toString().toInt
+          mStepIndex = button.getTag.toString.toInt
           setActiveTimelineStep()
         }
       })
@@ -184,7 +184,7 @@ class ProjectActivity extends Activity {
     val step      : Step = mProject.steps(mStepIndex)
 
     // Set the default background on all position buttons
-    for (i <- (0 to stepCount - 1))
+    for (i <- 0 to stepCount - 1)
     // Set the current button as selected
       mTimeline.getChildAt(i).asInstanceOf[ToggleButton].setChecked(i == mStepIndex)
 
@@ -218,7 +218,7 @@ class ProjectActivity extends Activity {
         ))
       )
 
-      mApplication.mProjectsDao.saveSteps(project)
+      mApplication.projectsDao.saveSteps(project)
 
     }
 
@@ -232,7 +232,7 @@ class ProjectActivity extends Activity {
 
     override def onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean = {
 
-      val  newValue: Int = v.getText().toString.toInt
+      val  newValue: Int = v.getText.toString.toInt
 
       if (newValue > 100) {
         v.setError("Position must be between 0 and 100")
@@ -277,7 +277,7 @@ class ProjectActivity extends Activity {
     mProject.boardConfig.servoConfigs.zipWithIndex.foreach { case (servoConfig: ServoConfig, i: Int) =>
 
       // Inflate the position layout
-      val positionLayout : LinearLayout = getLayoutInflater().inflate(R.layout.layout_project_positions, null).asInstanceOf[LinearLayout]
+      val positionLayout : LinearLayout = getLayoutInflater.inflate(R.layout.layout_project_positions, null).asInstanceOf[LinearLayout]
 
       val editPercentageLeft  : EditText = positionLayout.findViewById(R.id.editPercentageLeft).asInstanceOf[EditText]
       val seekbarLeft         : SeekBar  = positionLayout.findViewById(R.id.seekbarLeft ).asInstanceOf[SeekBar]
@@ -322,7 +322,7 @@ class ProjectActivity extends Activity {
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
 
     // Inflate the menu this adds items to the action bar if it is present.
-    getMenuInflater().inflate(R.menu.project, menu)
+    getMenuInflater.inflate(R.menu.project, menu)
 
     super.onCreateOptionsMenu(menu)
 
@@ -330,7 +330,7 @@ class ProjectActivity extends Activity {
 
   override def onOptionsItemSelected(item: MenuItem) : Boolean = {
 
-    item.getItemId() match {
+    item.getItemId match {
 
       case R.id.action_playStep =>
         playWholeStep()
@@ -360,7 +360,7 @@ class ProjectActivity extends Activity {
         steps = mProject.steps.zipWithIndex.filterNot { _._2 == mStepIndex }.unzip._1
     )
 
-    mApplication.mProjectsDao.saveSteps(mProject)
+    mApplication.projectsDao.saveSteps(mProject)
 
     mStepIndex = mStepIndex - 1
 
@@ -371,7 +371,7 @@ class ProjectActivity extends Activity {
   def newStep() {
 
     // Add the new step and save the project steps
-    mApplication.mProjectsDao.saveSteps(
+    mApplication.projectsDao.saveSteps(
       mProject.copy(
         steps = mProject.steps :+ Step(Vector.fill(mProject.boardConfig.servoConfigs.length)(50))
       )

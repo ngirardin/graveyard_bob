@@ -18,16 +18,17 @@ object BobApplication extends BobLogger {
 
 class BobApplication extends Application {
 
-  lazy val mOpenHelper     : BobSqliteOpenHelper = new BobSqliteOpenHelper(this)
-  lazy val mDatabase       : SQLiteDatabase      = mOpenHelper.getWritableDatabase()
-  lazy val mBoardConfigDao : BoardConfigDao      = new BoardConfigDao(mDatabase)
-  lazy val mProjectsDao    : ProjectDao          = new ProjectDao(mDatabase, mBoardConfigDao)
+  lazy val sqliteOpenHelper : BobSqliteOpenHelper = new BobSqliteOpenHelper(this)
+  lazy val sqliteDatabase   : SQLiteDatabase      = sqliteOpenHelper.getWritableDatabase
+
+  lazy val boardConfigDao   : BoardConfigDao      = new BoardConfigDao(sqliteDatabase)
+  lazy val projectsDao      : ProjectDao          = new ProjectDao    (sqliteDatabase, boardConfigDao)
 
   override def onCreate() {
 
     log("onCreate()", "Application starting")
 
-    if (/*BuildConfig.DEBUG && */ mProjectsDao.findAll().isEmpty)
+    if (/*BuildConfig.DEBUG && */ projectsDao.findAll().isEmpty)
       firstRun()
 
     super.onCreate()
@@ -38,21 +39,21 @@ class BobApplication extends Application {
 
     log("onCreate()", "First run - Creating the servos config fixtures...")
 
-    def servoConfigs(servoPins: Range): Vector[ServoConfig] = servoPins.map(
+    def servoConfigs(servoPins: List[Int]): Vector[ServoConfig] = servoPins.map(
       ServoConfig(_, (558, 2472))
     ).toVector
 
     val configs = List(
-      BoardConfig("Servos on pins 3 and 4", servoConfigs(3 to 4)),
-      BoardConfig("Servos on pins 3 to 9" , servoConfigs(3 to 9))
+      BoardConfig("Servos on pins 3 and 4", servoConfigs(List(3, 4)                 )),
+      BoardConfig("Servos on pins 3 to 9" , servoConfigs(List(3, 4, 5, 6, 7, 10, 11)))
     )
 
-    configs.foreach(mBoardConfigDao.save)
+    configs.foreach(boardConfigDao.save)
 
     log("onCreate()", "First run - Creating the project fixtures...")
 
     // Project 1
-    mProjectsDao.create(
+    projectsDao.create(
       Project(UUID.randomUUID.toString, "Simple demo project", configs(0), Vector(
         Step(4000, Vector( 1, 50)),
         Step(2000, Vector(99, 50)),
@@ -62,12 +63,12 @@ class BobApplication extends Application {
     )
 
     // Project 2
-    mProjectsDao.create(
+    projectsDao.create(
       Project(UUID.randomUUID.toString, "Bob demo project", configs(1), Vector(
-        Step( 5000, Vector(  0, 20, 20, 10, 20, 80, 100)),
-        Step( 6000, Vector( 25, 40, 40, 20, 40, 60,  50)),
-        Step( 5000, Vector( 75, 60, 60, 30, 60, 40,  25)),
-        Step(10000, Vector(100, 80, 80, 40, 80, 20,   0))
+        Step(5000, Vector(  0, 20, 20, 10, 20, 80, 100)),
+        Step(6000, Vector( 25, 40, 40, 20, 40, 60,  50)),
+        Step(5000, Vector( 75, 60, 60, 30, 60, 40,  25)),
+        Step(   0 , Vector(100, 80, 80, 40, 80, 20,  0))
       ))
     )
 
@@ -80,8 +81,8 @@ class BobApplication extends Application {
     log("onTerminate()", "Closing DB and open helper")
 
     // Close the database and the DB helper
-    mDatabase.close()
-    mOpenHelper.close()
+    sqliteDatabase.close()
+    sqliteOpenHelper.close()
 
     super.onTerminate()
 

@@ -1,6 +1,5 @@
 package fr.dmconcept.bob.client.models
 
-import scala.util.parsing.json.JSONObject
 import ServoConfig._
 
 object ServoConfig extends BobSerializable[ServoConfig] {
@@ -13,7 +12,7 @@ object ServoConfig extends BobSerializable[ServoConfig] {
   /**
    * The timings in microseconds for the min and max positions
    */
-  final val TIMING_RANGE = 1000 to 3000
+  final val TIMING_RANGE = 550 to 2500
 
   final val FREQUENCY = 50
 
@@ -21,10 +20,9 @@ object ServoConfig extends BobSerializable[ServoConfig] {
 
   def deserialize(serialized: Map[String, Any]): ServoConfig = {
 
-    def toInt(field: String) = serialized(field).asInstanceOf[Int]
+    def toInt(field: String) = serialized(field).asInstanceOf[Double].toInt
 
     new ServoConfig(toInt("port"), (toInt("minTiming"), toInt("maxTiming")))
-
   }
 
 }

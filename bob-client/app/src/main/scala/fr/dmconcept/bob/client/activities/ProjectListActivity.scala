@@ -34,7 +34,7 @@ class ProjectListActivity extends ListActivity {
     mApplication = getApplication.asInstanceOf[BobApplication]
 
     // Get the project list from the DB
-    mProjectDao = mApplication.mProjectsDao
+    mProjectDao = mApplication.projectsDao
 
     // Show the Server IP Selection activity
     startActivity(new Intent(this, classOf[ServerIPSelectionActivity]))
