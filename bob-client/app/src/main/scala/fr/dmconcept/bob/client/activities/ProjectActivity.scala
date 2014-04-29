@@ -1,9 +1,7 @@
 package fr.dmconcept.bob.client.activities
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.os.Bundle
 import android.util.Log
 import android.view._
 import android.widget._
@@ -11,6 +9,7 @@ import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.{R, BobApplication}
 import fr.dmconcept.bob.client.models.{ServoConfig, Step, Project}
 import ProjectActivity._
+import org.scaloid.common._
 
 object ProjectActivity {
 
@@ -27,7 +26,7 @@ object ProjectActivity {
 
 }
 
-class ProjectActivity extends Activity {
+class ProjectActivity extends SActivity {
 
   // The bob application
   lazy val mApplication: BobApplication = getApplication.asInstanceOf[BobApplication]
@@ -50,7 +49,12 @@ class ProjectActivity extends Activity {
   // The active step index
   var mStepIndex: Int = 0
 
-  override def onCreate(savedInstanceState: Bundle) {
+  onCreate {
+
+    debug("ProjectActivity.onCreate()")
+
+    // Set the activity title as the project name
+    setTitle(mProject.name)
 
     def registerViewListeners() {
 
@@ -83,6 +87,8 @@ class ProjectActivity extends Activity {
 
       })
 
+      /*
+      //TODO remove start and end
       // Click on the start or end buttons
       findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
         override def onClick(v: View) = playStartStep()
@@ -91,33 +97,27 @@ class ProjectActivity extends Activity {
       findViewById(R.id.buttonEnd).setOnClickListener(new View.OnClickListener() {
         override def onClick(v: View) = playEndStep()
       })
+      */
 
     }
-
-    super.onCreate(savedInstanceState)
-
-    Log.i(TAG, "ProjectActivity.onCreate()")
 
     setContentView(R.layout.activity_project)
 
     /*
-    mApplication   = (BobApplication) getApplication()
-
-    mCommunication = new BobCommunication(mApplication)
-
-    Get the project from the DB according to the intent extra id
-    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
-
-    mTimeline         = (LinearLayout) findViewById(R.id.timeline        )
-    mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration)
-    mPositions        = (LinearLayout) findViewById(R.id.positions       )
+    contentView = new SVerticalLayout {
+      this += new SLinearLayout {}.orientation(LinearLayout.HORIZONTAL)
+      this += new SLinearLayout {
+        SButton("Start").<<.wrap.weight(1).>>
+        SEditText().<<.wrap.marginLeft(R.dimen.activity_horizontal_margin).>>.ems(4).inputType(InputType.TYPE_CLASS_NUMBER)
+        STextView("ms").<<.wrap.marginRight(R.dimen.activity_horizontal_margin).>>
+        SButton("End").<<.wrap.weight(1).>>
+      }.<<.marginBottom(R.dimen.activity_vertical_margin).marginTop(R.dimen.activity_vertical_margin).>>.orientation(LinearLayout.HORIZONTAL)
+      SScrollView().<<.fill.>>
+    }.<<.fill.>>.focusableInTouchMode(true).paddingBottom(R.dimen.activity_vertical_margin).paddingTop(R.dimen.activity_vertical_margin).paddingRight(R.dimen.activity_horizontal_margin).paddingLeft(R.dimen.activity_horizontal_margin)
     */
 
     // Register the views event listeners
     registerViewListeners()
-
-    // Set the activity title as the project name
-    setTitle(mProject.name)
 
     // Create the positions
     createPositions()
@@ -283,14 +283,19 @@ class ProjectActivity extends Activity {
 
       val editPercentageLeft  : EditText = positionLayout.findViewById(R.id.editPercentageLeft).asInstanceOf[EditText]
       val seekbarLeft         : SeekBar  = positionLayout.findViewById(R.id.seekbarLeft ).asInstanceOf[SeekBar]
+
+      /*
       val seekbarRight        : SeekBar  = positionLayout.findViewById(R.id.seekbarRight).asInstanceOf[SeekBar]
       val editPercentageRight : EditText = positionLayout.findViewById(R.id.editPercentageRight).asInstanceOf[EditText]
+      */
 
       // Set the listeners on the widgets
       editPercentageLeft .setOnEditorActionListener (new PositionTextEditorActionListener(seekbarLeft        , 0, i))
       seekbarLeft        .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageLeft , 0, i))
+      /*
       seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, 1, i))
       editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , 1, i))
+      */
 
       // Append the position slider to the parent view
       mPositions.addView(positionLayout)
@@ -307,15 +312,20 @@ class ProjectActivity extends Activity {
     mProject.boardConfig.servoConfigs.zipWithIndex.foreach { case (servoConfig: ServoConfig, i: Int) =>
 
       val startPosition : Int = startPositions(i)
+      /*
       val endPosition   : Int = endPositions  (i)
+      */
 
       val positionLayout: LinearLayout = mPositions.getChildAt(i).asInstanceOf[LinearLayout]
 
-      positionLayout.findViewById(R.id.editPercentageLeft ).asInstanceOf[EditText].setText    (startPosition.toString)
-      positionLayout.findViewById(R.id.seekbarLeft        ).asInstanceOf[SeekBar ].setProgress(startPosition         )
+      positionLayout.findViewById(R.id.textServo         ).asInstanceOf[TextView].setText    (servoConfig.port.toString)
+      positionLayout.findViewById(R.id.editPercentageLeft).asInstanceOf[EditText].setText    (startPosition.toString)
+      positionLayout.findViewById(R.id.seekbarLeft       ).asInstanceOf[SeekBar ].setProgress(startPosition         )
 
+      /*
       positionLayout.findViewById(R.id.seekbarRight       ).asInstanceOf[SeekBar ].setProgress(endPosition           )
       positionLayout.findViewById(R.id.editPercentageRight).asInstanceOf[EditText].setText    (endPosition.toString  )
+      */
 
     }
 

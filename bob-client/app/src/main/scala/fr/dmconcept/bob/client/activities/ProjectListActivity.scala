@@ -13,7 +13,7 @@ class ProjectListActivity extends SActivity {
 
   onCreate {
 
-    debug("ProjectListActivity.onCreate *********************")
+    debug("ProjectListActivity.onCreate()")
 
     // Get the projects
     val projects = getApplication.asInstanceOf[BobApplication].projectsDao.findAll().toArray
@@ -41,11 +41,15 @@ class ProjectListActivity extends SActivity {
 
       list.onItemClick { (parent, view, position: Int, id: Long) =>
 
+        val project = projects(position)
+
+        debug(s"ProjectListActivity.list.onItemClick() Starting project activity for project ${project.id}")
+
         // Start the project activity by passing the project as intent
         startActivity(
-          SIntent[ProjectActivity]
-            .putExtra(ProjectActivity.EXTRA_PROJECT_ID, projects(position))
+          SIntent[ProjectActivity].putExtra(ProjectActivity.EXTRA_PROJECT_ID, project)
         )
+
       }
 
     }
