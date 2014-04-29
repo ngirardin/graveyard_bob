@@ -10,8 +10,10 @@
 
     <TextView
         android:id="@+id/textServo"
-        android:layout_width="10dp"
-        android:layout_height="wrap_content" />
+        android:layout_width="17dp"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        />
 
     <EditText
         android:layout_width="wrap_content"
