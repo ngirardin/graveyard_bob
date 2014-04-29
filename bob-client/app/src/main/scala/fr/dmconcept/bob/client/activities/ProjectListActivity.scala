@@ -1,48 +1,62 @@
 package fr.dmconcept.bob.client.activities
 
-import ProjectListActivity.TAG
-import android.app.ListActivity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import android.view._
-import android.widget._
-import fr.dmconcept.bob.client.{BobApplication, R}
+import org.scaloid.common._
+import fr.dmconcept.bob.client.BobApplication
+import org.scaloid.common.LoggerTag
+import android.widget.{ArrayAdapter, TextView}
 import fr.dmconcept.bob.client.models.Project
-import fr.dmconcept.bob.client.models.dao.ProjectDao
+import android.view.{ViewGroup, View}
 
-object ProjectListActivity {
+class ProjectListActivity extends SActivity {
 
-  val TAG = "activities.ProjctListActivity"
+  implicit override val loggerTag = LoggerTag("BobClient")
 
+  onCreate {
+
+    debug("ProjectListActivity.onCreate *********************")
+
+    // Get the projects
+    val projects = getApplication.asInstanceOf[BobApplication].projectsDao.findAll().toArray
+
+    contentView = {
+
+      val list = new SListView {
+
+        // Set the projects adapter
+        adapter = new ArrayAdapter[Project](context, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
+
+          override def getView(position: Int, convertView: View, parent: ViewGroup): View = {
+
+            val view = super.getView(position, convertView, parent)
+            val project = getItem(position)
+
+            view.findViewById(android.R.id.text1).asInstanceOf[TextView].setText(project.name)
+            view.findViewById(android.R.id.text2).asInstanceOf[TextView].setText(project.boardConfig.name)
+
+            view
+          }
+        }
+
+      }
+
+      list.onItemClick { (parent, view, position: Int, id: Long) =>
+
+        // Start the project activity by passing the project as intent
+        startActivity(
+          SIntent[ProjectActivity]
+            .putExtra(ProjectActivity.EXTRA_PROJECT_ID, projects(position))
+        )
+      }
+
+    }
+
+  }
 }
 
-class ProjectListActivity extends ListActivity {
-
-  lazy val application = getApplication.getPackageName
-
-  def log(message: String) = Log.i(application, s"$TAG message")
-
-  var mApplication: BobApplication = null
-
-  var mProjectDao : ProjectDao = null
-
-  override def onCreate(savedInstanceState: Bundle) {
-
-    super.onCreate(savedInstanceState)
-
-    mApplication = getApplication.asInstanceOf[BobApplication]
-
-    // Get the project list from the DB
-    mProjectDao = mApplication.projectsDao
-
-    // Show the Server IP Selection activity
-    startActivity(new Intent(this, classOf[ServerIPSelectionActivity]))
+  /*
 
     // Enable the context menu on the list
     registerForContextMenu(getListView)
-
-    val projects : Array[Project] = mProjectDao.findAll().toArray
 
     setListAdapter(new ArrayAdapter[Project](this, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
 
@@ -75,7 +89,6 @@ class ProjectListActivity extends ListActivity {
 
   }
 
-  /*
   override def onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo) {
 
     super.onCreateContextMenu(menu, v, menuInfo)
@@ -136,7 +149,6 @@ class ProjectListActivity extends ListActivity {
     return true
 
   }
-  */
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
 
@@ -166,5 +178,4 @@ class ProjectListActivity extends ListActivity {
     }
 
   }
-
-}
+  */

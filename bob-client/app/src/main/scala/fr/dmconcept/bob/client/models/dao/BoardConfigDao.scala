@@ -118,8 +118,7 @@ case class BoardConfigDao(database: SQLiteDatabase) {
     val name             = cursor.getString(1)
     val jsonServoConfigs = cursor.getString(2)
 
-    //TODO remove
-    log(s"fromCursor()", s"Columns values are: id=$id, name=$name, jsonServoConfigs=$jsonServoConfigs")
+//    log(s"fromCursor()", s"Columns values are: id=$id, name=$name, jsonServoConfigs=$jsonServoConfigs")
 
     BoardConfig(id, name, {
       JSON.parseFull(jsonServoConfigs)

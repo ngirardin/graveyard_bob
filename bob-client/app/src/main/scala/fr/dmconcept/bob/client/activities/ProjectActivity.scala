@@ -44,11 +44,8 @@ class ProjectActivity extends Activity {
   // The start and end positions layout
   lazy val mPositions        : LinearLayout = findViewById(R.id.positions       ).asInstanceOf[LinearLayout]
 
-  // The current project
-  lazy val mProject: Project = {
-    val projectId = getIntent.getStringExtra(EXTRA_PROJECT_ID)
-    mApplication.projectsDao.findById(projectId)
-  }
+  // Deserialize the project from the intent extra
+  lazy val mProject = getIntent.getSerializableExtra(EXTRA_PROJECT_ID).asInstanceOf[Project]
 
   // The active step index
   var mStepIndex: Int = 0
@@ -99,20 +96,22 @@ class ProjectActivity extends Activity {
 
     super.onCreate(savedInstanceState)
 
-    Log.i(TAG, "onCreate()")
+    Log.i(TAG, "ProjectActivity.onCreate()")
 
     setContentView(R.layout.activity_project)
 
-//    mApplication   = (BobApplication) getApplication()
+    /*
+    mApplication   = (BobApplication) getApplication()
 
-//    mCommunication = new BobCommunication(mApplication)
+    mCommunication = new BobCommunication(mApplication)
 
-    // Get the project from the DB according to the intent extra id
-//    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
+    Get the project from the DB according to the intent extra id
+    val projectId: Long = getIntent.getLongExtra(EXTRA_PROJECT_ID, -1)
 
-//    mTimeline         = (LinearLayout) findViewById(R.id.timeline        )
-//    mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration)
-//    mPositions        = (LinearLayout) findViewById(R.id.positions       )
+    mTimeline         = (LinearLayout) findViewById(R.id.timeline        )
+    mDurationEditText = (EditText    ) findViewById(R.id.editTextDuration)
+    mPositions        = (LinearLayout) findViewById(R.id.positions       )
+    */
 
     // Register the views event listeners
     registerViewListeners()
