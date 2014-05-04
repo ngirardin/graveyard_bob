@@ -60,7 +60,8 @@ public class NewProjectActivity extends Activity {
 
                 // Start the project activity
                 Intent intent = new Intent(v.getContext(), ProjectActivity.class);
-                intent.putExtra(ProjectActivity.EXTRA_PROJECT_ID(), project.id());
+                //TODO replace with intent.putExtra(ProjectActivity.Extras.PROJECT_ID(), project.id());
+                intent.putExtra("fr.dmconcept.bob.extras.projectId", project.id());
                 startActivity(intent);
 
             }

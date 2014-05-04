@@ -1,32 +1,34 @@
 package fr.dmconcept.bob.client.activities
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.util.Log
-import android.view._
-import android.widget._
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.{R, BobApplication}
-import fr.dmconcept.bob.client.models.{ServoConfig, Step, Project}
+import fr.dmconcept.bob.client.models.{Step, Project}
 import ProjectActivity._
 import org.scaloid.common._
+import android.os.Bundle
+import android.support.v4.app.{Fragment, FragmentPagerAdapter}
+import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
+import org.scaloid.common.LoggerTag
+import android.app.ActionBar.{TabListener, Tab}
+import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
+import android.content.Context
+import android.app.ActionBar
+import android.app
+import android.view.{MenuItem, Menu}
 
 object ProjectActivity {
 
-  // The intent extra key for the project id
-  def EXTRA_PROJECT_ID = "fr.dmconcept.bob.extras.projectId"
-
-  final val TAG = "activities.ProjectListActivity"
-
-  // The default step duration for new steps in ms
-  final val DEFAULT_STEP_DURATION = 2000
-
-  // The minimum step duration in ms
-  final val MIN_STEP_DURATION = 100
+  object Extras {
+    val PROJECT_ID = "fr.dmconcept.bob.extras.projectId"
+  }
 
 }
 
-class ProjectActivity extends SActivity {
+
+
+class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil {
+
+  implicit override val loggerTag = LoggerTag("BobClient")
 
   // The bob application
   lazy val mApplication: BobApplication = getApplication.asInstanceOf[BobApplication]
@@ -34,306 +36,81 @@ class ProjectActivity extends SActivity {
   // The communication layer with the server
   lazy val mCommunication: BobCommunication = new BobCommunication(mApplication)
 
-  // The timeline, duration edit text and positions layout widgets
-  lazy val mTimeline         : LinearLayout = findViewById(R.id.timeline        ).asInstanceOf[LinearLayout]
-
-  // The duration EditText
-  lazy val mDurationEditText : EditText     = findViewById(R.id.editTextDuration).asInstanceOf[EditText    ]
-
-  // The start and end positions layout
-  lazy val mPositions        : LinearLayout = findViewById(R.id.positions       ).asInstanceOf[LinearLayout]
-
   // Deserialize the project from the intent extra
-  lazy val mProject = getIntent.getSerializableExtra(EXTRA_PROJECT_ID).asInstanceOf[Project]
+  lazy val mProject = getIntent.getSerializableExtra(Extras.PROJECT_ID).asInstanceOf[Project]
 
-  // The active step index
-  var mStepIndex: Int = 0
+  override def onCreate(savedInstance: Bundle) {
 
-  onCreate {
+    super.onCreate(savedInstance)
 
-    debug("ProjectActivity.onCreate()")
+    info("ProjectActivity.onCreate()")
 
-    // Set the activity title as the project name
+    // Set the project name as the activity title
     setTitle(mProject.name)
 
-    def registerViewListeners() {
+    // Create the timeline tabs
+    val actionBar = getActionBar
 
-      // Duration changed
-      mDurationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS)
 
-        override def onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean = {
-
-          val newDuration: Int = v.getText.toString.toInt
-
-          newDuration match {
-            case MIN_STEP_DURATION =>
-              v.setError("The step can't last less than " + MIN_STEP_DURATION + " ms")
-
-            case _ =>
-              // Save the new duration
-              val step = mProject.steps(mStepIndex).copy(duration = newDuration)
-              val steps = mProject.steps.updated(mStepIndex, step)
-              val project = mProject.copy(steps = steps)
-
-              mApplication.projectsDao.saveSteps(project)
-
-              // Redraw the timeline to reflect the new step duration
-              updateTimeline()
-          }
-
-          true
-
-        }
-
-      })
-
-      /*
-      //TODO remove start and end
-      // Click on the start or end buttons
-      findViewById(R.id.buttonStart).setOnClickListener(new View.OnClickListener() {
-        override def onClick(v: View) = playStartStep()
-      })
-
-      findViewById(R.id.buttonEnd).setOnClickListener(new View.OnClickListener() {
-        override def onClick(v: View) = playEndStep()
-      })
-      */
-
-    }
-
-    setContentView(R.layout.activity_project)
-
-    /*
-    contentView = new SVerticalLayout {
-      this += new SLinearLayout {}.orientation(LinearLayout.HORIZONTAL)
-      this += new SLinearLayout {
-        SButton("Start").<<.wrap.weight(1).>>
-        SEditText().<<.wrap.marginLeft(R.dimen.activity_horizontal_margin).>>.ems(4).inputType(InputType.TYPE_CLASS_NUMBER)
-        STextView("ms").<<.wrap.marginRight(R.dimen.activity_horizontal_margin).>>
-        SButton("End").<<.wrap.weight(1).>>
-      }.<<.marginBottom(R.dimen.activity_vertical_margin).marginTop(R.dimen.activity_vertical_margin).>>.orientation(LinearLayout.HORIZONTAL)
-      SScrollView().<<.fill.>>
-    }.<<.fill.>>.focusableInTouchMode(true).paddingBottom(R.dimen.activity_vertical_margin).paddingTop(R.dimen.activity_vertical_margin).paddingRight(R.dimen.activity_horizontal_margin).paddingLeft(R.dimen.activity_horizontal_margin)
-    */
-
-    // Register the views event listeners
-    registerViewListeners()
-
-    // Create the positions
-    createPositions()
-
-    // Fill the timeline with the steps
-    updateTimeline()
-
-  }
-
-  /**
-   * Delete all the timeline steps and create them with a width
-   * matching their relative length
-   */
-  def updateTimeline() {
-
-    Log.i(TAG, "updateTimeline()")
-
-    val projectDuration: Float = mProject.duration
-
-    mTimeline.removeAllViews()
-
-    // Add the buttons to the timeline
     mProject.steps.zipWithIndex.foreach { case (step: Step, i: Int) =>
 
-      val step: Step = mProject.steps(i)
+      actionBar.addTab(actionBar
+        .newTab()
+        .setText(s"${i + 1}")
+        .setTabListener(new TabListener {
 
-      val durationRatio: Float = step.duration / projectDuration
+          override def onTabSelected(tab: Tab, ft: app.FragmentTransaction): Unit = {
 
-      val button: ToggleButton = new ToggleButton(this)
+            val position = tab.getPosition
+            // Select the positions view pager for this step
+            viewPager.setCurrentItem(position)
+           }
 
-      // Dynamically set the weight on the button according to the getDuration
-      button.setLayoutParams(new LinearLayout.LayoutParams(
-        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, durationRatio
-      ))
+          override def onTabReselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
 
-      // Set the step id as the tag
-      button.setTag(i)
-      button.setTextOff((i + 1).toString)
-      button.setTextOn ((i + 1).toString)
+          override def onTabUnselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
 
-      button.setOnClickListener(new View.OnClickListener() {
+        })
+      )
+    }
 
-        override def onClick(button: View) {
-          mStepIndex = button.getTag.toString.toInt
-          setActiveTimelineStep()
+    lazy val viewPager = new SViewPager {
+
+      setId(0x0001) // Need to set any id on the ViewPager
+
+      setAdapter(new FragmentPagerAdapter(supportFragmentManager) {
+
+        override def getCount: Int = mProject.steps.length
+
+        override def getItem(position: Int): Fragment =
+          PositionsFragment.getInstance(position, mProject.steps(position), mProject.boardConfig)
+
+      })
+
+      setOnPageChangeListener(new SimpleOnPageChangeListener {
+        override def onPageSelected(position: Int): Unit = {
+          // Update the active tab
+          getActionBar.setSelectedNavigationItem(position)
         }
       })
 
-      // Add the button before the "new step" button
-      mTimeline.addView(button)
-
     }
 
-    setActiveTimelineStep()
-  }
-
-  /**
-   * Enable the step button and update the position to the step value
-   */
-  def setActiveTimelineStep() {
-
-    Log.i(TAG, "setActiveTimelineStep()")
-
-    val stepCount : Int  = mProject.steps.length
-
-    val step      : Step = mProject.steps(mStepIndex)
-
-    // Set the default background on all position buttons
-    for (i <- 0 to stepCount - 1)
-    // Set the current button as selected
-      mTimeline.getChildAt(i).asInstanceOf[ToggleButton].setChecked(i == mStepIndex)
-
-    // Update the duration editText and position the cursor at the end
-    val durationString: String = step.duration.toString
-    mDurationEditText.setText     (durationString)
-    mDurationEditText.setSelection(durationString.length())
-
-    // Update the position sliders
-    updatePositions()
+    contentView = viewPager
 
   }
 
-  class PositionListener(
-
-    stepOffset    : Int,
-
-    positionIndex : Int
-
-  ) {
-
-    def savePosition(newValue: Int) {
-
-      val stepIndex: Int = mStepIndex + stepOffset
-
-      val step = mProject.steps(stepIndex)
-
-      val project = mProject.copy(
-        steps = mProject.steps.updated(stepIndex, step.copy(
-          positions = step.positions.updated(positionIndex, newValue)
-        ))
-      )
-
-      mApplication.projectsDao.saveSteps(project)
-
-    }
-
+  def onDurationChanged(duration: Int) {
+    toast(s"TODO onDurationChanged($duration)")
   }
 
-  case class PositionTextEditorActionListener (
-    seekBar  : SeekBar,
-    step     : Int,
-    position : Int
-  ) extends PositionListener(step, position) with TextView.OnEditorActionListener {
-
-    override def onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean = {
-
-      val  newValue: Int = v.getText.toString.toInt
-
-      if (newValue > 100) {
-        v.setError("Position must be between 0 and 100")
-      } else {
-        seekBar.setProgress(newValue)
-        savePosition(newValue)
-      }
-
-      true
-    }
-
-  }
-
-  case class PositionSeekbarChangeListener(
-    editText : EditText,
-    step     : Int,
-    position : Int
-  ) extends PositionListener(step, position) with SeekBar.OnSeekBarChangeListener {
-
-    override def onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-
-      if (fromUser)
-        // Update the percentage text
-        editText.setText(String.valueOf(progress))
-
-    }
-
-    override def onStartTrackingTouch(seekBar: SeekBar) {
-      // Do nothing
-    }
-
-    override def onStopTrackingTouch(seekBar: SeekBar) {
-      savePosition(seekBar.getProgress)
-    }
-  }
-
-  /**
-   * Create the positions
-   */
-  def createPositions() {
-
-    mProject.boardConfig.servoConfigs.zipWithIndex.foreach { case (servoConfig: ServoConfig, i: Int) =>
-
-      // Inflate the position layout
-      val positionLayout : LinearLayout = getLayoutInflater.inflate(R.layout.layout_project_positions, null).asInstanceOf[LinearLayout]
-
-      val editPercentageLeft  : EditText = positionLayout.findViewById(R.id.editPercentageLeft).asInstanceOf[EditText]
-      val seekbarLeft         : SeekBar  = positionLayout.findViewById(R.id.seekbarLeft ).asInstanceOf[SeekBar]
-
-      /*
-      val seekbarRight        : SeekBar  = positionLayout.findViewById(R.id.seekbarRight).asInstanceOf[SeekBar]
-      val editPercentageRight : EditText = positionLayout.findViewById(R.id.editPercentageRight).asInstanceOf[EditText]
-      */
-
-      // Set the listeners on the widgets
-      editPercentageLeft .setOnEditorActionListener (new PositionTextEditorActionListener(seekbarLeft        , 0, i))
-      seekbarLeft        .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageLeft , 0, i))
-      /*
-      seekbarRight       .setOnSeekBarChangeListener(new PositionSeekbarChangeListener   (editPercentageRight, 1, i))
-      editPercentageRight.setOnEditorActionListener (new PositionTextEditorActionListener(seekbarRight       , 1, i))
-      */
-
-      // Append the position slider to the parent view
-      mPositions.addView(positionLayout)
-
-    }
-
-  }
-
-  def updatePositions() {
-
-    val startPositions: Vector[Int] = mProject.steps(mStepIndex    ).positions
-    val endPositions  : Vector[Int] = mProject.steps(mStepIndex + 1).positions
-
-    mProject.boardConfig.servoConfigs.zipWithIndex.foreach { case (servoConfig: ServoConfig, i: Int) =>
-
-      val startPosition : Int = startPositions(i)
-      /*
-      val endPosition   : Int = endPositions  (i)
-      */
-
-      val positionLayout: LinearLayout = mPositions.getChildAt(i).asInstanceOf[LinearLayout]
-
-      positionLayout.findViewById(R.id.textServo         ).asInstanceOf[TextView].setText    (servoConfig.port.toString)
-      positionLayout.findViewById(R.id.editPercentageLeft).asInstanceOf[EditText].setText    (startPosition.toString)
-      positionLayout.findViewById(R.id.seekbarLeft       ).asInstanceOf[SeekBar ].setProgress(startPosition         )
-
-      /*
-      positionLayout.findViewById(R.id.seekbarRight       ).asInstanceOf[SeekBar ].setProgress(endPosition           )
-      positionLayout.findViewById(R.id.editPercentageRight).asInstanceOf[EditText].setText    (endPosition.toString  )
-      */
-
-    }
-
+  def onStepPositionChanged() {
+    toast("TODO onStepPositionChanged()")
   }
 
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
 
-    // Inflate the menu this adds items to the action bar if it is present.
     getMenuInflater.inflate(R.menu.project, menu)
 
     super.onCreateOptionsMenu(menu)
@@ -342,34 +119,27 @@ class ProjectActivity extends SActivity {
 
   override def onOptionsItemSelected(item: MenuItem) : Boolean = {
 
+    def t(f: => Unit): Boolean = {
+      f
+      true
+    }
+
     item.getItemId match {
-
-      case R.id.action_playStep =>
-        playWholeStep()
-        true
-
-      case R.id.action_playProject =>
-        playProject()
-        true
-
-      case R.id.action_deleteStep =>
-        deleteStep()
-        true
-
-      case R.id.action_addStep =>
-        newStep()
-        true
-
+      case R.id.action_deleteStep  => t(deleteStep() )
+      case R.id.action_insertStep  => t(newStep()    )
+      case R.id.action_playProject => t(playProject())
       case _ => super.onOptionsItemSelected(item)
-
     }
 
   }
 
   def deleteStep() {
 
+    //TODO implement step deletion
+    alert("Step deletion", "TODO")
+    /*
     mProject.copy(
-        steps = mProject.steps.zipWithIndex.filterNot { _._2 == mStepIndex }.unzip._1
+      steps = mProject.steps.zipWithIndex.filterNot { _._2 == mStepIndex }.unzip._1
     )
 
     mApplication.projectsDao.saveSteps(mProject)
@@ -377,11 +147,16 @@ class ProjectActivity extends SActivity {
     mStepIndex = mStepIndex - 1
 
     updateTimeline()
+    */
 
   }
 
   def newStep() {
 
+    //TODO implement step creation
+    alert("Step creation", "TODO")
+
+    /*
     // Add the new step and save the project steps
     mApplication.projectsDao.saveSteps(
       mProject.copy(
@@ -394,9 +169,11 @@ class ProjectActivity extends SActivity {
 
     // Update the timeline
     updateTimeline()
+    */
 
   }
 
+  /*
   def playStartStep() {
 
     Log.i(TAG, "playStartStep()")
@@ -435,20 +212,28 @@ class ProjectActivity extends SActivity {
     }
 
   }
+  */
 
   def playProject() {
 
-    Log.i(TAG, "playProject()")
+    info("ProjectActivity.playProject")
 
+    new AlertDialogBuilder("Playing project", "The project is playing...") {
+      negativeButton("Cancel" /*android.R.string.cancel, toast("Cancelled")*/)
+    }.show()
+
+    /*
     try {
       Toast.makeText(this, "Playing the project.", Toast.LENGTH_SHORT).show()
       mCommunication.sendSteps(mProject)
     } catch {
       case e: Throwable => showNetworkErrorDialog(e)
     }
+    */
 
   }
 
+  /*
   def showNetworkErrorDialog(exception: Throwable) {
     new AlertDialog.Builder(this)
       .setTitle("Network error")
@@ -461,5 +246,6 @@ class ProjectActivity extends SActivity {
       })
       .show()
   }
+  */
 
 }

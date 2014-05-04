@@ -3,7 +3,7 @@ package fr.dmconcept.bob.client.activities
 import org.scaloid.common._
 import fr.dmconcept.bob.client.BobApplication
 import org.scaloid.common.LoggerTag
-import android.widget.{ArrayAdapter, TextView}
+import android.widget.{AdapterView, ArrayAdapter, TextView}
 import fr.dmconcept.bob.client.models.Project
 import android.view.{ViewGroup, View}
 
@@ -17,6 +17,13 @@ class ProjectListActivity extends SActivity {
 
     // Get the projects
     val projects = getApplication.asInstanceOf[BobApplication].projectsDao.findAll().toArray
+
+    /*******************************/
+    //TODO remove me
+    startActivity(
+      SIntent[ProjectActivity].putExtra(ProjectActivity.Extras.PROJECT_ID, projects(1))
+    )
+    /*******************************/
 
     contentView = {
 
@@ -39,7 +46,7 @@ class ProjectListActivity extends SActivity {
 
       }
 
-      list.onItemClick { (parent, view, position: Int, id: Long) =>
+      list.onItemClick { (parent: AdapterView[_], view: View, position: Int, id: Long) =>
 
         val project = projects(position)
 
@@ -47,7 +54,8 @@ class ProjectListActivity extends SActivity {
 
         // Start the project activity by passing the project as intent
         startActivity(
-          SIntent[ProjectActivity].putExtra(ProjectActivity.EXTRA_PROJECT_ID, project)
+          SIntent[ProjectActivity]
+            .putExtra(ProjectActivity.Extras.PROJECT_ID, project)
         )
 
       }

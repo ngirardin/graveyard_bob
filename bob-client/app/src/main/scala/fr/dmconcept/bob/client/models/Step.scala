@@ -5,6 +5,13 @@ import scala.util.parsing.json.JSONArray
 
 object Step extends BobSerializable[Step] {
 
+  /** The minimum step duration in ms **/
+  final val MIN_STEP_DURATION = 100
+
+  /** The maximum step duration in ms **/
+  final val MAX_STEP_DURATION = 60 * 1000
+
+  /** The default step duration for a new step **/
   final val DEFAULT_DURATION = 5000
 
   def serialize(step: Step) = step.serialize
