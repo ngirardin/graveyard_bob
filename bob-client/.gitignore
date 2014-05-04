@@ -1,10 +1,6 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-.DS_Store
+/build
+project/target
+project/project
+target
 .idea/
-*.un~
-app/project/project
-app/project/target
-app/target
-target/
+.idea_modules/
