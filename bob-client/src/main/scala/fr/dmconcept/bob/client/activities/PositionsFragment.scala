@@ -1,16 +1,15 @@
 package fr.dmconcept.bob.client.activities
 
-import android.support.v4.app.Fragment
-import android.os.Bundle
-import org.scaloid.common._
-import fr.dmconcept.bob.client.models.{BoardConfig, Step}
 import PositionsFragment.Extras
-import android.view._
+import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.text.{InputFilter, InputType}
+import android.view._
 import android.view.inputmethod.EditorInfo
-import fr.dmconcept.bob.client.utils.{PercentageInputFilter, StepDurationInputFilter}
 import android.widget.{SeekBar, TextView}
-import org.scaloid.common.LoggerTag
+import fr.dmconcept.bob.client.models.{BoardConfig, Step}
+import fr.dmconcept.bob.client.utils.{PercentageInputFilter, StepDurationInputFilter}
+import org.scaloid.common._
 import org.scaloid.support.v4.SFragment
 
 object PositionsFragment {
@@ -44,27 +43,13 @@ class PositionsFragment extends SFragment with TagUtil {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
-  //TODO use lazy val?
-  var mNum = -1
-  var step        : Step = null
-  var boardConfig : BoardConfig = null
-
-  /**
-   * When creating, retrieve this instance's number from its arguments.
-   */
-  override def onCreate(savedInstanceState: Bundle) {
-
-    super.onCreate(savedInstanceState)
-
-    mNum        = getArguments.getInt         (Extras.POSITION   ).ensuring(_ > -1, "Invalid position")
-    step        = getArguments.getSerializable(Extras.STEP       ).asInstanceOf[Step]
-    boardConfig = getArguments.getSerializable(Extras.BOARDCONFIG).asInstanceOf[BoardConfig]
-
-  }
+  lazy val mPosition    = getArguments.getInt         (Extras.POSITION   ).ensuring(_ > -1, "Invalid position")
+  lazy val mStep        = getArguments.getSerializable(Extras.STEP       ).asInstanceOf[Step]
+  lazy val mBoardConfig = getArguments.getSerializable(Extras.BOARDCONFIG).asInstanceOf[BoardConfig]
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) : View = {
 
-    info(s"PositionFragment.onCreateView($mNum)")
+    info(s"PositionFragment.onCreateView($mPosition)")
 
     new SVerticalLayout {
 
@@ -78,7 +63,7 @@ class PositionsFragment extends SFragment with TagUtil {
 
         STextView("Duration").wrap
 
-        this += new SEditText(step.duration.toString) {
+        this += new SEditText(mStep.duration.toString) {
 
           inputType(InputType.TYPE_CLASS_NUMBER)
 
@@ -100,6 +85,7 @@ class PositionsFragment extends SFragment with TagUtil {
                 error(s"The step must last at least ${Step.MIN_STEP_DURATION} ms")
 
               //TODO save the duration
+              onDurationChanged(newVal)
 
               // Return false to tell that the input is not consumed and let Android hide the keyboard
               false
@@ -112,20 +98,20 @@ class PositionsFragment extends SFragment with TagUtil {
 
       this += new SVerticalLayout {
 
-        step.positions.zipWithIndex foreach {
+        mStep.positions.zipWithIndex foreach {
           case (position, i) =>
 
             // Position layout
             this += new SVerticalLayout {
 
               // Servo port
-              this += new STextView(boardConfig.servoConfigs(i).port.toString) {
+              this += new STextView(mBoardConfig.servoConfigs(i).port.toString) {
                 gravity(Gravity.RIGHT)
                 padding(0, 0, 8, 0) // right
               }.<<(30.dip, WRAP_CONTENT).>>
 
               // Position percentage EditText
-              val positionEditText = new SEditText(step.positions(i).toString) {
+              val positionEditText = new SEditText(mStep.positions(i).toString) {
 
                 inputType(InputType.TYPE_CLASS_NUMBER)
 
@@ -201,8 +187,12 @@ class PositionsFragment extends SFragment with TagUtil {
     toast("Position changed")
   }
 
+  private def onDurationChanged(duration: Int) {
+    toast(s"TODO onDurationChanged($duration)")
+  }
+
   override def onDestroyView() {
-    info(s"PositionFragment.onDestroyView($mNum)")
+    info(s"PositionFragment.onDestroyView($mPosition)")
     super.onDestroyView()
   }
 
