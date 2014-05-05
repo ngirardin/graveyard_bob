@@ -4,12 +4,20 @@ android.Plugin.androidBuild
 
 name := "bob-client"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
-scalacOptions in Compile += "-feature"
+proguardCache in Android ++= Seq(
+  ProguardCache("org.scaloid") % "org.scaloid"
+)
 
-platformTarget in Android := "android-19"
+proguardOptions in Android ++= Seq("-dontobfuscate", "-dontoptimize", "-dontwarn scala.collection.mutable.**")
 
 libraryDependencies += "org.scaloid" %% "scaloid" % "3.3-8"
 
 libraryDependencies += "com.android.support" % "support-v4" % "19.0.1"
+
+scalacOptions in Compile += "-feature"
+
+run <<= run in Android
+
+install <<= install in Android
