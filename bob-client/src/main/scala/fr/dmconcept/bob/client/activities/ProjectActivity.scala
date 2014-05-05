@@ -1,20 +1,20 @@
 package fr.dmconcept.bob.client.activities
 
-import fr.dmconcept.bob.client.communications.BobCommunication
-import fr.dmconcept.bob.client.{R, BobApplication}
-import fr.dmconcept.bob.client.models.{Step, Project}
 import ProjectActivity._
-import org.scaloid.common._
+import android.app
+import android.app.ActionBar
+import android.app.ActionBar.{TabListener, Tab}
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
-import org.scaloid.common.LoggerTag
-import android.app.ActionBar.{TabListener, Tab}
-import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
-import android.content.Context
-import android.app.ActionBar
-import android.app
 import android.view.{MenuItem, Menu}
+import fr.dmconcept.bob.client.R
+import fr.dmconcept.bob.client.communications.BobCommunication
+import fr.dmconcept.bob.client.models.{Step, Project}
+import org.scaloid.common.LoggerTag
+import org.scaloid.common._
+import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 
 object ProjectActivity {
 
@@ -23,7 +23,6 @@ object ProjectActivity {
   }
 
 }
-
 
 
 class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil {
@@ -99,14 +98,6 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
     contentView = viewPager
 
-  }
-
-  def onDurationChanged(duration: Int) {
-    toast(s"TODO onDurationChanged($duration)")
-  }
-
-  def onStepPositionChanged() {
-    toast("TODO onStepPositionChanged()")
   }
 
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
