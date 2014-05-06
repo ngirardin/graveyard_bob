@@ -1,12 +1,13 @@
 package fr.dmconcept.bob.client.activities
 
-import PositionsFragment.Extras
+import PositionsFragment.{Extras, PositionsFragmentListener}
+import android.app.Activity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.{InputFilter, InputType}
 import android.view._
 import android.view.inputmethod.EditorInfo
-import android.widget.{SeekBar, TextView}
+import android.widget.{SeekBar, TextView, CompoundButton}
 import fr.dmconcept.bob.client.models.{BoardConfig, Step}
 import fr.dmconcept.bob.client.utils.{PercentageInputFilter, StepDurationInputFilter}
 import org.scaloid.common._
@@ -37,6 +38,14 @@ object PositionsFragment {
     f
   }
 
+  trait PositionsFragmentListener {
+
+    /**
+    def onAutoplayChanged(checked: Boolean): Unit
+    **/
+
+  }
+
 }
 
 class PositionsFragment extends SFragment with TagUtil {
@@ -47,19 +56,22 @@ class PositionsFragment extends SFragment with TagUtil {
   lazy val mStep        = getArguments.getSerializable(Extras.STEP       ).asInstanceOf[Step]
   lazy val mBoardConfig = getArguments.getSerializable(Extras.BOARDCONFIG).asInstanceOf[BoardConfig]
 
+   var mPositionsFragmentListener: PositionsFragmentListener = null
+
+  override def onAttach(activity: Activity) {
+
+    super.onAttach(activity)
+    mPositionsFragmentListener = activity.asInstanceOf[PositionsFragmentListener]
+
+  }
+
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) : View = {
 
-    info(s"PositionFragment.onCreateView($mPosition)")
+    //info(s"PositionsFragment.onCreateView($mPosition)")
 
     new SVerticalLayout {
 
       this += new SVerticalLayout {
-
-        // Auto-play + duration widgets
-        //TODO autoplay
-        SCheckBox("Auto-play", toast("TODO checkbocAutoplay changed"))
-          .wrap
-          .Weight(1).>>
 
         STextView("Duration").wrap
 

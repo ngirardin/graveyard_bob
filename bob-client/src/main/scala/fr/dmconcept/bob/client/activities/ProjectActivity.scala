@@ -24,8 +24,7 @@ object ProjectActivity {
 
 }
 
-
-class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil {
+class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil with PositionsFragment.PositionsFragmentListener {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
@@ -69,6 +68,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
   }
 
   private def newTab(actionBar: ActionBar): ActionBar.Tab = {
+
     // Pass the actionBar variable to avoid calling getActionBar several time
     actionBar.newTab().setTabListener(new TabListener {
 
@@ -81,7 +81,9 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
       override def onTabReselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
 
       override def onTabUnselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
+
     })
+
   }
 
   def updateTabsText() {
@@ -124,7 +126,17 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
   }
 
   override def onPrepareOptionsMenu(menu: Menu): Boolean = {
-    menu.findItem(R.id.action_deleteStep).setVisible(getActionBar.getTabCount > 2)
+
+    // Disable the delete button if only two steps left
+    menu.findItem(R.id.action_deleteStep).setVisible(
+      getActionBar.getTabCount > 2
+    )
+
+    // Check the autoplay checkbox according to the preferences
+    menu.findItem(R.id.action_autoplay).setChecked(
+      defaultSharedPreferences.getBoolean("autoplay", false)
+    )
+
     true
   }
 
@@ -139,6 +151,9 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
       case R.id.action_deleteStep  => t(deleteStep() )
       case R.id.action_insertStep  => t(newStep()    )
       case R.id.action_playProject => t(playProject())
+      case R.id.action_autoplay    => 
+        item.setChecked(!item.isChecked)
+        t(onAutoplayChanged(item.isChecked))
       case _ => super.onOptionsItemSelected(item)
     }
 
@@ -198,7 +213,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     viewPager.getAdapter.notifyDataSetChanged()
 
     // Add the tab and select it
-    actionBar.addTab(newTab(actionBar).setText("x"), tabIndex + 1, true)
+    actionBar.addTab(newTab(actionBar), tabIndex + 1, true)
 
     // Update the tab texts
     updateTabsText()
@@ -282,5 +297,16 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
       .show()
   }
   */
+
+  def onAutoplayChanged(checked: Boolean) {
+
+    // Save the autoplay status to the preferences
+    defaultSharedPreferences
+      .edit
+      .putBoolean("autoplay", checked)
+      .apply()
+
+  }
+
 
 }

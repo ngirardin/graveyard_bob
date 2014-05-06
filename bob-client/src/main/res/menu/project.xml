@@ -20,4 +20,10 @@
         android:showAsAction="always"
         android:title="Play the project"/>
 
+    <item
+		android:id="@+id/action_autoplay"
+        android:showAsAction="ifRoom"
+		android:checkable="true"
+        android:title="Auto-play the changes"/>
+
 </menu>
