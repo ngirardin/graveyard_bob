@@ -6,15 +6,15 @@ import android.app.ActionBar
 import android.app.ActionBar.{TabListener, Tab}
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.{Fragment, FragmentPagerAdapter}
+import android.support.v4.app.{FragmentStatePagerAdapter, Fragment, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
-import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
-import org.scaloid.common.LoggerTag
+import fr.dmconcept.bob.client.{TR, BobApplication, R}
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
+import android.support.v4.view.PagerAdapter
 
 object ProjectActivity {
 
@@ -36,7 +36,8 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
   lazy val mCommunication: BobCommunication = new BobCommunication(mApplication)
 
   // Deserialize the project from the intent extra
-  lazy val mProject = getIntent.getSerializableExtra(Extras.PROJECT_ID).asInstanceOf[Project]
+  //TODO replace by projectdao
+  var mProject: Project = null
 
   override def onCreate(savedInstance: Bundle) {
 
@@ -44,68 +45,87 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
     info("ProjectActivity.onCreate()")
 
+    //TODO replace by projectdao
+    mProject = getIntent.getSerializableExtra(Extras.PROJECT_ID).asInstanceOf[Project]
+
     // Set the project name as the activity title
     setTitle(mProject.name)
 
     // Create the timeline tabs
-    val actionBar = getActionBar
-
-    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS)
-
-    mProject.steps.zipWithIndex.foreach { case (step: Step, i: Int) =>
-
-      actionBar.addTab(actionBar
-        .newTab()
-        .setText(s"${i + 1}")
-        .setTabListener(new TabListener {
-
-          override def onTabSelected(tab: Tab, ft: app.FragmentTransaction): Unit = {
-
-            val position = tab.getPosition
-            // Select the positions view pager for this step
-            viewPager.setCurrentItem(position)
-           }
-
-          override def onTabReselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
-
-          override def onTabUnselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
-
-        })
-      )
-    }
-
-    lazy val viewPager = new SViewPager {
-
-      setId(0x0001) // Need to set any id on the ViewPager
-
-      setAdapter(new FragmentPagerAdapter(supportFragmentManager) {
-
-        override def getCount: Int = mProject.steps.length
-
-        override def getItem(position: Int): Fragment =
-          PositionsFragment.getInstance(position, mProject.steps(position), mProject.boardConfig)
-
-      })
-
-      setOnPageChangeListener(new SimpleOnPageChangeListener {
-        override def onPageSelected(position: Int): Unit = {
-          // Update the active tab
-          getActionBar.setSelectedNavigationItem(position)
-        }
-      })
-
-    }
+    createTabs()
 
     contentView = viewPager
 
   }
 
+  private def createTabs() {
+    val actionBar = getActionBar
+
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS)
+
+    mProject.steps.zipWithIndex.foreach { case (step: Step, i: Int) =>
+      actionBar.addTab(newTab(actionBar).setText(s"${i + 1}"))
+    }
+  }
+
+  private def newTab(actionBar: ActionBar): ActionBar.Tab = {
+    // Pass the actionBar variable to avoid calling getActionBar several time
+    actionBar.newTab().setTabListener(new TabListener {
+
+      override def onTabSelected(tab: Tab, ft: app.FragmentTransaction): Unit = {
+        val position = tab.getPosition
+        // Select the positions view pager for this step
+        viewPager.setCurrentItem(position)
+      }
+
+      override def onTabReselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
+
+      override def onTabUnselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
+    })
+  }
+
+  def updateTabsText() {
+
+    val actionBar = getActionBar
+
+    for (i <- 0 until actionBar.getTabCount)
+      actionBar.getTabAt(i).setText(s"${i + 1}")
+
+  }
+
+
+  lazy val viewPager = new SViewPager {
+
+    setId(0x0001) // Need to set any id on the ViewPager
+
+    setAdapter(new FragmentStatePagerAdapter(supportFragmentManager) {
+
+      override def getCount: Int = mProject.steps.length
+
+      override def getItem(position: Int): Fragment =
+        PositionsFragment.getInstance(position, mProject.steps(position), mProject.boardConfig)
+
+      override def getItemPosition(o: Any): Int = PagerAdapter.POSITION_NONE
+
+    })
+
+    setOnPageChangeListener(new SimpleOnPageChangeListener {
+      override def onPageSelected(position: Int): Unit = {
+        // Update the active tab
+        getActionBar.setSelectedNavigationItem(position)
+      }
+    })
+
+  }
+
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
-
     getMenuInflater.inflate(R.menu.project, menu)
-
     super.onCreateOptionsMenu(menu)
+  }
 
+  override def onPrepareOptionsMenu(menu: Menu): Boolean = {
+    menu.findItem(R.id.action_deleteStep).setVisible(getActionBar.getTabCount > 2)
+    true
   }
 
   override def onOptionsItemSelected(item: MenuItem) : Boolean = {
@@ -126,41 +146,65 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   def deleteStep() {
 
-    //TODO implement step deletion
-    alert("Step deletion", "TODO")
-    /*
-    mProject.copy(
-      steps = mProject.steps.zipWithIndex.filterNot { _._2 == mStepIndex }.unzip._1
-    )
+    val actionBar = getActionBar
+    val tabCount  = actionBar.getTabCount
+    val tabIndex  = actionBar.getSelectedNavigationIndex
 
-    mApplication.projectsDao.saveSteps(mProject)
+    // If deleting the last step, set the last -1 step duration to 0
+    if (tabIndex == mProject.steps.length - 1) {
 
-    mStepIndex = mStepIndex - 1
+      // Drop the last step
+      val withoutLast = mProject.steps.init // Drop the last step
 
-    updateTimeline()
-    */
+      mProject = mProject.copy(
+        steps = withoutLast.updated(tabIndex - 1, withoutLast.last.copy(duration = 0)) // Set the new last step duration to 0
+      )
+
+    } else {
+
+      // Delete the step
+      mProject = mProject.copy(
+        steps = mProject.steps.zipWithIndex.filterNot { _._2 == tabIndex }.unzip._1
+      )
+
+    }
+
+    // Notify the page adapter that the project changed
+    viewPager.getAdapter.notifyDataSetChanged()
+
+    // Delete the tab
+    actionBar.removeTabAt(tabIndex)
+
+    // Update the tab texts
+    updateTabsText()
+
+    // Disable the delete menu if only two tabs left (3 before deletion)
+    if (tabCount == 3)
+      invalidateOptionsMenu()
 
   }
 
   def newStep() {
 
-    //TODO implement step creation
-    alert("Step creation", "TODO")
+    val actionBar = getActionBar
+    val tabIndex  = actionBar.getSelectedNavigationIndex
 
-    /*
-    // Add the new step and save the project steps
-    mApplication.projectsDao.saveSteps(
-      mProject.copy(
-        steps = mProject.steps :+ Step(Vector.fill(mProject.boardConfig.servoConfigs.length)(50))
-      )
+    // Add of a copy of the current step after the current step
+    mProject = mProject.copy(
+      steps = (mProject.steps.take(tabIndex) :+ mProject.steps(tabIndex).copy()) ++ mProject.steps.drop(tabIndex)
     )
 
-    // Select the last period (the last step is the end step)
-    mStepIndex = mProject.steps.length - 2
+    // Notify the page adapter that the project changed
+    viewPager.getAdapter.notifyDataSetChanged()
 
-    // Update the timeline
-    updateTimeline()
-    */
+    // Add the tab and select it
+    actionBar.addTab(newTab(actionBar).setText("x"), tabIndex + 1, true)
+
+    // Update the tab texts
+    updateTabsText()
+
+    // Update the delete menu state
+    invalidateOptionsMenu()
 
   }
 

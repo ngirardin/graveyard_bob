@@ -120,26 +120,26 @@ class PositionsFragment extends SFragment with TagUtil {
 
                 filters(Array[InputFilter](PercentageInputFilter))
 
-                onEditorAction {
-                  (v: TextView, actionId: Int, event: KeyEvent) =>
+                onEditorAction { (v: TextView, actionId: Int, event: KeyEvent) =>
 
-                    // Update the seekbar position to the new value
-                    val newVal = v.text.toString match {
-                      case "" =>
-                        v.text = "0" // Set the field to 0
-                        0
-                      case s => s.toInt
-                    }
+                  // Update the seekbar position to the new value
+                  val newVal = v.text.toString match {
+                    case "" =>
+                      v.text = "0" // Set the field to 0
+                      0
+                    case s => s.toInt
+                  }
 
-                    info(s"ProjectActivity - Servo $i changed to $newVal% (EditText)")
+                  info(s"ProjectActivity - Servo $i changed to $newVal% (EditText)")
 
-                    positionSeekBar.progress(newVal)
+                  positionSeekBar.progress(newVal)
 
-                    // Save the position
-                    onStepPositionChanged()
+                  // Save the position
+                  onStepPositionChanged()
 
-                    // Return false to tell that the input is not consumed and let Android hide the keyboard
-                    false
+                  // Return false to tell that the input is not consumed and let Android hide the keyboard
+                  false
+
                 }
 
               }.<<(55.dip, WRAP_CONTENT).>>
