@@ -20,11 +20,6 @@
         android:label="@string/app_name">
 
         <activity
-            android:name=".activities.ServerIPSelectionActivity"
-            android:label="Server IP">
-        </activity>
-
-        <activity
             android:name=".activities.ProjectListActivity"
             android:label="@string/app_name">
             <intent-filter>

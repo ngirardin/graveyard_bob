@@ -2,19 +2,20 @@ package fr.dmconcept.bob.client.activities
 
 import ProjectActivity._
 import android.app
-import android.app.ActionBar
 import android.app.ActionBar.{TabListener, Tab}
-import android.content.Context
+import android.app.{AlertDialog, Dialog, ActionBar}
+import android.content.{Context, DialogInterface}
 import android.os.Bundle
-import android.support.v4.app.{FragmentStatePagerAdapter, Fragment, FragmentPagerAdapter}
+import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
+import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
+import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
-import fr.dmconcept.bob.client.{TR, BobApplication, R}
+import java.util.regex.Pattern
 import org.scaloid.common._
-import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
-import android.support.v4.view.PagerAdapter
+import org.scaloid.support.v4.{SFragmentActivity, SViewPager, SDialogFragment}
 
 object ProjectActivity {
 
@@ -148,13 +149,21 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     }
 
     item.getItemId match {
+
       case R.id.action_deleteStep  => t(deleteStep() )
+
       case R.id.action_insertStep  => t(newStep()    )
+
       case R.id.action_playProject => t(playProject())
+
       case R.id.action_autoplay    => 
         item.setChecked(!item.isChecked)
         t(onAutoplayChanged(item.isChecked))
+
+      case R.id.action_setServerIp => t(showServerIpDialog)
+
       case _ => super.onOptionsItemSelected(item)
+
     }
 
   }
@@ -308,5 +317,60 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   }
 
+  def showServerIpDialog() {
+
+    new SDialogFragment {
+
+      final val IP_REGEXP = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+
+      override def onCreateDialog(savedInstanceState: Bundle): Dialog = {
+
+        lazy val dialog: AlertDialog = new AlertDialogBuilder("Server IP address", "Type the IP address displayed on the server app.") {
+
+          lazy val editTextIP: SEditText = new SEditText("Server IP address") {
+
+            hint("IP address")
+
+            onTextChanged({ (text: CharSequence, start: Int, lenghtBefore: Int, lenghtAfter: Int) =>
+
+              val valid = text.length() > 0 && IP_REGEXP.matcher(text.toString).matches()
+
+              if (!valid)
+                setError("Invalid IP address")
+
+              dialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(valid)
+
+            })
+
+            text(defaultSharedPreferences.getString("serverIP", ""))
+
+          }
+
+          setView(new SVerticalLayout {
+
+            this += editTextIP.<<.margin(0, 50, 0, 50).>> // left and right
+
+            orientation(HORIZONTAL)
+
+          })
+
+          positiveButton(onClick = {
+
+            defaultSharedPreferences
+              .edit
+              .putString("serverIP", editTextIP.getText.toString)
+              .apply()
+
+          })
+
+          negativeButton()
+
+        }.create()
+
+        dialog
+      }
+    }.show(supportFragmentManager, "serverIpDialog")
+
+  }
 
 }

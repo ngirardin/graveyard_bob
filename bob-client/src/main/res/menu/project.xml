@@ -26,4 +26,9 @@
 		android:checkable="true"
         android:title="Auto-play the changes"/>
 
+    <item
+		android:id="@+id/action_setServerIp"
+        android:showAsAction="ifRoom"
+        android:title="Set the server IP address"/>
+
 </menu>
