@@ -1,21 +1,20 @@
 package fr.dmconcept.bob.client.communications
 
+import SendStepsAsyncTask._
 import android.os.AsyncTask
-
 import android.util.Log
-
+import fr.dmconcept.bob.client.communications.SendStepsAsyncTask.{SendStepResult, SendStepInput}
+import fr.dmconcept.bob.client.models.json.BobJsonProtocol._
+import fr.dmconcept.bob.client.models.{Step, BoardConfig}
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.impl.client.DefaultHttpClient
+import spray.json._
 
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import SendStepsAsyncTask._
-import fr.dmconcept.bob.client.models.{Step, BoardConfig}
-import fr.dmconcept.bob.client.communications.SendStepsAsyncTask.{SendStepResult, SendStepInput}
-import scala.util.parsing.json.{JSONArray, JSONObject}
 
 object SendStepsAsyncTask {
 
@@ -55,7 +54,7 @@ case class SendStepsAsyncTask(
     } catch {
       case e: Throwable =>
         log("doInBackground() - Request error: ${e.getMessage()}")
-        SendStepResult(Option(e.getMessage()))
+        SendStepResult(Option(e.getMessage))
     }
 
   }
@@ -63,8 +62,8 @@ case class SendStepsAsyncTask(
   @throws [IOException]("if the network fails")
   def sendRequest(input: SendStepInput) {
 
-    val serializedServoConfigs: String = JSONObject(input.boardConfig.serialize).toString
-    val serializedSteps       : String = JSONArray(input.steps.map(_.serialize).toList).toString
+    val serializedServoConfigs: String = input.boardConfig.toJson.compactPrint
+    val serializedSteps       : String = input.steps.toJson.compactPrint
 
     //TODO put request in body
     val url = s"http://$host:$port/step?servoconfig=$serializedServoConfigs&steps=$serializedSteps"
@@ -76,13 +75,13 @@ case class SendStepsAsyncTask(
 
     val response = httpClient.execute(httpPost)
 
-    response.getStatusLine().getStatusCode() match {
+    response.getStatusLine.getStatusCode match {
 
       case HttpStatus.SC_OK =>
 
         // TODO use scala iostream
         def readLine(response: HttpResponse) = new BufferedReader(
-            new InputStreamReader(response.getEntity().getContent(), "UTF-8")
+            new InputStreamReader(response.getEntity.getContent, "UTF-8")
           ).readLine
 
         val body = readLine(response)

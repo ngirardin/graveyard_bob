@@ -1,8 +1,10 @@
 package fr.dmconcept.bob.client.models
 
+import fr.dmconcept.bob.client.models.json.BobJsonProtocol._
 import java.util.UUID
+import spray.json._
 
-object Project extends BobSerializable[Project] {
+object Project {
 
   final val TAG = "models.Project"
 
@@ -11,18 +13,7 @@ object Project extends BobSerializable[Project] {
    */
   final val STEP_DEFAULT_POSITION = (0, 100)
 
-  def serialize(project: Project) = project.serialize
-
-  def deserialize(serialized: Map[String, Any]): Project = {
-
-    val id          = serialized("id"  ).asInstanceOf[String]
-    val name        = serialized("name").asInstanceOf[String]
-    val boardConfig = BoardConfig.deserialize(serialized("boardConfig").asInstanceOf[Map[String, Any]])
-    val steps       = serialized("steps").asInstanceOf[List[Map[String, Any]]].map(Step.deserialize).toVector
-
-    Project(id, name, boardConfig, steps)
-
-  }
+  def deserialize(json: JsValue) = json.convertTo[Project]
 
   /**
    * Creates a new Project with a start and end Step
@@ -119,16 +110,9 @@ case class Project(
 
     assert(
       step.positions.length == expected,
-      s"The step position count don't match the board config servo count: expecting ${expected} but got ${step.positions.length} in $step"
+      s"The step position count don't match the board config servo count: expecting $expected but got ${step.positions.length} in $step"
     )
 
   }
-
-  def serialize = Map(
-    "id"          -> id,
-    "name"        -> name,
-    "boardConfig" -> boardConfig.serialize,
-    "steps"       -> steps.map(Step.serialize)
-  )
 
 }

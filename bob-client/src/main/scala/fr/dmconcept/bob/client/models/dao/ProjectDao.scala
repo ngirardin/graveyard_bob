@@ -3,38 +3,22 @@ package fr.dmconcept.bob.client.models.dao
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import fr.dmconcept.bob.client.models.{Step, Project}
-import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
-import scala.util.parsing.json.{JSONObject, JSON, JSONArray}
 import android.os.SystemClock
-import fr.dmconcept.bob.client.BobLogger
-import ProjectDao.log
+import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
+import fr.dmconcept.bob.client.models.json.BobJsonProtocol._
+import fr.dmconcept.bob.client.models.{Step, Project}
+import org.scaloid.common._
+import spray.json._
 
-object ProjectDao extends BobLogger {
-
-  val TAG = "models.dao.ProjectDao"
-
-}
-
-case class ProjectDao(
+case class ProjectDao (
 
   database       : SQLiteDatabase,
 
   boardConfigDao : BoardConfigDao
 
-) {
+) extends TagUtil {
 
-  private def serializeSteps(project: Project): String = JSONArray(
-    project.steps.toList.map(s => JSONObject(s.serialize))
-  ).toString()
-
-  private def deserializeSteps(jsonSteps: String): Vector[Step] =
-    JSON
-    .parseFull(jsonSteps)
-    .getOrElse(throw new RuntimeException(s"Can't deserialize the steps: $jsonSteps"))
-    .asInstanceOf[List[Map[String,Any]]]
-    .map { jsonStep: Map[String, Any] => Step.deserialize(jsonStep)}
-    .toVector
+  implicit override val loggerTag = LoggerTag("BobClient")
 
   def create(project: Project) {
 
@@ -43,9 +27,9 @@ case class ProjectDao(
     values.put(BobSqliteOpenHelper.PROJECT_COL_ID          , project.id            )
     values.put(BobSqliteOpenHelper.PROJECT_COL_NAME        , project.name          )
     values.put(BobSqliteOpenHelper.PROJECT_COL_BOARD_CONFIG, project.boardConfig.id)
-    values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS       , serializeSteps(project))
+    values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS       , project.steps.toJson.compactPrint)
 
-    log(s"create()", values.toString)
+    info(s"ProjectDao.create($project) values=$values")
 
     database.insert(BobSqliteOpenHelper.PROJECT_TABLE, null, values)
 
@@ -57,7 +41,7 @@ case class ProjectDao(
 
     val values = new ContentValues()
 
-    values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS, serializeSteps(project))
+    values.put(BobSqliteOpenHelper.PROJECT_COL_STEPS, project.steps.toJson.compactPrint)
 
     database.update(
       BobSqliteOpenHelper.PROJECT_TABLE,
@@ -66,9 +50,7 @@ case class ProjectDao(
       Array(project.id)
     ).ensuring(_ == 1, s"The database.update() method didn't returned 1")
 
-    val elapsed = SystemClock.elapsedRealtime() - now
-
-    log(s"saveSteps()", s"$values took $elapsed ms")
+    info(s"ProjectDao.saveSteps(${project.id}) took ${SystemClock.elapsedRealtime() - now} ms")
 
   }
 
@@ -113,9 +95,7 @@ case class ProjectDao(
 
     cursor.close()
 
-    val elapsed = SystemClock.elapsedRealtime() - now
-
-    log(s"findById($id)", s"took $elapsed ms")
+    info(s"ProjectDao.findById($id) took ${SystemClock.elapsedRealtime() - now} ms")
 
     project
 
@@ -146,19 +126,19 @@ case class ProjectDao(
 
     cursor.close()
 
-    val elapsed = SystemClock.elapsedRealtime() - now
-    log(s"findAll()", s"took $elapsed ms")
+    info(s"ProjectDao.findAll() took ${SystemClock.elapsedRealtime() - now} ms")
 
     projects
 
   }
 
   private def fromCursor(cursor: Cursor): Project =
+
     Project(
-      cursor.getString(0)                         , // PROJECT_COL_ID
-      cursor.getString(1)                         , // PROJECT_COL_NAME
-      boardConfigDao.findById(cursor.getString(2)), // PROJECT_COL_BOARD_CONFIG
-      deserializeSteps(cursor.getString(3))         // PROJECT_COL_STEPS
+      cursor.getString(0)                         ,         // PROJECT_COL_ID
+      cursor.getString(1)                         ,         // PROJECT_COL_NAME
+      boardConfigDao.findById(cursor.getString(2)),         // PROJECT_COL_BOARD_CONFIG
+      cursor.getString(3).parseJson.convertTo[Vector[Step]] // PROJECT_COL_STEPS
     )
 
   // TODO implement

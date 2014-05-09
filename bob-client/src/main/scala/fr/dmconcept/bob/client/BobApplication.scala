@@ -2,21 +2,23 @@ package fr.dmconcept.bob.client
 
 import android.app.Application
 import android.database.sqlite.SQLiteDatabase
-import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
 import fr.dmconcept.bob.client.models.dao.{ProjectDao, BoardConfigDao}
+import fr.dmconcept.bob.client.models.helpers.BobSqliteOpenHelper
 import fr.dmconcept.bob.client.models.{Step, Project, ServoConfig, BoardConfig}
 import java.util.UUID
-import BobApplication._
+import org.scaloid.common._
 
-object BobApplication extends BobLogger {
+object BobApplication {
 
-  val PREFERENCES_SERVER_IP = "sever_ip"
-
-  val TAG = "BobApplication"
-
+  object Preferences {
+    val SERVER_IP = "serverIP"
+    val AUTOPLAY  = "autoplay"
+  }
 }
 
-class BobApplication extends Application {
+class BobApplication extends Application with TagUtil {
+
+  implicit override val loggerTag = LoggerTag("BobClient")
 
   lazy val sqliteOpenHelper : BobSqliteOpenHelper = new BobSqliteOpenHelper(this)
   lazy val sqliteDatabase   : SQLiteDatabase      = sqliteOpenHelper.getWritableDatabase
@@ -26,7 +28,7 @@ class BobApplication extends Application {
 
   override def onCreate() {
 
-    log("onCreate()", "Application starting")
+    info("BobApplication.onCreate()")
 
     if (/*BuildConfig.DEBUG && */ projectsDao.findAll().isEmpty)
       firstRun()
@@ -37,7 +39,7 @@ class BobApplication extends Application {
 
   private def firstRun() {
 
-    log("onCreate()", "First run - Creating the servos config fixtures...")
+    info("BobApplication.onCreate() First run, creating the servos config fixtures")
 
     def servoConfigs(servoPins: List[Int]): Vector[ServoConfig] = servoPins.map(
       ServoConfig(_, (558, 2472))
@@ -50,7 +52,7 @@ class BobApplication extends Application {
 
     configs.foreach(boardConfigDao.save)
 
-    log("onCreate()", "First run - Creating the project fixtures...")
+    info("BobApplication.onCreate() First run, creating the project fixtures")
 
     // Project 1
     projectsDao.create(
@@ -72,13 +74,11 @@ class BobApplication extends Application {
       ))
     )
 
-    log("onCreate", "First run - Fixtures creation done")
-
   }
 
   override def onTerminate() {
 
-    log("onTerminate()", "Closing DB and open helper")
+    info("BobApplication.onTerminate() Closing DB and open helper")
 
     // Close the database and the DB helper
     sqliteDatabase.close()

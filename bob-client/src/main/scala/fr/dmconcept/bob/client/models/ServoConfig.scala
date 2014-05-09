@@ -1,8 +1,10 @@
 package fr.dmconcept.bob.client.models
 
 import ServoConfig._
+import fr.dmconcept.bob.client.models.json.BobJsonProtocol.servoConfigFormat
+import spray.json._
 
-object ServoConfig extends BobSerializable[ServoConfig] {
+object ServoConfig {
 
   /**
    * The IOIO output ports
@@ -16,14 +18,7 @@ object ServoConfig extends BobSerializable[ServoConfig] {
 
   final val FREQUENCY = 50
 
-  def serialize(servoConfig: ServoConfig) = servoConfig.serialize
-
-  def deserialize(serialized: Map[String, Any]): ServoConfig = {
-
-    def toInt(field: String) = serialized(field).asInstanceOf[Double].toInt
-
-    new ServoConfig(toInt("port"), (toInt("minTiming"), toInt("maxTiming")))
-  }
+  def deserialize(json: JsValue): ServoConfig = json.convertTo[ServoConfig]
 
 }
 
@@ -33,7 +28,7 @@ case class ServoConfig(
   port      : Int,
 
   // The servo timings for the start and end position
-  timings   : (Int, Int)
+   timings: (Int,Int)
 
 ) {
 
@@ -44,13 +39,5 @@ case class ServoConfig(
   assert(TIMING_RANGE.contains(timings._1), "Start timing out of range"                           )
   assert(TIMING_RANGE.contains(timings._2), "End timing out of range"                             )
   assert(timings._1 < timings._2          , "The end timing must be greater than the start timing")
-
-  def serialize: Map[String, Any] = Map(
-    "port"      -> port     ,
-    "minTiming" -> timings._1,
-    "maxTiming" -> timings._2
-  )
-
-  def toJson = ServoConfig.toJson(this)
 
 }

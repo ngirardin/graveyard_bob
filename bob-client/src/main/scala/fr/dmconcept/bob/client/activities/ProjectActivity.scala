@@ -10,9 +10,9 @@ import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
-import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
+import fr.dmconcept.bob.client.{R, BobApplication}
 import java.util.regex.Pattern
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager, SDialogFragment}
@@ -135,7 +135,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
     // Check the autoplay checkbox according to the preferences
     menu.findItem(R.id.action_autoplay).setChecked(
-      defaultSharedPreferences.getBoolean("autoplay", false)
+      defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
     )
 
     true
@@ -160,7 +160,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
         item.setChecked(!item.isChecked)
         t(onAutoplayChanged(item.isChecked))
 
-      case R.id.action_setServerIp => t(showServerIpDialog)
+      case R.id.action_setServerIp => t(showServerIpDialog())
 
       case _ => super.onOptionsItemSelected(item)
 
@@ -312,7 +312,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     // Save the autoplay status to the preferences
     defaultSharedPreferences
       .edit
-      .putBoolean("autoplay", checked)
+      .putBoolean(BobApplication.Preferences.AUTOPLAY, checked)
       .apply()
 
   }
@@ -342,7 +342,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
             })
 
-            text(defaultSharedPreferences.getString("serverIP", ""))
+            text(defaultSharedPreferences.getString(BobApplication.Preferences.SERVER_IP, ""))
 
           }
 
@@ -358,7 +358,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
             defaultSharedPreferences
               .edit
-              .putString("serverIP", editTextIP.getText.toString)
+              .putString(BobApplication.Preferences.SERVER_IP, editTextIP.getText.toString)
               .apply()
 
           })

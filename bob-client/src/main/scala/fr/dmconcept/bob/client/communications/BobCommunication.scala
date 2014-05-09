@@ -1,14 +1,14 @@
 package fr.dmconcept.bob.client.communications
 
-import android.content.Context
-import fr.dmconcept.bob.client.models.{Project, BoardConfig, Step}
-import android.accounts.NetworkErrorException
 import BobCommunication._
-import android.util.Log
+import android.content.Context
 import android.net.{NetworkInfo, ConnectivityManager}
+import android.util.Log
 import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.communications.SendStepsAsyncTask.SendStepInput
-import BobCommunication._
+import fr.dmconcept.bob.client.models.{Project, BoardConfig, Step}
+import org.scaloid.common._
+
 
 /**
  *
@@ -25,9 +25,11 @@ object BobCommunication {
 
 case class BobCommunication(
 
-  context: Context
+  c: Context
 
 ) {
+
+  implicit val context = c
 
   def sendStep(boardConfig: BoardConfig, step: Step)  {
 
@@ -59,27 +61,30 @@ case class BobCommunication(
 
   private def launchSendSteps(input: SendStepInput) {
 
-    def isNetworkAvailable(): Boolean = Option(context
+    def isNetworkAvailable: Boolean = Option(context
       .getSystemService(Context.CONNECTIVITY_SERVICE)
       .asInstanceOf[ConnectivityManager]
       .getActiveNetworkInfo
-    ).map { ni : NetworkInfo =>
-        ni.isConnected && (ni.getType == ConnectivityManager.TYPE_ETHERNET || ni.getType == ConnectivityManager.TYPE_WIFI)
-    }.getOrElse(false)
+    ).fold(false) {ni: NetworkInfo =>
+      ni.isConnected && (
+        ni.getType == ConnectivityManager.TYPE_ETHERNET ||
+        ni.getType == ConnectivityManager.TYPE_WIFI
+      )
+    }
 
     log(s"launchSendSteps($input)")
 
-    assert(isNetworkAvailable(), "No network connection available")
+    assert(isNetworkAvailable, "No network connection available")
 
     // Read the server IP from the preferences
-    val serverIP = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE)
-      .getString(BobApplication.PREFERENCES_SERVER_IP, "")
-      .ensuring(_.nonEmpty, "Empty server IP address from preferences")
-
-    SendStepsAsyncTask(serverIP, PORT)
-      .execute(input)
-      .get()
-      .ensuring(_.error.isEmpty, "StepStepAsyncTask error")
+    defaultSharedPreferences.getString(BobApplication.Preferences.SERVER_IP, "") match {
+      //TODO disable playing is empty server ip
+      case "" => throw new RuntimeException("Empty server IP preferences empty")
+      case ip => SendStepsAsyncTask(ip, PORT)
+        .execute(input)
+        .get()
+        .ensuring(_.error.isEmpty, "StepStepAsyncTask error")
+    }
 
   }
 
