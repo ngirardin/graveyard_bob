@@ -10,9 +10,10 @@ import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
+import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
-import fr.dmconcept.bob.client.{R, BobApplication}
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 
@@ -30,9 +31,6 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   // The bob application
   lazy val mApplication: BobApplication = getApplication.asInstanceOf[BobApplication]
-
-  // The communication layer with the server
-  lazy val mCommunication: BobCommunication = new BobCommunication(mApplication)
 
   // Deserialize the project from the intent extra
   //TODO replace by projectdao
@@ -276,18 +274,25 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
     info("ProjectActivity.playProject")
 
+    /*
     new AlertDialogBuilder("Playing project", "The project is playing...") {
       negativeButton("Cancel" /*android.R.string.cancel, toast("Cancelled")*/)
     }.show()
-
-    /*
-    try {
-      Toast.makeText(this, "Playing the project.", Toast.LENGTH_SHORT).show()
-      mCommunication.sendSteps(mProject)
-    } catch {
-      case e: Throwable => showNetworkErrorDialog(e)
-    }
     */
+
+    defaultSharedPreferences.getString(BobApplication.Preferences.SERVER_IP, "") match {
+      case ""       => showServerIpDialog()
+      case serverIP =>
+        try {
+          //TODO show play dialog
+          // The communication layer with the server
+          val mCommunication: BobCommunication = new BobCommunication(this)
+          mCommunication.send(serverIP, mProject)
+        } catch {
+          case e: Throwable => alert("Network error", "Check that the server app is running and connected to the same network that this device.")
+        }
+    }
+
 
   }
 

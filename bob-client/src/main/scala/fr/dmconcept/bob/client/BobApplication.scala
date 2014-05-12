@@ -14,6 +14,11 @@ object BobApplication {
     val SERVER_IP = "serverIP"
     val AUTOPLAY  = "autoplay"
   }
+
+  object Params {
+    val PORT = 8000
+  }
+
 }
 
 class BobApplication extends Application with TagUtil {
