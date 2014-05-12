@@ -23,18 +23,18 @@ object ServerIPDialogFragment extends SDialogFragment with TagUtil {
 
   }
 
+  //TODO fix crash on orientation change
   override def onCreateDialog(savedInstanceState: Bundle): Dialog = {
-
-    info("-------------- onCreateDialog")
 
     val builder = new AlertDialogBuilder("Server IP address", "Start the server app and type the IP address that it displays.") {
 
       setView(new SVerticalLayout {
 
-        STextView("Server IP:").wrap
-        this += editTextIP.<<.margin(0, 50, 0, 50).>> // left and right
+        STextView("Server IP").wrap
+        this += editTextIP
 
         orientation(HORIZONTAL)
+        padding(50, 0, 50, 0) // left and right
 
       })
 
