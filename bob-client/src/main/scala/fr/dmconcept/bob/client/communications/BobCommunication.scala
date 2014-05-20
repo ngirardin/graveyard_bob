@@ -1,20 +1,23 @@
 package fr.dmconcept.bob.client.communications
 
-import android.app.{ProgressDialog, Activity}
-import android.content.DialogInterface.OnClickListener
+import android.app.Activity
 import android.content.{DialogInterface, Context}
 import android.net.{NetworkInfo, ConnectivityManager}
 import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.activities.ProjectActivity
 import fr.dmconcept.bob.client.models.Project
 import java.io.{InputStreamReader, BufferedReader}
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.{HttpResponse, HttpStatus}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import org.scaloid.common._
 import spray.json._
+import fr.dmconcept.bob.client.models.json.BobJsonProtocol._
+import org.apache.http.params.HttpParams
+import java.net.URLEncoder
 
 case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
 
@@ -40,28 +43,20 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
     if (!isNetworkAvailable)
       alert("No network connection", "You need to be connected on a local network to play the project")
 
-    import scala.concurrent.ExecutionContext.Implicits.global
-    import scala.concurrent.Future
-
     val json = project.toJson.compactPrint
 
     def sendRequest() {
 
       //TODO put request in body
-      val url = s"http://$serverIP:${BobApplication.Params.PORT}/play"
+      val rootUrl = s"http://$serverIP:${BobApplication.Params.PORT}/play"
+      val params  = s"project=" + URLEncoder.encode(json, "UTF-8")
 
-      info(s"BobCommunication.send() url=$url")
+      val url = s"$rootUrl?$params"
+
+      info(s"BobCommunication.send() > url=$url")
 
       val httpClient = new DefaultHttpClient()
-      val httpPost   = new HttpPost(url)
-
-      httpPost.setEntity(new UrlEncodedFormEntity({
-        val l = new java.util.ArrayList[BasicNameValuePair]()
-        l.add(new BasicNameValuePair("project", json))
-        l
-      }))
-
-      val response = httpClient.execute(httpPost)
+      val response   = httpClient.execute(new HttpGet(url))
 
       response.getStatusLine.getStatusCode match {
 
@@ -74,10 +69,12 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
 
           val body: String = readLine(response)
 
-          info("BobCommunication.send() body = ")
+          info(s"BobCommunication.send() < body = $body")
 
-          if (!body.equals("BOB"))
+          if (body != "BOB") {
+            error("Invalid response")
             throw new RuntimeException("Invalid response: $body")
+          }
 
         case status: Int =>
           throw new RuntimeException(s"HTTP $status")
@@ -86,26 +83,11 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
 
     }
 
-    val progress = new ProgressDialog(context)
-    progress.setTitle("Playing the project...")
-    progress.setMessage("Touch outside to cancel")
-    progress.setIndeterminate(true)
-    progress.setCancelable(true)
-    progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new OnClickListener {
-      override def onClick(dialog: DialogInterface, which: Int): Unit = dialog.cancel()
-    })
-    progress.setOnCancelListener(new DialogInterface.OnCancelListener {
-      override def onCancel(dialog: DialogInterface): Unit = {
-        dialog.cancel()
-        //TODO cancel the playing
-        alert("TODO","cancel")
-      }
-    })
-    progress.show()
-
     Future {
-      sendRequest()
-      runOnUiThread(progress.dismiss())
+      info("BobCommunication.send() -- Before sending request")
+        sendRequest()
+        info("BobCommunication.send() -- After sending request")
+        info("BobCommunication.send() -- Dialog dismissed")
     }
 
   }
