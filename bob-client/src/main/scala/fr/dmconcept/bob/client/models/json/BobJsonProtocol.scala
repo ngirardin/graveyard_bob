@@ -23,7 +23,7 @@ object BobJsonProtocol extends DefaultJsonProtocol {
   )
 
   implicit val stepFormat        = jsonFormat[Int, Vector[Int], Step](
-    Step.apply, "duration", "position"
+    Step.apply, "duration", "positions"
   )
 
   implicit val projectFormat     = jsonFormat[String, String, BoardConfig, Vector[Step], Project](
