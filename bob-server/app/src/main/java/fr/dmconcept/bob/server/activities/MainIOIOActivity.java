@@ -9,40 +9,41 @@ import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.provider.Telephony;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import fr.dmconcept.bob.server.BobServer;
 import fr.dmconcept.bob.server.R;
 import fr.dmconcept.bob.server.ioio.ProjectLock;
 import fr.dmconcept.bob.server.models.Project;
 import fr.dmconcept.bob.server.models.ServoConfig;
-import fr.dmconcept.bob.server.models.Step;
 import ioio.lib.api.DigitalOutput;
-import ioio.lib.api.IOIO;
-import ioio.lib.api.PwmOutput;
 import ioio.lib.api.Sequencer;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
+import org.apache.http.conn.util.InetAddressUtils;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 
 public class MainIOIOActivity extends IOIOActivity {
 
     private static final String TAG = "BobServer ------------------- ";
 
+    private TextView textViewIP;
     private TextView textViewLog;
 
+    private ArrayList<String> ips;
     private BobServer mBobServer;
 
-    private ProjectLock mProject = new ProjectLock();
+    private final ProjectLock mProject = new ProjectLock();
 
     public static final int PERIOD  = 20000 /* microseconds */; /* 50hz = 0.02s = 20ms = 20.000us */
     public static final int MIN     = 1000 * 2 /* periods */  ; /* 1000us * 0.5us periods         */
@@ -55,6 +56,8 @@ public class MainIOIOActivity extends IOIOActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main_ioio_activity);
+
+        textViewIP  = (TextView) findViewById(R.id.textViewIP );
         textViewLog = (TextView) findViewById(R.id.textViewLog);
 
         info("onCreate()");
@@ -66,7 +69,41 @@ public class MainIOIOActivity extends IOIOActivity {
             }
         });
 
+        // Get the device IP addresses
+        ips = getIPs();
+
+        // Display an error message and exit the app if the device has no IP address
+        if (ips.isEmpty()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    new AlertDialog.Builder(MainIOIOActivity.this)
+                            .setTitle("No network connection")
+                            .setMessage("The app needs a Wifi or Ethernet network connection")
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .show();
+                }
+            });
+            return;
+        }
+
         mBobServer = new BobServer(new BobServer.BobServerListener() {
+
+            @Override
+            public void onServerStarted() {
+
+                // Display the IP addresses
+                textViewIP.setText("");
+
+                for (String ip: ips)
+                    textViewIP.setText(textViewIP.getText() + ip + "\n");
+
+            }
 
             @Override
             public void onCantStart(IOException exception) {
@@ -171,6 +208,13 @@ public class MainIOIOActivity extends IOIOActivity {
             return;
         }
 
+        //TODO better newIntent handling
+        createIOIOLooper();
+
+    }
+
+    protected IOIOLooper createIOIOLooper() {
+        return new SequencerLooper();
     }
 
     class SequencerLooper extends BaseIOIOLooper {
@@ -181,7 +225,7 @@ public class MainIOIOActivity extends IOIOActivity {
         final int INITIAL = 3000; /* 1500 us * (1 / 0.5microseconds) */
         final int SLICE =  PERIOD / 16; /* Slice duration in 16microseconds period */
 
-        private ArrayList<Sequencer.ChannelCuePwmPosition> channelCues = new ArrayList();
+        private ArrayList<Sequencer.ChannelCuePwmPosition> channelCues = new ArrayList<>();
 
         @Override
         protected void setup() throws ConnectionLostException, InterruptedException {
@@ -197,7 +241,7 @@ public class MainIOIOActivity extends IOIOActivity {
 
             info("SequencerLooper.setup() Setting config " + mProject.getProject().boardConfig.name);
 
-            ArrayList<Sequencer.ChannelConfigPwmPosition> channelConfigs = new ArrayList();
+            ArrayList<Sequencer.ChannelConfigPwmPosition> channelConfigs = new ArrayList<>();
 
             for (ServoConfig sc: mProject.getProject().boardConfig.servoConfigs) {
 
@@ -260,12 +304,10 @@ public class MainIOIOActivity extends IOIOActivity {
 
             if (currentSlice == mProject.getSliceCount()) {
 
-                info("********** LAST SLICE");
-
                 sequencer_.stop();
 
                 synchronized (mProject) {
-                    info("SequencerLooper.push() Waiting for a new project");
+                    info("SequencerLooper.push() Sequence done, waiting for a new project");
                     mProject.wait();
 
                     info("SequencerLooper.push() Got a new project: " + mProject.getDuration() + "ms, " + mProject.getSliceCount() + " slices");
@@ -274,81 +316,17 @@ public class MainIOIOActivity extends IOIOActivity {
                     info("SequencerLooper.push() Wait for sequencer to stop...");
                     sequencer_.waitEventType(Sequencer.Event.Type.STOPPED);
 
-                    info("SequencerLooper.push() Prefilling sequencer...");
+                    info("SequencerLooper.push() Prefilling the sequencer...");
                     while (sequencer_.available() > 0) {
                         push();
                     }
 
-                    info("SequencerLooper.push() Starting sequencer");
+                    info("SequencerLooper.push() Starting the sequencer");
                     sequencer_.start();
                 }
             }
 
         }
-    }
-
-    class RandomLooper extends BaseIOIOLooper {
-
-        PwmOutput pin3;
-        PwmOutput pin4;
-        PwmOutput pin5;
-        PwmOutput pin6;
-        PwmOutput pin7;
-        PwmOutput pin10;
-        DigitalOutput pin11;
-
-        @Override
-        protected void setup() throws ConnectionLostException, InterruptedException {
-            pin3 = ioio_.openPwmOutput(3, 50);
-            pin4 = ioio_.openPwmOutput(4, 50);
-            pin5 = ioio_.openPwmOutput(5, 50);
-            pin6 = ioio_.openPwmOutput(6, 50);
-            pin7 = ioio_.openPwmOutput(7, 50);
-            pin10 = ioio_.openPwmOutput(10, 50);
-            pin11 = ioio_.openDigitalOutput(11);
-        }
-
-        private int getRandom() {
-            return new Random().nextInt(2000 - 1000) + 1000;
-        }
-
-        @Override
-        public void loop() throws ConnectionLostException, InterruptedException {
-
-            final int servo1 = getRandom();
-            final int servo2 = getRandom();
-            final int servo3 = getRandom();
-            final int servo4 = getRandom();
-            final int servo5 = getRandom();
-            final int servo6 = getRandom();
-            final boolean led1 = new Random().nextBoolean();
-
-            pin3.setPulseWidth(servo1);
-            pin4.setPulseWidth(servo2);
-            pin5.setPulseWidth(servo3);
-            pin6.setPulseWidth(servo4);
-            pin7.setPulseWidth(servo5);
-            pin10.setPulseWidth(servo6);
-            pin11.write(led1);
-
-            Thread.sleep(1000);
-        }
-
-        @Override
-        public void disconnected() {
-            info("disconnected");
-        }
-
-        @Override
-        public void incompatible() {
-            info("incompatible");
-        }
-    }
-
-    protected IOIOLooper createIOIOLooper() {
-
-        return new SequencerLooper();
-
     }
 
     @Override
@@ -364,6 +342,36 @@ public class MainIOIOActivity extends IOIOActivity {
         mBobServer.stop();
 
         super.onStop();
+    }
+
+    private ArrayList<String> getIPs() {
+
+        ArrayList<String> ips = new ArrayList<>();
+
+        try {
+
+            for (NetworkInterface intf : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+
+                        String sAddr = addr.getHostAddress().toUpperCase();
+                        boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
+
+                        if (isIPv4)
+                            ips.add(sAddr);
+                    }
+                }
+            }
+
+        } catch (SocketException e) {
+            // Do notihgn
+        }
+
+        return ips;
+
     }
 
 }

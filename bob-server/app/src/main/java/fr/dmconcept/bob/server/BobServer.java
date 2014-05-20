@@ -18,9 +18,12 @@ public class BobServer extends NanoHTTPD {
 
     public interface BobServerListener {
 
+        void onServerStarted();
+
         void onCantStart(IOException exception);
 
         void onPlayRequest(Project project);
+
     }
 
     private static final String TAG = "BobServer";
@@ -41,6 +44,7 @@ public class BobServer extends NanoHTTPD {
 
         try {
             start();
+            mListener.onServerStarted();
         } catch (IOException e) {
             mListener.onCantStart(e);
         }
@@ -100,7 +104,7 @@ public class BobServer extends NanoHTTPD {
 
     private List<ServoConfig> deserializeServoConfigs(JSONArray json) throws JSONException {
 
-        ArrayList<ServoConfig> servoConfigs = new ArrayList();
+        ArrayList<ServoConfig> servoConfigs = new ArrayList<>();
 
         for (int i = 0; i < json.length(); i++) {
 
@@ -123,7 +127,7 @@ public class BobServer extends NanoHTTPD {
 
     private List<Step> deserializeSteps(JSONArray json) throws JSONException {
 
-        ArrayList<Step> steps = new ArrayList();
+        ArrayList<Step> steps = new ArrayList<>();
 
         for (int i = 0; i < json.length(); i++) {
 
@@ -144,7 +148,7 @@ public class BobServer extends NanoHTTPD {
 
     private ArrayList<Integer> deserializePositions(JSONArray json) throws JSONException {
 
-        ArrayList<Integer> positions = new ArrayList<Integer>();
+        ArrayList<Integer> positions = new ArrayList<>();
 
         for (int i = 0; i < json.length(); i++)
             positions.add(json.getInt(i));
