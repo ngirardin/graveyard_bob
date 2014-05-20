@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="fr.dmconcept.bob.client"
-	android:versionCode="4"
-	android:versionName="0.4">
+	android:versionCode="5"
+	android:versionName="0.5">
 
     <uses-permission android:name="android.permission.INTERNET"             />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 	<!-- API 14 = Android 4.0 -->
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="7"
         android:targetSdkVersion="19"
     />
 
