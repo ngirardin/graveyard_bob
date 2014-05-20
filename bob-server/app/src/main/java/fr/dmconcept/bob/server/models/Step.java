@@ -4,58 +4,17 @@ import java.util.ArrayList;
 
 public class Step {
 
-    // The step getDuration in ms
-    private int mDuration;
+    public int duration;
 
-    // Store the servos position in percentage
-    private ArrayList<Integer> mPositions;
+    public ArrayList<Integer> positions;
 
-    /**
-     * Create a step with the given getDuration and positions
-     *
-     * @param duration the step getDuration in ms
-     * @param positions the positions values
-     */
     public Step(int duration, ArrayList<Integer> positions) {
 
         assert duration         > 0;
         assert positions.size() > 0;
 
-        this.mDuration  = duration;
-        this.mPositions = positions;
-
-    }
-
-    /**
-     * @return the step duration in ms
-     */
-    public int getDuration() {
-        return mDuration;
-    }
-
-    /**
-     * @return the positions
-     */
-    public ArrayList<Integer> getPositions() {
-        return mPositions;
-    }
-
-    public int getPosition(int i) {
-        return mPositions.get(i);
-    }
-
-    /**
-     * Set the position for a servo
-     *
-     * @param position the position index
-     * @param value the position value, between 0 and 100
-     */
-    public void setPosition(int position, int value) {
-
-        assert position > 0 && position < mPositions.size();
-        assert value > -1 && position < 101;
-
-        mPositions.set(position, value);
+        this.duration  = duration;
+        this.positions = positions;
 
     }
 

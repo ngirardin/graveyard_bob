@@ -16,7 +16,7 @@
         <!-- launchMode="singleTask" to  allow only one instance to avoid unexpected behavior when
         When connecting the IOIO and selecting the app in the chooser -->
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".activities.MainIOIOActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask">
 
