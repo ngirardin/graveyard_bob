@@ -1,11 +1,11 @@
 package fr.dmconcept.bob.client.activities
 
-import org.scaloid.common._
-import fr.dmconcept.bob.client.BobApplication
-import org.scaloid.common.LoggerTag
-import android.widget.{AdapterView, ArrayAdapter, TextView}
-import fr.dmconcept.bob.client.models.Project
 import android.view.{ViewGroup, View}
+import android.widget.{AdapterView, ArrayAdapter, TextView}
+import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.models.Project
+import org.scaloid.common.LoggerTag
+import org.scaloid.common._
 
 class ProjectListActivity extends SActivity {
 
@@ -17,13 +17,6 @@ class ProjectListActivity extends SActivity {
 
     // Get the projects
     val projects = getApplication.asInstanceOf[BobApplication].projectsDao.findAll().toArray
-
-    /*******************************/
-    //TODO remove me
-    startActivity(
-      SIntent[ProjectActivity].putExtra(ProjectActivity.Extras.PROJECT_ID, projects(1))
-    )
-    /*******************************/
 
     contentView = {
 
