@@ -4,7 +4,8 @@ import ProjectActivity._
 import android.app
 import android.app.ActionBar
 import android.app.ActionBar.{TabListener, Tab}
-import android.content.Context
+import android.content.DialogInterface.OnClickListener
+import android.content.{DialogInterface, Context}
 import android.os.Bundle
 import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
 import android.support.v4.view.PagerAdapter
@@ -229,47 +230,6 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   }
 
-  /*
-  def playStartStep() {
-
-    Log.i(TAG, "playStartStep()")
-
-    try {
-      Toast.makeText(this, "Playing the start position.", Toast.LENGTH_SHORT).show()
-      mCommunication.sendStep(mProject.boardConfig, mProject.steps(mStepIndex))
-    } catch {
-      case e: Throwable => showNetworkErrorDialog(e)
-    }
-
-  }
-
-  def playEndStep() {
-
-    Log.i(TAG, "playEndStep()")
-
-    try {
-      Toast.makeText(this, "Playing the end position.", Toast.LENGTH_SHORT).show()
-      mCommunication.sendStep(mProject.boardConfig, mProject.steps(mStepIndex + 1))
-    } catch {
-      case e: Throwable => showNetworkErrorDialog(e)
-    }
-
-  }
-
-  def playWholeStep() {
-
-    Log.i(TAG, "playWholeStep()")
-
-    try {
-      Toast.makeText(this, "Playing the step.", Toast.LENGTH_SHORT).show()
-      mCommunication.sendSteps(mProject.boardConfig, mProject.steps(mStepIndex), mProject.steps(mStepIndex + 1))
-    } catch {
-      case e: Throwable => showNetworkErrorDialog(e)
-    }
-
-  }
-  */
-
   def playProject() {
 
     info("ProjectActivity.playProject")
@@ -287,29 +247,40 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
           //TODO show play dialog
           // The communication layer with the server
           val mCommunication: BobCommunication = new BobCommunication(this)
+
           mCommunication.send(serverIP, mProject)
+
+          val progress = new android.app.ProgressDialog(this)
+          progress.setTitle("Playing the project...")
+          progress.setMessage("Touch outside to cancel")
+          progress.setIndeterminate(true)
+          progress.setCancelable(true)
+          progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new OnClickListener {
+            override def onClick(dialog: DialogInterface, which: Int): Unit = dialog.cancel()
+          })
+          progress.setOnCancelListener(new DialogInterface.OnCancelListener {
+            override def onCancel(dialog: DialogInterface): Unit = {
+              dialog.cancel()
+              //TODO cancel the playing
+              alert("TODO","cancel")
+            }
+          })
+          progress.show()
+
+          new java.util.Timer().schedule(new java.util.TimerTask() {
+            override def run() {
+              progress.dismiss()
+            }
+          }, mProject.duration)
+
         } catch {
-          case e: Throwable => alert("Network error", "Check that the server app is running and connected to the same network that this device.")
+          case e: Throwable =>
+            alert("Network error", "Check that the server app is running and connected to the same network that this device.")
+            e.printStackTrace()
         }
     }
 
-
   }
-
-  /*
-  def showNetworkErrorDialog(exception: Throwable) {
-    new AlertDialog.Builder(this)
-      .setTitle("Network error")
-      .setIcon(android.R.drawable.ic_dialog_alert)
-      .setMessage(s"Can't contact the Bob Server app: ${exception.getMessage}.")
-      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-        override def onClick(dialog: DialogInterface, which: Int) {
-          dialog.dismiss()
-        }
-      })
-      .show()
-  }
-  */
 
   def onAutoplayChanged(checked: Boolean) {
 
