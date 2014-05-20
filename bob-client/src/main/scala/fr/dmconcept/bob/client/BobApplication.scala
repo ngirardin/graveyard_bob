@@ -72,10 +72,19 @@ class BobApplication extends Application with TagUtil {
     // Project 2
     projectsDao.create(
       Project(UUID.randomUUID.toString, "Bob demo project", configs(1), Vector(
-        Step(5000, Vector(  0, 20, 20, 10, 20, 80, 100)),
-        Step(6000, Vector( 25, 40, 40, 20, 40, 60,  50)),
-        Step(5000, Vector( 75, 60, 60, 30, 60, 40,  25)),
-        Step(   0 , Vector(100, 80, 80, 40, 80, 20,  0))
+        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0)),
+        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20)),
+        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
+        Step( 500, Vector(100,   0,  60,  40,  80, 800,  60)),
+        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80)),
+        Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100)),
+
+        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0)),
+        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20)),
+        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
+        Step( 500, Vector(100,   0,  60,  40,  80, 800,  60)),
+        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80)),
+        Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100))
       ))
     )
 
