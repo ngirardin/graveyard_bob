@@ -38,7 +38,7 @@
     <RadioGroup
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/boardConfigRadioGroup"></RadioGroup>
+        android:id="@+id/boardConfigRadioGroup" />
 
     <Button
         android:layout_width="wrap_content"

@@ -1,74 +1,34 @@
 package fr.dmconcept.bob.client.activities
 
-import android.view.{ViewGroup, View}
-import android.widget.{AdapterView, ArrayAdapter, TextView}
-import fr.dmconcept.bob.client.BobApplication
+import android.view.ContextMenu.ContextMenuInfo
+import android.view.{MenuItem, ContextMenu, ViewGroup, View}
+import android.widget.AdapterView.AdapterContextMenuInfo
+import android.widget._
 import fr.dmconcept.bob.client.models.Project
-import org.scaloid.common.LoggerTag
+import fr.dmconcept.bob.client.{R, BobApplication}
+import java.util.UUID
 import org.scaloid.common._
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 class ProjectListActivity extends SActivity {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
-  onCreate {
+  lazy val projectDao = getApplication.asInstanceOf[BobApplication].projectsDao
 
-    debug("ProjectListActivity.onCreate()")
+  lazy val list = new SListView {
 
-    // Get the projects
-    val projects = getApplication.asInstanceOf[BobApplication].projectsDao.findAll().toArray
+    // Store the project as a mutable array to avoid UnsupportedOperationException
+    val projects = ListBuffer[Project]()
+    projects.appendAll(projectDao.findAll())
 
-    contentView = {
+    // Set the projects adapter
+    adapter = new ArrayAdapter[Project](context, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
 
-      val list = new SListView {
+      override def getView(position: Int, convertView: View, parent: ViewGroup): View = {
 
-        // Set the projects adapter
-        adapter = new ArrayAdapter[Project](context, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
-
-          override def getView(position: Int, convertView: View, parent: ViewGroup): View = {
-
-            val view = super.getView(position, convertView, parent)
-            val project = getItem(position)
-
-            view.findViewById(android.R.id.text1).asInstanceOf[TextView].setText(project.name)
-            view.findViewById(android.R.id.text2).asInstanceOf[TextView].setText(project.boardConfig.name)
-
-            view
-          }
-        }
-
-      }
-
-      list.onItemClick { (parent: AdapterView[_], view: View, position: Int, id: Long) =>
-
-        val project = projects(position)
-
-        debug(s"ProjectListActivity.list.onItemClick() Starting project activity for project ${project.id}")
-
-        // Start the project activity by passing the project as intent
-        startActivity(
-          SIntent[ProjectActivity]
-            .putExtra(ProjectActivity.Extras.PROJECT_ID, project)
-        )
-
-      }
-
-    }
-
-  }
-}
-
-  /*
-
-    // Enable the context menu on the list
-    registerForContextMenu(getListView)
-
-    setListAdapter(new ArrayAdapter[Project](this, android.R.layout.simple_list_item_2, android.R.id.text1, projects) {
-
-      override def getView(position: Int, convertView: View, parent: ViewGroup) : View = {
-
-        val view: View = super.getView(position, convertView, parent)
-
+        val view = super.getView(position, convertView, parent)
         val project = getItem(position)
 
         view.findViewById(android.R.id.text1).asInstanceOf[TextView].setText(project.name)
@@ -76,21 +36,34 @@ class ProjectListActivity extends SActivity {
 
         view
       }
+    }
 
-    })
+    onItemClick { (parent: AdapterView[_], view: View, position: Int, id: Long) =>
 
+      val project = adapter.asInstanceOf[ArrayAdapter[Project]].getItem(position)
+
+      info(s"ProjectListActivity.list.onItemClick() Starting project activity for project ${project.id}")
+
+      // Start the project activity by passing the project as intent
+      startActivity(
+        SIntent[ProjectActivity]
+          .putExtra(ProjectActivity.Extras.PROJECT_ID, project)
+      )
+
+    }
+
+    // Enable the context menu on the list
+    registerForContextMenu(this)
 
   }
 
-  override def onListItemClick(listView: ListView, view: View, position: Int, id: Long) {
+  onCreate {
 
-    val project = getListAdapter.getItem(position).asInstanceOf[Project]
+    debug("ProjectListActivity.onCreate()")
 
-    // Start the project details activity
-    startActivity(
-      new Intent(listView.getContext, classOf[ProjectActivity])
-        .putExtra(ProjectActivity.EXTRA_PROJECT_ID, project.id)
-    )
+    contentView = {
+      list
+    }
 
   }
 
@@ -98,63 +71,97 @@ class ProjectListActivity extends SActivity {
 
     super.onCreateContextMenu(menu, v, menuInfo)
 
-    getMenuInflater().inflate(R.menu.project_list_context, menu)
+    getMenuInflater.inflate(R.menu.project_list_context, menu)
 
-    val info    : AdapterContextMenuInfo = menuInfo.asInstanceOf[AdapterContextMenuInfo]
+    val info: AdapterContextMenuInfo = menuInfo.asInstanceOf[AdapterContextMenuInfo]
 
-    val project : Project = v.asInstanceOf[ListView].getItemAtPosition(info.position).asInstanceOf[Project]
+    val project: Project = v.asInstanceOf[ListView]
+      .getItemAtPosition(info.position).asInstanceOf[Project]
 
-    menu.setHeaderTitle(project.getName())
+    menu.setHeaderTitle(project.name)
 
+  }
+
+  lazy val adapter: ArrayAdapter[Project] = list.adapter.asInstanceOf[ArrayAdapter[Project]]
+
+  def updateAdapter() {
+    // Notify the adapter to update
+    adapter.clear()
+    adapter.addAll(projectDao.findAll())
   }
 
   override def onContextItemSelected(item: MenuItem): Boolean = {
 
     super.onContextItemSelected(item)
 
+
+    val project = {
+      val position = item.getMenuInfo.asInstanceOf[AdapterContextMenuInfo].position
+      list.getItemAtPosition(position).asInstanceOf[Project]
+    }
+
     item.getItemId match {
 
-      case R.id.action_rename => {
-        Toast.makeText(getBaseContext, "rename", Toast.LENGTH_LONG).show()
-      }
+      case R.id.action_rename =>
 
-      case R.id.action_clone => {
-        Toast.makeText(getBaseContext, "clone", Toast.LENGTH_LONG).show()
-      }
+        val ft = getFragmentManager.beginTransaction()
 
-      //TODO implement deletion
-      case R.id.action_delete => {
+        // Remove any previous dialog
+        val prev = getFragmentManager.findFragmentByTag("dialog")
+        if (prev != null)
+          ft.remove(prev)
 
-        new AlertDialog.Builder(this)
-          .setTitle(project.getName)
-          .setIcon(android.R.drawable.ic_menu_delete)
-          .setMessage("Delete the project?\n\nThis operation can't be undone.")
-          .setPositiveButton(android.R.string.yes, new OnClickListener {
-            override def onClick(dialog: DialogInterface, which: Int) {
-              val p = project
-              mProjectDao.delete(p)
-              Toast.makeText(getBaseContext, s"${p.getName} has been deleted", Toast.LENGTH_LONG).show()
-            }
+        ft.addToBackStack(null)
+
+        val newFragment = ProjectListRenameFragment.newInstance(project)
+        newFragment.show(ft, "dialog")
+
+      case R.id.action_clone =>
+
+        val newProject = project.copy(
+          id   = UUID.randomUUID().toString,
+          name = s"Copy of ${project.name}"
+        )
+
+        info(s"onContextItemSelected() Clone project ${project.name} [${project.id} -> ${newProject.id}]")
+
+        projectDao.create(newProject)
+
+        updateAdapter()
+
+      case R.id.action_delete =>
+
+        new AlertDialogBuilder("Delete the project", "Are you sure to delete the project")
+          .negativeButton(android.R.string.no)
+          .positiveButton(android.R.string.yes, {
+            projectDao.delete(project)
+            updateAdapter()
+            toast(s"${project.name} has been deleted")
           })
-
-          .setNegativeButton(android.R.string.no, new OnClickListener {
-            override def onClick(dialog: DialogInterface, which: Int) = dialog.dismiss()
-          })
-          .show()
-      }
+        .show()
 
     }
 
-    def project: Project = {
-      val position = item.getMenuInfo.asInstanceOf[AdapterContextMenuInfo].position
-      getListAdapter.getItem(position).asInstanceOf[Project]
-    }
-
-    // Menu consummed
-    return true
+    // Menu consumed
+    true
 
   }
 
+  def renameProject(project: Project, newName: String) {
+
+    info(s"onContextItemSelected() Rename project ${project.id} [${project.name} -> $newName]")
+
+    projectDao.updateName(project, newName)
+
+    toast("The project has been renamed")
+
+    updateAdapter()
+
+  }
+
+}
+
+  /*
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
 
     // Inflate the menu; this adds items to the action bar if it is present.

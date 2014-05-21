@@ -35,6 +35,7 @@ case class ProjectDao (
 
   }
 
+  //TODO rename to updateSteps
   def saveSteps(project: Project) {
 
     val now = SystemClock.elapsedRealtime()
@@ -54,26 +55,23 @@ case class ProjectDao (
 
   }
 
-  //TODO dead code?
-  /*
-  def savePosition(Project project, int stepIndex, int positionIndex, int newValue) {
+  def updateName(project: Project, newName: String) {
 
-      Log.i(TAG, "savePosition(project: " + project.getId() + ", step: " + stepIndex + ", position: " + positionIndex + ", newValue: " + newValue);
+    val now = SystemClock.elapsedRealtime()
 
-      project.getStep(stepIndex).setPosition(positionIndex, newValue);
-      saveSteps(project);
+    val values = new ContentValues()
+    values.put(BobSqliteOpenHelper.PROJECT_COL_NAME, newName)
 
-  }
+    database.update(
+      BobSqliteOpenHelper.PROJECT_TABLE,
+      values,
+      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = ?",
+      Array(project.id)
+    ).ensuring(_ == 1, s"The database.update() method didn't returned 1")
 
-  public void saveDuration(Project project, int stepIndex, int newDuration) {
-
-      Log.i(TAG, "saveDuration(project: " + project.getId() + ", step: " + stepIndex + ", newDuration: " + newDuration);
-
-      project.getStep(stepIndex).setDuration(newDuration);
-      saveSteps(project);
+    info(s"ProjectDao.updateName(${project.id}) took ${SystemClock.elapsedRealtime() - now} ms")
 
   }
-  */
 
   def findById(id: String): Project = {
 
@@ -132,16 +130,26 @@ case class ProjectDao (
 
   }
 
-  private def fromCursor(cursor: Cursor): Project =
+  def delete(project: Project) {
 
+    val now = SystemClock.elapsedRealtime()
+
+    database.delete(
+      BobSqliteOpenHelper.PROJECT_TABLE,
+      s"${BobSqliteOpenHelper.PROJECT_COL_ID} = ?",
+      Array(project.id)
+    ).ensuring(_ == 1, s"The database.delete() method didn't returned 1")
+
+    info(s"ProjectDao.delete(${project.id}) took ${SystemClock.elapsedRealtime() - now} ms")
+
+  }
+
+  private def fromCursor(cursor: Cursor): Project =
     Project(
       cursor.getString(0)                         ,         // PROJECT_COL_ID
       cursor.getString(1)                         ,         // PROJECT_COL_NAME
       boardConfigDao.findById(cursor.getString(2)),         // PROJECT_COL_BOARD_CONFIG
       cursor.getString(3).parseJson.convertTo[Vector[Step]] // PROJECT_COL_STEPS
     )
-
-  // TODO implement
-  def delete(project: Project) = ???
 
 }

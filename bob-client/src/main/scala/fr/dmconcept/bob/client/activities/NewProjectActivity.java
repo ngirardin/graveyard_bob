@@ -32,7 +32,7 @@ public class NewProjectActivity extends Activity {
 
         Log.i(TAG, "onCreate()");
 
-        setContentView(R.layout.activity_newproject);
+        setContentView(R.layout.fragment_newproject);
 
         BobApplication app = (BobApplication)getApplication();
 

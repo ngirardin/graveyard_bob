@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.ProjectListActivity">
 
+    <!-- No icons on context menus -->
     <item
         android:id="@+id/action_rename"
         android:title="Rename"/>
