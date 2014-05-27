@@ -27,4 +27,10 @@ case class BoardConfig(
   assert(!name.isEmpty        , "Empty name"         )
   assert(servoConfigs.nonEmpty, "Empty servo configs")
 
+  {
+    //Check that the servo configs don't contain duplicate pins
+    val ports = servoConfigs.map(_.port)
+    assert(ports.size == ports.distinct.size)
+  }
+
 }
