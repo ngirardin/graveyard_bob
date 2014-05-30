@@ -46,16 +46,16 @@ class BobApplication extends Application with TagUtil {
 
     info("BobApplication.onCreate() First run, creating the servos config fixtures")
 
-    def servoConfigs(servoPins: List[Int]): Vector[ServoConfig] = servoPins.map(
-      ServoConfig(_, (558, 2472))
-    ).toVector
+    def servoConfigs(servoPins: List[Int]): Vector[ServoConfig] = servoPins.map { s =>
+      ServoConfig(s"Servo $s", s)
+    }.toVector
 
     val configs = List(
       BoardConfig("Servos on pins 3 and 4", servoConfigs(List(3, 4)                 )),
       BoardConfig("Servos on pins 3 to 9" , servoConfigs(List(3, 4, 5, 6, 7, 10, 11)))
     )
 
-    configs.foreach(boardConfigDao.save)
+    configs.foreach(boardConfigDao.create)
 
     info("BobApplication.onCreate() First run, creating the project fixtures")
 

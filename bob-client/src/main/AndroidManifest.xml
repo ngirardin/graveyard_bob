@@ -30,9 +30,13 @@
 
         <activity android:name=".activities.ProjectActivity" />
 
-        <activity android:name=".activities.NewProjectActivity" />
+        <activity
+            android:name=".activities.NewProjectActivity"
+            android:label="New project" />
 
-        <activity android:name=".activities.BoardConfigActivity" />
+        <activity
+            android:name=".activities.BoardConfigActivity"
+            android:label="New board configuration" />
 
     </application>
 

@@ -24,20 +24,14 @@ object ServoConfig {
 
 case class ServoConfig(
 
-  // The IOIO port
-  port      : Int,
-
-  // The servo timings for the start and end position
-   timings: (Int,Int)
+  servo   : String,   // The servo name
+  pin     : Int       // The IOIO pin
 
 ) {
 
-  // Check that the port is a peripheral port
-  assert(PERIPHERAL_PORTS.contains(port), "Invalid IOIO port")
+  servo.ensuring(_.nonEmpty)
 
-  // Check that the timings are in the timing limits
-  assert(TIMING_RANGE.contains(timings._1), "Start timing out of range"                           )
-  assert(TIMING_RANGE.contains(timings._2), "End timing out of range"                             )
-  assert(timings._1 < timings._2          , "The end timing must be greater than the start timing")
+  // Check that the port is a peripheral port
+  assert(PERIPHERAL_PORTS.contains(pin), "Invalid IOIO pin")
 
 }

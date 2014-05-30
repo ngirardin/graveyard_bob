@@ -11,11 +11,8 @@ import org.scaloid.common._
 import spray.json._
 
 case class ProjectDao (
-
   database       : SQLiteDatabase,
-
   boardConfigDao : BoardConfigDao
-
 ) extends TagUtil {
 
   implicit override val loggerTag = LoggerTag("BobClient")
@@ -124,7 +121,7 @@ case class ProjectDao (
 
     cursor.close()
 
-    info(s"ProjectDao.findAll() took ${SystemClock.elapsedRealtime() - now} ms")
+    info(s"ProjectDao.findAll() took ${SystemClock.elapsedRealtime() - now} ms to retrieve ${projects.length} projects")
 
     projects
 

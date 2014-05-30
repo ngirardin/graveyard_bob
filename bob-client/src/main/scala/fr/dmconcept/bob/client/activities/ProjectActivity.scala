@@ -11,17 +11,16 @@ import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
-import fr.dmconcept.bob.client.BobApplication
-import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
+import fr.dmconcept.bob.client.{R, BobApplication}
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 
 object ProjectActivity {
 
   object Extras {
-    val PROJECT_ID = "fr.dmconcept.bob.extras.projectId"
+    val PROJECT = "projectId"
   }
 
 }
@@ -44,7 +43,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     info("ProjectActivity.onCreate()")
 
     //TODO replace by projectdao
-    mProject = getIntent.getSerializableExtra(Extras.PROJECT_ID).asInstanceOf[Project]
+    mProject = getIntent.getSerializableExtra(Extras.PROJECT).asInstanceOf[Project]
 
     // Set the project name as the activity title
     setTitle(mProject.name)

@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment
 import android.text.{InputFilter, InputType}
 import android.view._
 import android.view.inputmethod.EditorInfo
-import android.widget.{SeekBar, TextView, CompoundButton}
+import android.widget.{SeekBar, TextView}
 import fr.dmconcept.bob.client.models.{BoardConfig, Step}
 import fr.dmconcept.bob.client.utils.{PercentageInputFilter, StepDurationInputFilter}
 import org.scaloid.common._
@@ -117,7 +117,7 @@ class PositionsFragment extends SFragment with TagUtil {
             this += new SVerticalLayout {
 
               // Servo port
-              this += new STextView(mBoardConfig.servoConfigs(i).port.toString) {
+              this += new STextView(mBoardConfig.servoConfigs(i).pin.toString) {
                 gravity(Gravity.RIGHT)
                 padding(0, 0, 8, 0) // right
               }.<<(30.dip, WRAP_CONTENT).>>

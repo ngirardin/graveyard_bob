@@ -14,7 +14,7 @@ case class BoardConfigDao(database: SQLiteDatabase) extends TagUtil {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
-  def save(boardConfig: BoardConfig) {
+  def create(boardConfig: BoardConfig) {
 
     val now = SystemClock.elapsedRealtime()
 

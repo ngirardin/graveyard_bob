@@ -4,9 +4,14 @@ import fr.dmconcept.bob.client.models.json.BobJsonProtocol._
 import java.util.UUID
 import spray.json._
 
-object BoardConfig extends {
+object BoardConfig {
 
-  def apply(name: String, servoConfigs: Vector[ServoConfig]): BoardConfig = {
+  /**
+   * Max quantity of servo per board
+   */
+  final val MAX_SERVOS = 7
+
+  def apply(name: String, servoConfigs: Seq[ServoConfig]): BoardConfig = {
     BoardConfig(UUID.randomUUID.toString, name, servoConfigs)
   }
 
@@ -15,13 +20,9 @@ object BoardConfig extends {
 }
 
 case class BoardConfig(
-
-    id           : String,
-
-    name         : String,
-
-    servoConfigs : Vector[ServoConfig]
-
+  id           : String,
+  name         : String,
+  servoConfigs : Seq[ServoConfig]
 ) {
 
   assert(!name.isEmpty        , "Empty name"         )
@@ -29,8 +30,8 @@ case class BoardConfig(
 
   {
     //Check that the servo configs don't contain duplicate pins
-    val ports = servoConfigs.map(_.port)
-    assert(ports.size == ports.distinct.size)
+    val ports = servoConfigs.map(_.pin)
+    assert(ports.size == ports.distinct.size, "Expected only distinct ports")
   }
 
 }

@@ -14,8 +14,8 @@ object BobJsonProtocol extends DefaultJsonProtocol {
   */
 
   // Workaround for issue https://github.com/spray/spray-json/issues/53
-  implicit val servoConfigFormat = jsonFormat[Int, (Int, Int), ServoConfig] (
-    ServoConfig.apply, "port", "timings"
+  implicit val servoConfigFormat = jsonFormat[String, Int, ServoConfig] (
+    ServoConfig.apply, "servo", "pin"
   )
 
   implicit val boardConfigFormat = jsonFormat[String, String, Vector[ServoConfig], BoardConfig](
