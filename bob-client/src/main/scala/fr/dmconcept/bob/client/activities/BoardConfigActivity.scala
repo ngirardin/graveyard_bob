@@ -148,8 +148,8 @@ class BoardConfigActivity extends SActivity {
           .zipWithIndex
           // Remove the servo not connected (spinner index == 0)
           .map { case (spinner: SSpinner, servoIndex: Int) =>
-            // Bring back the pin to 0 indexed
-            (spinner.selectedItemPosition - 1, servoIndex)
+            // Bring back the pin to 0 indexed and the servoIndex to 1 indexed
+            (spinner.selectedItemPosition - 1, servoIndex + 1)
           }
           .filter { case (pinIndex: Int, servoIndex : Int) =>
 
