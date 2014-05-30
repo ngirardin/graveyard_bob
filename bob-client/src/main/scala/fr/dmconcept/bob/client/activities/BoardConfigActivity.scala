@@ -148,11 +148,12 @@ class BoardConfigActivity extends SActivity {
           .zipWithIndex
           // Remove the servo not connected (spinner index == 0)
           .map { case (spinner: SSpinner, servoIndex: Int) =>
-            (spinner.selectedItemPosition, servoIndex)
+            // Bring back the pin to 0 indexed
+            (spinner.selectedItemPosition - 1, servoIndex)
           }
-          .filter { case (pin: Int, servoIndex : Int) =>
+          .filter { case (pinIndex: Int, servoIndex : Int) =>
 
-            val valid = pin > 0
+            val valid = pinIndex > -1
 
             if (!valid)
               info(s"BoardConfigActivity.onOptionsItemSelected() Servo $servoIndex not connected")
@@ -160,9 +161,9 @@ class BoardConfigActivity extends SActivity {
             valid
           }
           // Create the servo configs
-          .map { case (pin : Int, servoIndex : Int) =>
+          .map { case (pinIndex : Int, servoIndex : Int) =>
 
-            val sc = ServoConfig(s"Servo $pin", ServoConfig.PERIPHERAL_PORTS(servoIndex + 1))
+            val sc = ServoConfig(s"Servo $servoIndex", ServoConfig.PERIPHERAL_PORTS(pinIndex))
             info(s"BoardConfigActivity.onOptionsItemSelected() Creating $sc")
             sc
 
