@@ -6,7 +6,7 @@
         android:id="@+id/action_deleteStep"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:showAsAction="ifRoom"
-        android:title="Remove the step"/>
+        android:title="Delete the step"/>
 
     <item
         android:id="@+id/action_insertStep"
