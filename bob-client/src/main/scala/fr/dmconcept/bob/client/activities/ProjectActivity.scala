@@ -79,8 +79,12 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
       override def getCount: Int = project.steps.length
 
-      override def getItem(position: Int): Fragment =
-        PositionsFragment.getInstance(position, project.steps(position), project.boardConfig)
+      override def getItem(position: Int): Fragment = {
+
+        val isLastStep = position == project.steps.length - 1
+        PositionsFragment.getInstance(position, project.steps(position), isLastStep, project.boardConfig)
+
+      }
 
       override def getItemPosition(o: Any): Int = PagerAdapter.POSITION_NONE
 
@@ -151,7 +155,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   override def onStepPositionChanged(stepIndex: Int, servoIndex: Int, newPosition: Int) {
 
-    info("ProjectActivity.onStepPositionChanged(stepIndex=SstepIndex, servoIndex=$servoIndex, newPosition=$newPosition")
+    info(s"ProjectActivity.onStepPositionChanged(stepIndex=SstepIndex, servoIndex=$servoIndex, newPosition=$newPosition")
 
     val oldSteps     = project.steps
     val oldStep      = oldSteps(stepIndex)

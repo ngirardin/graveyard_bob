@@ -19,6 +19,7 @@ object PositionsFragment {
   object Extras {
     final val STEP_INDEX  = "stepindex"
     final val STEP        = "step"
+    final val LAST_STEP   = "isLastStep"
     final val BOARDCONFIG = "boardconfig"
   }
 
@@ -27,7 +28,7 @@ object PositionsFragment {
     final val POSITIONS = "positions"
   }
 
-  def getInstance(position : Int, step : Step, boardConfig: BoardConfig): Fragment = {
+  def getInstance(position : Int, step : Step, isLastStep: Boolean, boardConfig: BoardConfig): Fragment = {
 
     val f = new PositionsFragment
 
@@ -36,6 +37,7 @@ object PositionsFragment {
       val b = new Bundle()
       b.putInt         (Extras.STEP_INDEX , position   )
       b.putSerializable(Extras.STEP       , step       )
+      b.putBoolean     (Extras.LAST_STEP  , isLastStep )
       b.putSerializable(Extras.BOARDCONFIG, boardConfig)
       b
     })
@@ -63,6 +65,7 @@ class PositionsFragment extends SFragment with TagUtil {
 
   lazy val stepIndex    = getArguments.getInt         (Extras.STEP_INDEX ).ensuring(_ > -1, "Invalid position")
   lazy val mStep        = getArguments.getSerializable(Extras.STEP       ).asInstanceOf[Step]
+  lazy val isLastStep   = getArguments.getBoolean     (Extras.LAST_STEP  )
   lazy val mBoardConfig = getArguments.getSerializable(Extras.BOARDCONFIG).asInstanceOf[BoardConfig]
 
   var mPositionsFragmentListener: PositionsFragmentListener = null
@@ -73,8 +76,6 @@ class PositionsFragment extends SFragment with TagUtil {
 
     // Attach the listener used to communicate with the activity
     mPositionsFragmentListener = activity.asInstanceOf[PositionsFragmentListener]
-
-    info(s"PositionsFragment.onAttach()            [stepIndex=$stepIndex]")
 
   }
 
@@ -201,13 +202,17 @@ class PositionsFragment extends SFragment with TagUtil {
       }
 
     } else {
-      info(s"PositionsFragment.onCreateView()        [stepIndex=$stepIndex] savedInstanceState=null")
+      info(s"PositionsFragment.onCreateView()        [stepIndex=$stepIndex]")
     }
 
     new SVerticalLayout {
 
       // Duration layout
       this += new SVerticalLayout {
+
+        // Hide it if last step
+        if (isLastStep)
+          visibility(View.INVISIBLE)
 
         STextView("Duration").wrap
 
@@ -282,7 +287,7 @@ class PositionsFragment extends SFragment with TagUtil {
   }
 
   override def onDestroyView() {
-    info(s"PositionFragment.onDestroyView()        [stepIndex=$stepIndex]")
+    info(s"PositionsFragment.onDestroyView()       [stepIndex=$stepIndex]")
     super.onDestroyView()
   }
 
