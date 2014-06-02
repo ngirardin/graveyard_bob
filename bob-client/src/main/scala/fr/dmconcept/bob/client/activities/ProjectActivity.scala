@@ -2,8 +2,8 @@ package fr.dmconcept.bob.client.activities
 
 import ProjectActivity._
 import android.app
-import android.app.ActionBar
 import android.app.ActionBar.{TabListener, Tab}
+import android.app.{Activity, ActionBar}
 import android.content.DialogInterface.OnClickListener
 import android.content.{DialogInterface, Context}
 import android.os.Bundle
@@ -23,45 +23,83 @@ object ProjectActivity {
     val PROJECT = "projectId"
   }
 
+  object States {
+    val CURRENT_STEP = "currentStep"
+  }
+
 }
 
 class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil with PositionsFragment.PositionsFragmentListener {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
+  implicit val activity: Activity = this
+
   // The bob application
   lazy val mApplication: BobApplication = getApplication.asInstanceOf[BobApplication]
 
-  // Deserialize the project from the intent extra
-  //TODO replace by projectdao
-  var mProject: Project = null
+  var project: Project = null
 
   override def onCreate(savedInstance: Bundle) {
 
     super.onCreate(savedInstance)
 
-    info("ProjectActivity.onCreate()")
-
-    //TODO replace by projectdao
-    mProject = getIntent.getSerializableExtra(Extras.PROJECT).asInstanceOf[Project]
+    project = getIntent.getSerializableExtra(Extras.PROJECT).asInstanceOf[Project]
 
     // Set the project name as the activity title
-    setTitle(mProject.name)
+    setTitle(project.name)
 
     // Create the timeline tabs
     createTabs()
 
+    // Need to create the tabs before selected the saved one
+    if (savedInstance != null) {
+
+      val currentStep = savedInstance.getInt(States.CURRENT_STEP).ensuring(_ > -1)
+      info(s"ProjectActivity.onCreate() intent.PROJECT.id=${project.id} currentStep=$currentStep")
+
+      viewPager.currentItem(currentStep)
+
+    } else {
+      info(s"ProjectActivity.onCreate() intent.PROJECT.id=${project.id}")
+    }
+
+    // Create the view pager
     contentView = viewPager
 
   }
 
+  lazy val viewPager = new SViewPager {
+
+    setId(getUniqueId) // Need to set any id on the ViewPager
+
+    setAdapter(new FragmentStatePagerAdapter(supportFragmentManager) {
+
+      override def getCount: Int = project.steps.length
+
+      override def getItem(position: Int): Fragment =
+        PositionsFragment.getInstance(position, project.steps(position), project.boardConfig)
+
+      override def getItemPosition(o: Any): Int = PagerAdapter.POSITION_NONE
+
+    })
+
+    setOnPageChangeListener(new SimpleOnPageChangeListener {
+      override def onPageSelected(position: Int): Unit = {
+        // Update the active tab
+        getActionBar.setSelectedNavigationItem(position)
+      }
+    })
+
+  }
   private def createTabs() {
+
     val actionBar = getActionBar
 
     actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS)
 
-    mProject.steps.zipWithIndex.foreach { case (step: Step, i: Int) =>
-      actionBar.addTab(newTab(actionBar).setText(s"${i + 1}"))
+    project.steps.zipWithIndex.foreach { case (step: Step, stepIdex: Int) =>
+      actionBar.addTab(newTab(actionBar).setText(s"${stepIdex + 1}"))
     }
   }
 
@@ -93,28 +131,21 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   }
 
+  override def onDurationChanged(stepIndex: Int, newDuration: Int) {
+    toast(s"Step $stepIndex: duration changed to $newDuration")
+  }
 
-  lazy val viewPager = new SViewPager {
+  override def onStepPositionChanged(stepIndex: Int, positionIndex: Int, newPosition: Int) {
+    toast(s"Step $stepIndex: position $positionIndex changed to $newPosition")
+  }
 
-    setId(0x0001) // Need to set any id on the ViewPager
+  override def onSaveInstanceState(outState: Bundle) {
 
-    setAdapter(new FragmentStatePagerAdapter(supportFragmentManager) {
+    val currentStep = viewPager.currentItem
 
-      override def getCount: Int = mProject.steps.length
+    info(s"ProjectActivity.onSaveInstanceState() currentStep=$currentStep")
 
-      override def getItem(position: Int): Fragment =
-        PositionsFragment.getInstance(position, mProject.steps(position), mProject.boardConfig)
-
-      override def getItemPosition(o: Any): Int = PagerAdapter.POSITION_NONE
-
-    })
-
-    setOnPageChangeListener(new SimpleOnPageChangeListener {
-      override def onPageSelected(position: Int): Unit = {
-        // Update the active tab
-        getActionBar.setSelectedNavigationItem(position)
-      }
-    })
+    outState.putInt(States.CURRENT_STEP, currentStep)
 
   }
 
@@ -172,20 +203,20 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     val tabIndex  = actionBar.getSelectedNavigationIndex
 
     // If deleting the last step, set the last -1 step duration to 0
-    if (tabIndex == mProject.steps.length - 1) {
+    if (tabIndex == project.steps.length - 1) {
 
       // Drop the last step
-      val withoutLast = mProject.steps.init // Drop the last step
+      val withoutLast = project.steps.init // Drop the last step
 
-      mProject = mProject.copy(
+      project = project.copy(
         steps = withoutLast.updated(tabIndex - 1, withoutLast.last.copy(duration = 0)) // Set the new last step duration to 0
       )
 
     } else {
 
       // Delete the step
-      mProject = mProject.copy(
-        steps = mProject.steps.zipWithIndex.filterNot { _._2 == tabIndex }.unzip._1
+      project = project.copy(
+        steps = project.steps.zipWithIndex.filterNot { _._2 == tabIndex }.unzip._1
       )
 
     }
@@ -211,8 +242,8 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     val tabIndex  = actionBar.getSelectedNavigationIndex
 
     // Add of a copy of the current step after the current step
-    mProject = mProject.copy(
-      steps = (mProject.steps.take(tabIndex) :+ mProject.steps(tabIndex).copy()) ++ mProject.steps.drop(tabIndex)
+    project = project.copy(
+      steps = (project.steps.take(tabIndex) :+ project.steps(tabIndex).copy()) ++ project.steps.drop(tabIndex)
     )
 
     // Notify the page adapter that the project changed
@@ -247,7 +278,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
           // The communication layer with the server
           val mCommunication: BobCommunication = new BobCommunication(this)
 
-          mCommunication.send(serverIP, mProject)
+          mCommunication.send(serverIP, project)
 
           val progress = new android.app.ProgressDialog(this)
           progress.setTitle("Playing the project...")
@@ -270,7 +301,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
             override def run() {
               progress.dismiss()
             }
-          }, mProject.duration)
+          }, project.duration)
 
         } catch {
           case e: Throwable =>
