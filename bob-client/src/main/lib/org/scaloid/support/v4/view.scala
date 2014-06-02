@@ -254,7 +254,9 @@ trait TraitPagerAdapter[V <: android.support.v4.view.PagerAdapter] {
 
 
 trait ViewImplicits {
+
   import scala.language.implicitConversions
+
   @inline implicit def viewPager2RichViewPager[V <: android.support.v4.view.ViewPager](viewPager: V) = new RichViewPager[V](viewPager)
 }
 object ViewImplicits extends ViewImplicits

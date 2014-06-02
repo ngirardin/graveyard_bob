@@ -195,6 +195,7 @@ trait TraitSimpleCursorAdapter[V <: android.support.v4.widget.SimpleCursorAdapte
 
 
 trait WidgetImplicits {
+
   import scala.language.implicitConversions
 
   @inline implicit def resourceCursorAdapter2RichResourceCursorAdapter[V <: android.support.v4.widget.ResourceCursorAdapter](resourceCursorAdapter: V) = new RichResourceCursorAdapter[V](resourceCursorAdapter)

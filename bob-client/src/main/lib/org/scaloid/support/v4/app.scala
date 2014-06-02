@@ -35,9 +35,9 @@
 
 package org.scaloid.support.v4
 
-import org.scaloid.common._
-import android.support.v4.app._
 import android.content._
+import android.support.v4.app._
+import org.scaloid.common._
 import scala.reflect._
 
 
