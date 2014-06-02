@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.view.inputmethod.EditorInfo
 import android.view.{MenuItem, Menu, View}
 import android.widget._
 import fr.dmconcept.bob.client.activities.NewProjectActivity.STATES
@@ -30,6 +31,9 @@ class NewProjectActivity extends SActivity {
   lazy val editTextName = new SEditText() {
 
     hint("Project name")
+
+    //Disable full screen keyboard on landscape
+    setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI)
 
     afterTextChanged { s: Editable =>
 
