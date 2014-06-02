@@ -127,7 +127,7 @@ class NewProjectActivity extends SActivity {
 
         application.projectsDao.create(project)
 
-        startActivity(SIntent[ProjectActivity].putExtra(ProjectActivity.Extras.PROJECT, project))
+        startActivity(SIntent[ProjectActivity].putExtra(ProjectActivity.Extras.PROJECT_ID, project.id))
         finish()
 
         true

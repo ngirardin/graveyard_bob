@@ -32,8 +32,7 @@ case class ProjectDao (
 
   }
 
-  //TODO rename to updateSteps
-  def saveSteps(project: Project) {
+  def updateSteps(project: Project) {
 
     val now = SystemClock.elapsedRealtime()
 

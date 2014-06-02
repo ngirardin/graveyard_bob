@@ -209,8 +209,7 @@ class ProjectListActivity extends SActivity {
 
   private def startProjectActivity(project: Project) {
     startActivity (
-      SIntent[ProjectActivity]
-        .putExtra (ProjectActivity.Extras.PROJECT, project)
+      SIntent[ProjectActivity].putExtra(ProjectActivity.Extras.PROJECT_ID, project.id)
     )
   }
 

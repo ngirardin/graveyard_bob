@@ -20,7 +20,7 @@ import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 object ProjectActivity {
 
   object Extras {
-    val PROJECT = "projectId"
+    val PROJECT_ID = "projectId"
   }
 
   object States {
@@ -36,15 +36,17 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
   implicit val activity: Activity = this
 
   // The bob application
-  lazy val mApplication: BobApplication = getApplication.asInstanceOf[BobApplication]
+  lazy val application: BobApplication = getApplication.asInstanceOf[BobApplication]
 
   var project: Project = null
 
-  override def onCreate(savedInstance: Bundle) {
+  override def onCreate(savedInstanceState: Bundle) {
 
-    super.onCreate(savedInstance)
+    super.onCreate(savedInstanceState)
 
-    project = getIntent.getSerializableExtra(Extras.PROJECT).asInstanceOf[Project]
+    val projectId = getIntent.getStringExtra(Extras.PROJECT_ID)
+
+    project = application.projectsDao.findById(projectId)
 
     // Set the project name as the activity title
     setTitle(project.name)
@@ -53,15 +55,15 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     createTabs()
 
     // Need to create the tabs before selected the saved one
-    if (savedInstance != null) {
+    if (savedInstanceState != null) {
 
-      val currentStep = savedInstance.getInt(States.CURRENT_STEP).ensuring(_ > -1)
-      info(s"ProjectActivity.onCreate() intent.PROJECT.id=${project.id} currentStep=$currentStep")
+      val currentStep = savedInstanceState.getInt(States.CURRENT_STEP).ensuring(_ > -1)
+      info(s"ProjectActivity.onCreate(project=${project.id}) currentStep=$currentStep")
 
       viewPager.currentItem(currentStep)
 
     } else {
-      info(s"ProjectActivity.onCreate() intent.PROJECT.id=${project.id}")
+      info(s"ProjectActivity.onCreate(project=$projectId)")
     }
 
     // Create the view pager
@@ -132,11 +134,37 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
   }
 
   override def onDurationChanged(stepIndex: Int, newDuration: Int) {
-    toast(s"Step $stepIndex: duration changed to $newDuration")
+
+    info(s"ProjectActivity.onDurationChanged(stepIndex=$stepIndex, newDuration=$newDuration")
+
+    val oldSteps     = project.steps
+    val oldStep      = oldSteps(stepIndex)
+
+    val newStep      = oldStep.copy(duration = newDuration)
+    val newSteps     = oldSteps.updated(stepIndex, newStep)
+
+    project = project.copy(steps = newSteps)
+
+    application.projectsDao.updateSteps(project)
+
   }
 
-  override def onStepPositionChanged(stepIndex: Int, positionIndex: Int, newPosition: Int) {
-    toast(s"Step $stepIndex: position $positionIndex changed to $newPosition")
+  override def onStepPositionChanged(stepIndex: Int, servoIndex: Int, newPosition: Int) {
+
+    info("ProjectActivity.onStepPositionChanged(stepIndex=SstepIndex, servoIndex=$servoIndex, newPosition=$newPosition")
+
+    val oldSteps     = project.steps
+    val oldStep      = oldSteps(stepIndex)
+    val oldPositions = oldStep.positions
+
+    val newPositions = oldPositions.updated(servoIndex, newPosition)
+    val newStep      = oldStep.copy(positions = newPositions)
+    val newSteps     = oldSteps.updated(stepIndex, newStep)
+
+    project = project.copy(steps = newSteps)
+
+    application.projectsDao.updateSteps(project)
+
   }
 
   override def onSaveInstanceState(outState: Bundle) {

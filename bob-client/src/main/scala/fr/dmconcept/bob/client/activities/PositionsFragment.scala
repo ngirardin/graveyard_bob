@@ -68,17 +68,22 @@ class PositionsFragment extends SFragment with TagUtil {
   var mPositionsFragmentListener: PositionsFragmentListener = null
 
   override def onAttach(activity: Activity) {
-    // Attach the listener used to communicate with the activity
+
     super.onAttach(activity)
+
+    // Attach the listener used to communicate with the activity
     mPositionsFragmentListener = activity.asInstanceOf[PositionsFragmentListener]
+
+    info(s"PositionsFragment.onAttach()            [stepIndex=$stepIndex]")
+
   }
 
   lazy val editTextDuration = new SEditText(mStep.duration.toString) {
 
     inputType(InputType.TYPE_CLASS_NUMBER)
 
-    // Set the Done button instead of Next
-    imeOptions(EditorInfo.IME_ACTION_DONE)
+    // Set the Done button instead of Next and don't display full screen keyboard
+    imeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI)
 
     filters(Array[InputFilter](StepDurationInputFilter))
 
@@ -109,8 +114,8 @@ class PositionsFragment extends SFragment with TagUtil {
 
       inputType(InputType.TYPE_CLASS_NUMBER)
 
-      // Set the Done button instead of Next
-      imeOptions(EditorInfo.IME_ACTION_DONE)
+      // Set the Done button instead of Next and don't display the full-screen keyboard
+      imeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI)
 
       filters(Array[InputFilter](PercentageInputFilter))
 
@@ -190,6 +195,11 @@ class PositionsFragment extends SFragment with TagUtil {
 
       editTextDuration.setText(duration)
 
+      positions.zipWithIndex.foreach { case (position: Int, i: Int) =>
+          updateEditTextPosition(i, position)
+          updateSeekbarPosition (i, position)
+      }
+
     } else {
       info(s"PositionsFragment.onCreateView()        [stepIndex=$stepIndex] savedInstanceState=null")
     }
@@ -260,13 +270,14 @@ class PositionsFragment extends SFragment with TagUtil {
 
     super.onSaveInstanceState(outState)
 
-    val duration = editTextDuration.getText
-    val progress = seekbarPositions.map(_.progress)
+    val duration  = editTextDuration.getText
+    val positions = seekbarPositions.map(_.progress)
 
-    info(s"PositionsFragment.onSaveInstanceState() [stepIndex=$stepIndex] duration=$duration, progress=$progress")
+    val logPositions = positions.mkString(",")
+    info(s"PositionsFragment.onSaveInstanceState() [stepIndex=$stepIndex] duration=$duration, progress=$logPositions")
 
-    outState.putCharSequence(States.DURATION , duration)
-    outState.putIntArray    (States.POSITIONS, progress.toArray)
+    outState.putCharSequence(States.DURATION , duration         )
+    outState.putIntArray    (States.POSITIONS, positions.toArray)
 
   }
 
