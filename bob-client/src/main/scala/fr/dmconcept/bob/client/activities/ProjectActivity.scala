@@ -253,6 +253,9 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
     }
 
+    // Save the project
+    application.projectsDao.updateSteps(project)
+
     // Notify the page adapter that the project changed
     viewPager.getAdapter.notifyDataSetChanged()
 
@@ -277,6 +280,9 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
     project = project.copy(
       steps = (project.steps.take(tabIndex) :+ project.steps(tabIndex).copy()) ++ project.steps.drop(tabIndex)
     )
+
+    // Save the project
+    application.projectsDao.updateSteps(project)
 
     // Notify the page adapter that the project changed
     viewPager.getAdapter.notifyDataSetChanged()
