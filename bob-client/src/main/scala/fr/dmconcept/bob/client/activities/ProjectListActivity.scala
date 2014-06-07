@@ -4,8 +4,8 @@ import android.view.ContextMenu.ContextMenuInfo
 import android.view._
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget._
+import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.models.{BoardConfig, Project}
-import fr.dmconcept.bob.client.{R, BobApplication}
 import java.util.UUID
 import org.scaloid.common._
 import scala.collection.JavaConverters._
@@ -74,10 +74,8 @@ class ProjectListActivity extends SActivity {
 
     getMenuInflater.inflate(R.menu.project_list_context, menu)
 
-    val info: AdapterContextMenuInfo = menuInfo.asInstanceOf[AdapterContextMenuInfo]
-
-    val project: Project = v.asInstanceOf[ListView]
-      .getItemAtPosition(info.position).asInstanceOf[Project]
+    val info    = menuInfo.asInstanceOf[AdapterContextMenuInfo]
+    val project = v.asInstanceOf[ListView].getItemAtPosition(info.position).asInstanceOf[Project]
 
     menu.setHeaderTitle(project.name)
 

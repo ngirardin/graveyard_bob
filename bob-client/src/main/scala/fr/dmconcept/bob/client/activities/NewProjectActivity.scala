@@ -7,9 +7,9 @@ import android.text.Editable
 import android.view.inputmethod.EditorInfo
 import android.view.{MenuItem, Menu, View}
 import android.widget._
+import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.activities.NewProjectActivity.STATES
 import fr.dmconcept.bob.client.models.Project
-import fr.dmconcept.bob.client.{R, BobApplication}
 import org.scaloid.common._
 
 object NewProjectActivity {
@@ -100,8 +100,10 @@ class NewProjectActivity extends SActivity {
   }
 
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
-    getMenuInflater.inflate(R.menu.save, menu)
+
+    getMenuInflater.inflate(R.menu.main_save, menu)
     super.onCreateOptionsMenu(menu)
+
   }
 
   override def onPrepareOptionsMenu(menu: Menu): Boolean = {

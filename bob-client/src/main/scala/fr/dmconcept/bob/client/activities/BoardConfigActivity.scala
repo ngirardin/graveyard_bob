@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.{View, Menu, MenuItem}
 import android.widget.AdapterView
+import fr.dmconcept.bob.client.BobApplication
 import fr.dmconcept.bob.client.activities.BoardConfigActivity.{STATES, RESULTS}
 import fr.dmconcept.bob.client.models.{BoardConfig, ServoConfig}
-import fr.dmconcept.bob.client.{R, BobApplication}
 import org.scaloid.common._
 
 object BoardConfigActivity {
@@ -110,7 +110,7 @@ class BoardConfigActivity extends SActivity {
 
   override def onCreateOptionsMenu(menu: Menu) : Boolean = {
 
-    getMenuInflater.inflate(R.menu.save, menu)
+    getMenuInflater.inflate(R.menu.main_save, menu)
     super.onCreateOptionsMenu(menu)
 
   }

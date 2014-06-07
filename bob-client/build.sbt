@@ -17,6 +17,7 @@ libraryDependencies += "org.scaloid" %% "scaloid" % "3.4-10"
 //TODO use published lib
 libraryDependencies += "org.scaloid" %% "scaloid-support-v4" % "3.4-10"
 
+// Used for Fragments
 libraryDependencies += "com.android.support" % "support-v4" % "19.0.1"
 
 resolvers += "spray" at "http://repo.spray.io/"
