@@ -12,6 +12,7 @@ import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
 import android.view.{MenuItem, Menu}
 import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.communications.BobCommunication
 import fr.dmconcept.bob.client.models.{Step, Project}
 import org.scaloid.common._

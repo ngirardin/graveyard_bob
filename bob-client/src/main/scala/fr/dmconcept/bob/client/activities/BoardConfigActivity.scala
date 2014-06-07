@@ -7,6 +7,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.{View, Menu, MenuItem}
 import android.widget.AdapterView
 import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.activities.BoardConfigActivity.{STATES, RESULTS}
 import fr.dmconcept.bob.client.models.{BoardConfig, ServoConfig}
 import org.scaloid.common._

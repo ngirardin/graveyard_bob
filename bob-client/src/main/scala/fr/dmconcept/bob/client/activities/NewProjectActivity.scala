@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.{MenuItem, Menu, View}
 import android.widget._
 import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.activities.NewProjectActivity.STATES
 import fr.dmconcept.bob.client.models.Project
 import org.scaloid.common._

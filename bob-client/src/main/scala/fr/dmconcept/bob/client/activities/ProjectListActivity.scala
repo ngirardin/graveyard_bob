@@ -5,6 +5,7 @@ import android.view._
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget._
 import fr.dmconcept.bob.client.BobApplication
+import fr.dmconcept.bob.client.R
 import fr.dmconcept.bob.client.models.{BoardConfig, Project}
 import java.util.UUID
 import org.scaloid.common._
