@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.protogenefactory.ioiomaster"
+	android:versionCode="6"
+	android:versionName="0.6">
+
+    <!-- Client permissions -->
+    <uses-permission android:name="android.permission.INTERNET"             />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Server permissions -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+	<!-- API 14 = Android 4.0 from 2011 -->
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:name=".client.BobApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/AppTheme"
+        android:label="@string/app_name">
+
+        <!-- ****** CLIENT ***** -->
+        <activity
+            android:name=".client.activities.ProjectListActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".client.activities.ProjectActivity" />
+
+        <activity
+            android:name=".client.activities.NewProjectActivity"
+            android:label="New project" />
+
+        <activity
+            android:name=".client.activities.BoardConfigActivity"
+            android:label="New board configuration" />
+
+
+        <!-- ****** SERVER ***** -->
+        <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
+
+        <activity
+            android:name=".server.VideoActivity"
+            android:label="Remote video">
+        </activity>
+
+    </application>
+
+</manifest>

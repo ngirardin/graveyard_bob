@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.ProjectListActivity">
+
+    <!--
+    <item
+        android:id="@+id/action_boardConfig"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:showAsAction="ifRoom"
+        android:title="Manage the board configurations"/>
+    -->
+
+    <item
+        android:id="@+id/action_newProject"
+        android:icon="@android:drawable/ic_menu_add"
+        android:showAsAction="ifRoom"
+        android:title="New project"/>
+
+</menu>
+<!-- From: file:/home/nico/Dev/IdeaProjects/bob/bob-client/res/menu/project_list.xml -->

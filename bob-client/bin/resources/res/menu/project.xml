@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.ProjectActivity">
+
+    <item
+        android:id="@+id/action_deleteStep"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:showAsAction="ifRoom"
+        android:title="Delete the step"/>
+
+    <item
+        android:id="@+id/action_insertStep"
+        android:icon="@android:drawable/ic_menu_add"
+        android:showAsAction="always"
+        android:title="Add a new step"/>
+
+    <item
+        android:id="@+id/action_playProject"
+        android:icon="@android:drawable/ic_menu_send"
+        android:showAsAction="always"
+        android:title="Play the project"/>
+
+    <item
+		android:id="@+id/action_autoplay"
+        android:showAsAction="never"
+		android:checkable="true"
+        android:title="Auto-play the changes"/>
+
+    <item
+		android:id="@+id/action_setServerIp"
+        android:showAsAction="never"
+        android:title="Set the server IP address"/>
+
+</menu>
+<!-- From: file:/home/nico/Dev/IdeaProjects/bob/bob-client/res/menu/project.xml -->
