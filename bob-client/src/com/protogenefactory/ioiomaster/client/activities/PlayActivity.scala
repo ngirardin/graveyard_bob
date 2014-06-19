@@ -1,54 +1,83 @@
 package com.protogenefactory.ioiomaster.client.activities
 
 import android.content.pm.ActivityInfo
+import android.view.Gravity
+import com.protogenefactory.ioiomaster.client.BobApplication
 import org.scaloid.common._
 
 class PlayActivity extends SActivity {
-
-  val projects = Seq("Hello short", "Hello long", "Open hand", "Close hand", "Head left", "Head right")
 
   val joysticks = Seq("Wheels", "Head", "Arm")
 
   val mp3s = Seq("Hello!", "Bye-bye!", "Hi, I'm Bob!")
 
+  lazy val application = getApplication.asInstanceOf[BobApplication]
+
+  lazy val serverIP = application.serverIP
+
+  lazy val projects = application.projectsDao.findAll()
+
   onCreate {
 
     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
 
+    setTitle(s"$getTitle connected to $serverIP")
+
     contentView = new SLinearLayout {
 
+      /**
+       * Projects column
+       */
       this += new SVerticalLayout {
 
         STextView("Sequences")
+          .gravity(Gravity.CENTER)
 
         projects.map(p =>
-          SButton(p, toast(s"Play project $p"))
-            .fill
+
+          SButton(p.name, {
+              toast(s"Play project ${p.name}")
+          })
+          .textSize(12.dip)
+          .fill
+
         )
       }.<<.wrap.Weight(1.0f).>>
 
+      /**
+       * Joysticks column
+       */
       this += new SVerticalLayout {
 
         STextView("Joysticks")
+          .gravity(Gravity.CENTER)
 
         joysticks.map(j =>
-          SToggleButton(j)
+          SToggleButton(j, toast("TODO joysticks"))
             .textOff(j)
             .textOn(j)
             .fill
         )
       }.<<.wrap.Weight(1.0f).>>
 
+      /**
+       * Sounds column
+       */
       this += new SVerticalLayout {
 
         STextView("Sounds")
+          .gravity(Gravity.CENTER)
 
         mp3s.map(m =>
           SButton(m, toast(s"Play sound $m"))
-            .fill
+          .textSize(12.dip)
+          .fill
         )
       }.<<.wrap.Weight(1.0f).>>
 
+      /**
+       * Video column
+       */
       this += new SVerticalLayout {
 
         SButton("VIDEO")

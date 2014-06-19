@@ -1,20 +1,20 @@
 package com.protogenefactory.ioiomaster.client.activities
 
-import ProjectActivity._
 import android.app
-import android.app.ActionBar.{TabListener, Tab}
-import android.app.{Activity, ActionBar}
+import android.app.ActionBar.{Tab, TabListener}
+import android.app.{ActionBar, Activity}
+import android.content.DialogInterface
 import android.content.DialogInterface.OnClickListener
-import android.content.{DialogInterface, Context}
 import android.os.Bundle
-import android.support.v4.app.{FragmentStatePagerAdapter, Fragment}
+import android.support.v4.app.{Fragment, FragmentStatePagerAdapter}
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener
-import android.view.{MenuItem, Menu}
-import com.protogenefactory.ioiomaster.client.BobApplication
+import android.view.{Menu, MenuItem}
 import com.protogenefactory.ioiomaster.R
+import com.protogenefactory.ioiomaster.client.BobApplication
+import com.protogenefactory.ioiomaster.client.activities.ProjectActivity._
 import com.protogenefactory.ioiomaster.client.communications.BobCommunication
-import com.protogenefactory.ioiomaster.client.models.{Step, Project}
+import com.protogenefactory.ioiomaster.client.models.{Project, Step}
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 
@@ -30,7 +30,7 @@ object ProjectActivity {
 
 }
 
-class ProjectActivity extends SFragmentActivity with TraitContext[Context] with TagUtil with PositionsFragment.PositionsFragmentListener {
+class ProjectActivity extends SFragmentActivity /* with TraitContext[Context] */ with TagUtil with PositionsFragment.PositionsFragmentListener {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
@@ -174,7 +174,7 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   override def onSaveInstanceState(outState: Bundle) {
 
-    val currentStep = viewPager.currentItem
+    val currentStep = viewPager.getCurrentItem
 
     info(s"ProjectActivity.onSaveInstanceState() currentStep=$currentStep")
 
@@ -220,8 +220,6 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
       case R.id.action_autoplay     =>
         item.setChecked(!item.isChecked)
         t(onAutoplayChanged(item.isChecked))
-
-      case R.id.action_setServerIp  => t(showServerIpDialog())
 
       case _ => super.onOptionsItemSelected(item)
 
@@ -299,54 +297,46 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
 
   }
 
+  //TODO update
   def playProject() {
 
     info("ProjectActivity.playProject")
 
-    /*
-    new AlertDialogBuilder("Playing project", "The project is playing...") {
-      negativeButton("Cancel" /*android.R.string.cancel, toast("Cancelled")*/)
-    }.show()
-    */
+    try {
 
-    defaultSharedPreferences.getString(BobApplication.Preferences.SERVER_IP, "") match {
-      case ""       => showServerIpDialog()
-      case serverIP =>
-        try {
-          //TODO show play dialog
-          // The communication layer with the server
-          val mCommunication: BobCommunication = new BobCommunication(this)
+      //TODO show play dialog
+      // The communication layer with the server
+      val mCommunication: BobCommunication = new BobCommunication(this)
 
-          mCommunication.send(serverIP, project)
+      mCommunication.send(application.serverIP, project)
 
-          val progress = new android.app.ProgressDialog(this)
-          progress.setTitle("Playing the project...")
-          progress.setMessage("Touch outside to cancel")
-          progress.setIndeterminate(true)
-          progress.setCancelable(true)
-          progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new OnClickListener {
-            override def onClick(dialog: DialogInterface, which: Int): Unit = dialog.cancel()
-          })
-          progress.setOnCancelListener(new DialogInterface.OnCancelListener {
-            override def onCancel(dialog: DialogInterface): Unit = {
-              dialog.cancel()
-              //TODO cancel the playing
-              alert("TODO","cancel")
-            }
-          })
-          progress.show()
-
-          new java.util.Timer().schedule(new java.util.TimerTask() {
-            override def run() {
-              progress.dismiss()
-            }
-          }, project.duration)
-
-        } catch {
-          case e: Throwable =>
-            alert("Network error", "Check that the server app is running and connected to the same network that this device.")
-            e.printStackTrace()
+      val progress = new android.app.ProgressDialog(this)
+      progress.setTitle("Playing the project...")
+      progress.setMessage("Touch outside to cancel")
+      progress.setIndeterminate(true)
+      progress.setCancelable(true)
+      progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new OnClickListener {
+        override def onClick(dialog: DialogInterface, which: Int): Unit = dialog.cancel()
+      })
+      progress.setOnCancelListener(new DialogInterface.OnCancelListener {
+        override def onCancel(dialog: DialogInterface): Unit = {
+          dialog.cancel()
+          //TODO cancel the playing
+          alert("TODO","cancel")
         }
+      })
+      progress.show()
+
+      new java.util.Timer().schedule(new java.util.TimerTask() {
+        override def run() {
+          progress.dismiss()
+        }
+      }, project.duration)
+
+    } catch {
+      case e: Throwable =>
+        alert("Network error", "Check that the server app is running and connected to the same network that this device.")
+        e.printStackTrace()
     }
 
   }
@@ -358,12 +348,6 @@ class ProjectActivity extends SFragmentActivity with TraitContext[Context] with 
       .edit
       .putBoolean(BobApplication.Preferences.AUTOPLAY, checked)
       .apply()
-
-  }
-
-  def showServerIpDialog() {
-
-    ServerIPDialogFragment.show(supportFragmentManager, "serverIpDialog")
 
   }
 

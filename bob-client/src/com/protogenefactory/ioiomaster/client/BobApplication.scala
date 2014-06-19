@@ -1,11 +1,13 @@
 package com.protogenefactory.ioiomaster.client
 
+import java.util.UUID
+
 import android.app.Application
 import android.database.sqlite.SQLiteDatabase
-import com.protogenefactory.ioiomaster.client.models.dao.{ProjectDao, BoardConfigDao}
+import com.protogenefactory.ioiomaster.client.BobApplication.Preferences
+import com.protogenefactory.ioiomaster.client.models.dao.{BoardConfigDao, ProjectDao}
 import com.protogenefactory.ioiomaster.client.models.helpers.BobSqliteOpenHelper
-import com.protogenefactory.ioiomaster.client.models.{Step, Project, ServoConfig, BoardConfig}
-import java.util.UUID
+import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig, Step}
 import org.scaloid.common._
 
 object BobApplication {
@@ -21,7 +23,7 @@ object BobApplication {
 
 }
 
-class BobApplication extends Application with TagUtil {
+class BobApplication extends Application with SContext {
 
   implicit override val loggerTag = LoggerTag("BobClient")
 
@@ -100,6 +102,16 @@ class BobApplication extends Application with TagUtil {
 
     super.onTerminate()
 
+  }
+
+  def serverIP =
+    defaultSharedPreferences.getString(Preferences.SERVER_IP, "")
+
+  def serverIP(serverIP: String) {
+    defaultSharedPreferences
+      .edit
+      .putString(Preferences.SERVER_IP, serverIP)
+      .apply()
   }
 
 }
