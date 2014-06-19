@@ -7,6 +7,8 @@ import org.scaloid.common._
 
 class PlayActivity extends SActivity {
 
+  implicit override val loggerTag = LoggerTag("Bob")
+
   val joysticks = Seq("Wheels", "Head", "Arm")
 
   val mp3s = Seq("Hello!", "Bye-bye!", "Hi, I'm Bob!")
@@ -19,6 +21,9 @@ class PlayActivity extends SActivity {
 
   onCreate {
 
+    info("PlayActivity.onCreate()")
+
+    // Force landscape
     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
 
     setTitle(s"$getTitle connected to $serverIP")
@@ -39,7 +44,6 @@ class PlayActivity extends SActivity {
               toast(s"Play project ${p.name}")
           })
           .textSize(12.dip)
-          .fill
 
         )
       }.<<.wrap.Weight(1.0f).>>
@@ -47,6 +51,7 @@ class PlayActivity extends SActivity {
       /**
        * Joysticks column
        */
+      /*
       this += new SVerticalLayout {
 
         STextView("Joysticks")
@@ -59,6 +64,7 @@ class PlayActivity extends SActivity {
             .fill
         )
       }.<<.wrap.Weight(1.0f).>>
+      */
 
       /**
        * Sounds column
@@ -71,7 +77,6 @@ class PlayActivity extends SActivity {
         mp3s.map(m =>
           SButton(m, toast(s"Play sound $m"))
           .textSize(12.dip)
-          .fill
         )
       }.<<.wrap.Weight(1.0f).>>
 
