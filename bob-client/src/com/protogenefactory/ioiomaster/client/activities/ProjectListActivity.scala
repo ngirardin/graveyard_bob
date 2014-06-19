@@ -1,14 +1,16 @@
 package com.protogenefactory.ioiomaster.client.activities
 
+import java.util.UUID
+
 import android.view.ContextMenu.ContextMenuInfo
 import android.view._
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget._
-import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.R
+import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
-import java.util.UUID
 import org.scaloid.common._
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -58,9 +60,7 @@ class ProjectListActivity extends SActivity {
 
     info("ProjectListActivity.onCreate()")
 
-    contentView = {
-      list
-    }
+    contentView = list
 
   }
 
