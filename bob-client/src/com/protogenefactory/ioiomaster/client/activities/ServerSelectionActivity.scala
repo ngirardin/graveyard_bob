@@ -3,6 +3,7 @@ package com.protogenefactory.ioiomaster.client.activities
 import java.util.regex.Pattern
 
 import android.view.Gravity
+import com.protogenefactory.ioiomaster.client.BobApplication
 import org.scaloid.common._
 
 class ServerSelectionActivity extends SActivity {
@@ -11,7 +12,7 @@ class ServerSelectionActivity extends SActivity {
 
   final val IP_REGEXP = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 
-  lazy val application= getApplication.asInstanceOf[BobApplication]
+  lazy val application = getApplication.asInstanceOf[BobApplication]
 
   lazy val editTextIP : SEditText = new SEditText("Server IP address") {
 
