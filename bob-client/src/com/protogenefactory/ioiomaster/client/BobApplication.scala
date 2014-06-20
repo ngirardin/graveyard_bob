@@ -53,8 +53,8 @@ class BobApplication extends Application with SContext {
     }.toVector
 
     val configs = List(
-      BoardConfig("Servos on pins 3 and 4", servoConfigs(List(3, 4)                 )),
-      BoardConfig("Servos on pins 3 to 9" , servoConfigs(List(3, 4, 5, 6, 7, 10, 11)))
+      BoardConfig("Servos on pins 3 and 4", servoConfigs(List(3, 4)               )),
+      BoardConfig("Servos on pins 1 to 7" , servoConfigs(List(1, 2, 3, 4, 5, 6, 7)))
     )
 
     configs.foreach(boardConfigDao.create)
