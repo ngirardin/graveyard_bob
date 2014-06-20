@@ -34,7 +34,7 @@ object BobSqliteOpenHelper {
 class BobSqliteOpenHelper(context: Context) extends SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
   @Override def onCreate(database: SQLiteDatabase) {
-    Log.i("BobClient", "BobSqliteOpenHelper.onCreate() Creating the database")
+    Log.i("Bob", "BobSqliteOpenHelper.onCreate() Creating the database")
     database.execSQL(BOARDCONFIG_CREATE_TABLE)
     database.execSQL(PROJECT_CREATE_TABLE)
   }

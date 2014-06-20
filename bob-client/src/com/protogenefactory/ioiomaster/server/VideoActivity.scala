@@ -8,7 +8,7 @@ import org.scaloid.common._
 
 class VideoActivity extends SActivity {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val mSurfaceView = new SurfaceView(this, null)
 

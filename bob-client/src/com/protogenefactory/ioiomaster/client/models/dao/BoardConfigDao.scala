@@ -6,13 +6,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.SystemClock
 import com.protogenefactory.ioiomaster.client.models.helpers.BobSqliteOpenHelper
 import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
-import com.protogenefactory.ioiomaster.client.models.{ServoConfig, BoardConfig}
+import com.protogenefactory.ioiomaster.client.models.{BoardConfig, ServoConfig}
 import org.scaloid.common._
 import spray.json._
 
 case class BoardConfigDao(database: SQLiteDatabase) extends TagUtil {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   def create(boardConfig: BoardConfig) {
 

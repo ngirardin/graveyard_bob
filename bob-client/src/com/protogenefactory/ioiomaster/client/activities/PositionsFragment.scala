@@ -8,7 +8,7 @@ import android.view._
 import android.view.inputmethod.EditorInfo
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.{SeekBar, TextView}
-import com.protogenefactory.ioiomaster.client.activities.PositionsFragment.{States, Extras, PositionsFragmentListener}
+import com.protogenefactory.ioiomaster.client.activities.PositionsFragment.{Extras, PositionsFragmentListener, States}
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Step}
 import com.protogenefactory.ioiomaster.client.utils.{PercentageInputFilter, StepDurationInputFilter}
 import org.scaloid.common._
@@ -61,7 +61,7 @@ object PositionsFragment {
 
 class PositionsFragment extends SFragment with TagUtil {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val stepIndex    = getArguments.getInt         (Extras.STEP_INDEX ).ensuring(_ > -1, "Invalid position")
   lazy val mStep        = getArguments.getSerializable(Extras.STEP       ).asInstanceOf[Step]

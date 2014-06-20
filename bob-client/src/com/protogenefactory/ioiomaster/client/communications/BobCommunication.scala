@@ -1,27 +1,27 @@
 package com.protogenefactory.ioiomaster.client.communications
 
+import java.io.{BufferedReader, InputStreamReader}
+import java.net.URLEncoder
+
 import android.app.Activity
-import android.content.{DialogInterface, Context}
-import android.net.{NetworkInfo, ConnectivityManager}
+import android.content.Context
+import android.net.{ConnectivityManager, NetworkInfo}
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.activities.ProjectActivity
 import com.protogenefactory.ioiomaster.client.models.Project
-import java.io.{InputStreamReader, BufferedReader}
+import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
-import org.apache.http.message.BasicNameValuePair
 import org.apache.http.{HttpResponse, HttpStatus}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.scaloid.common._
 import spray.json._
-import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
-import org.apache.http.params.HttpParams
-import java.net.URLEncoder
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   implicit val context: Activity = projectActivity
 

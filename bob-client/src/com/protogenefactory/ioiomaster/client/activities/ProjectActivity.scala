@@ -32,7 +32,7 @@ object ProjectActivity {
 
 class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragment.PositionsFragmentListener {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   implicit val activity: Activity = this
 

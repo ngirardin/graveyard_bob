@@ -5,10 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.view.inputmethod.EditorInfo
-import android.view.{MenuItem, Menu, View}
+import android.view.{Menu, MenuItem, View}
 import android.widget._
-import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.R
+import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.activities.NewProjectActivity.STATES
 import com.protogenefactory.ioiomaster.client.models.Project
 import org.scaloid.common._
@@ -24,7 +24,7 @@ object NewProjectActivity {
 
 class NewProjectActivity extends SActivity {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val application    = getApplication.asInstanceOf[BobApplication]
   lazy val boardConfigDao = application.boardConfigDao

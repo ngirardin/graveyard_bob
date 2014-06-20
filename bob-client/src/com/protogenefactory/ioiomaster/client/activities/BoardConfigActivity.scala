@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
-import android.view.{View, Menu, MenuItem}
+import android.view.{Menu, MenuItem, View}
 import android.widget.AdapterView
-import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.activities.BoardConfigActivity.{STATES, RESULTS}
+import com.protogenefactory.ioiomaster.client.BobApplication
+import com.protogenefactory.ioiomaster.client.activities.BoardConfigActivity.{RESULTS, STATES}
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, ServoConfig}
 import org.scaloid.common._
 
@@ -29,7 +29,7 @@ object BoardConfigActivity {
 
 class BoardConfigActivity extends SActivity {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val boardConfigDao = getApplication.asInstanceOf[BobApplication].boardConfigDao
 

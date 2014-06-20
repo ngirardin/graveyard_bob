@@ -1,6 +1,6 @@
 package com.protogenefactory.ioiomaster.client.utils
 
-import android.text.{Spanned, InputFilter}
+import android.text.{InputFilter, Spanned}
 import android.util.Log
 import com.protogenefactory.ioiomaster.client.models.Step
 
@@ -21,17 +21,14 @@ trait RangeInputFilter extends InputFilter {
 
       val input: Int = Integer.parseInt(newVal)
 
-      if (range contains input) {
-        //Log.d("BobClient", s"RangeFilter - Value $input between ${range.start} and ${range.end}")
+      if (range contains input)
         return null
-      }
 
     } catch {
-      case e: Throwable => Log.d("BobClient", s"RangeFilter - Value $newVal is not an integer")
+      case e: Throwable => Log.d("Bob", s"RangeInputFilter.filter() - Value $newVal is not an integer")
     }
 
-    //Log.d("BobClient", s"RangeFilter - Value $newVal outside ${range.start} and ${range.end}")
-    /* return */ ""
+    return ""
 
   }
 

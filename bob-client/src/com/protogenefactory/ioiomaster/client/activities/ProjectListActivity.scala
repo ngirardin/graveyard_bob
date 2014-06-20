@@ -16,7 +16,7 @@ import scala.collection.mutable.ListBuffer
 
 class ProjectListActivity extends SActivity {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val projectDao = getApplication.asInstanceOf[BobApplication].projectsDao
 
