@@ -1,5 +1,6 @@
 package com.protogenefactory.ioiomaster.client.activities
 
+import java.util.Date
 import java.util.regex.Pattern
 
 import android.view.Gravity
@@ -56,11 +57,21 @@ class ServerSelectionActivity extends SActivity {
 
         this += new STextView("Server IP")
 
-        this += editTextIP
+        this += editTextIP.<<(150.dip, WRAP_CONTENT).>>
 
       }.wrap.>>
 
-      this += buttonConnect.<<.wrap.>>
+      this += buttonConnect.<<(200.dip, WRAP_CONTENT).>>
+
+      this += {
+        val pm = getPackageManager().getPackageInfo(getPackageName(), 0)
+        val version   = pm.versionName
+        val buildDate = new Date(pm.lastUpdateTime)
+
+        new STextView(s"Version $version\nBuilt $buildDate")
+          .marginTop(64)
+
+      }.wrap.>>
 
       gravity(Gravity.CENTER)
 
