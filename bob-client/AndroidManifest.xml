@@ -13,8 +13,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.usb.accessory" />
 
-	<!-- API 14 = Android 4.0 from 2011 -->
+    <!-- API 14 = Android 4.0 from 2011 -->
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
@@ -38,7 +39,8 @@
 
         <activity
             android:name=".client.activities.PlayActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
         </activity>
 
         <activity
@@ -58,6 +60,24 @@
 
 
         <!-- ****** SERVER ***** -->
+
+        <service android:name=".server.services.ServerService" />
+
+        <activity
+            android:name=".server.activities.StatusActivity"
+            android:launchMode="singleInstance"
+            android:label="@string/app_name">
+
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" />
+
+        </activity>
+
         <!--
         <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
 
@@ -67,7 +87,6 @@
         </activity>
         -->
 
-        <service android:name=".services.ServerService" />
 
     </application>
 

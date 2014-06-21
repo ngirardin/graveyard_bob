@@ -69,6 +69,26 @@ case class ProjectDao (
 
   }
 
+  def isEmpty(): Boolean = {
+
+    val cursor = database.query(
+      BobSqliteOpenHelper.PROJECT_TABLE,
+      BobSqliteOpenHelper.PROJECT_ALL,
+      null,
+      null,
+      null,
+      null,
+      null
+    )
+
+    val empty = cursor.getCount() == 0
+
+    cursor.close()
+
+    empty
+
+  }
+
   def findById(id: String): Project = {
 
     val now = SystemClock.elapsedRealtime()

@@ -8,6 +8,7 @@ import com.protogenefactory.ioiomaster.client.BobApplication.Preferences
 import com.protogenefactory.ioiomaster.client.models.dao.{BoardConfigDao, ProjectDao}
 import com.protogenefactory.ioiomaster.client.models.helpers.BobSqliteOpenHelper
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig, Step}
+import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
 
 object BobApplication {
@@ -25,7 +26,7 @@ object BobApplication {
 
 class BobApplication extends Application with SContext {
 
-  implicit override val loggerTag = LoggerTag("BobClient")
+  implicit override val loggerTag = LoggerTag("Bob")
 
   lazy val sqliteOpenHelper : BobSqliteOpenHelper = new BobSqliteOpenHelper(this)
   lazy val sqliteDatabase   : SQLiteDatabase      = sqliteOpenHelper.getWritableDatabase
@@ -37,8 +38,11 @@ class BobApplication extends Application with SContext {
 
     info("BobApplication.onCreate()")
 
-    if (/*BuildConfig.DEBUG && */ projectsDao.findAll().isEmpty)
+    if (/*BuildConfig.DEBUG && */ projectsDao.isEmpty)
       firstRun()
+
+    // Start the server service
+    startService[ServerService]
 
     super.onCreate()
 
@@ -89,18 +93,6 @@ class BobApplication extends Application with SContext {
         Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100))
       ))
     )
-
-  }
-
-  override def onTerminate() {
-
-    info("BobApplication.onTerminate() Closing DB and open helper")
-
-    // Close the database and the DB helper
-    sqliteDatabase.close()
-    sqliteOpenHelper.close()
-
-    super.onTerminate()
 
   }
 

@@ -1,6 +1,5 @@
 package com.protogenefactory.ioiomaster.client.activities
 
-import android.content.pm.ActivityInfo
 import android.view.Gravity
 import com.protogenefactory.ioiomaster.client.BobApplication
 import org.scaloid.common._
@@ -23,9 +22,6 @@ class PlayActivity extends SActivity {
 
     info("PlayActivity.onCreate()")
 
-    // Force landscape
-    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-
     setTitle(s"$getTitle connected to $serverIP")
 
     contentView = new SLinearLayout {
@@ -41,9 +37,9 @@ class PlayActivity extends SActivity {
         projects.map(p =>
 
           SButton(p.name, {
-              toast(s"Play project ${p.name}")
+            toast(s"Play project ${p.name}")
           })
-          .textSize(12.dip)
+            .textSize(12.dip)
 
         )
       }.<<.wrap.Weight(1.0f).>>
@@ -76,7 +72,7 @@ class PlayActivity extends SActivity {
 
         mp3s.map(m =>
           SButton(m, toast(s"Play sound $m"))
-          .textSize(12.dip)
+            .textSize(12.dip)
         )
       }.<<.wrap.Weight(1.0f).>>
 
