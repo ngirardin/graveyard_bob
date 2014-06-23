@@ -149,41 +149,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     throw new NotImplementedError()
   }
 
-  /*
-  override def createIOIOLooper(p1: String, p2: scala.Any): IOIOLooper = new BaseIOIOLooper {
-
-    var port2 : PwmOutput = null
-    var port3 : PwmOutput = null
-    var port4 : PwmOutput = null
-
-    override def setup() {
-      notification("IOIO connected", "Touch for more information")
-      toast("setup")
-      port2 = ioio_.openPwmOutput(2, 50)
-      port3 = ioio_.openPwmOutput(3, 50)
-      port4 = ioio_.openPwmOutput(4, 50)
-    }
-
-    override def loop() {
-      toast("1")
-      port2.setPulseWidth(1000)
-      port3.setPulseWidth(1000)
-      port4.setPulseWidth(1000)
-      Thread.sleep(500)
-      toast("2")
-      port2.setPulseWidth(1500)
-      port3.setPulseWidth(1500)
-      port4.setPulseWidth(1500)
-      Thread.sleep(500)
-      toast("3")
-      port2.setPulseWidth(2000)
-      port3.setPulseWidth(2000)
-      port4.setPulseWidth(2000)
-    }
-
-  }
-  */
-
   override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
     final val CLK     = Sequencer.Clock.CLK_2M; /* 0.5us periods */
@@ -260,7 +225,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       if (now - lastLog > 100) {
         lastLog = now
-        info(s"SequencerLooper.push() $currentSlice/${mProject.slices}")
+        info(s"SequencerLooper.push() $currentSlice/${mProject.slices.length}")
       }
 
       currentSlice = currentSlice + 1
