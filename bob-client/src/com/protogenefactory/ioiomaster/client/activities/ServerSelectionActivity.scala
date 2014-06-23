@@ -78,9 +78,7 @@ class ServerSelectionActivity extends SActivity {
 
       }.wrap.>>
 
-      gravity(Gravity.CENTER)
-
-    }
+    }.gravity(Gravity.CENTER)
 
   }
 

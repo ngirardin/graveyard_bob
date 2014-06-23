@@ -1,10 +1,11 @@
 package com.protogenefactory.ioiomaster.server.services
 
-import android.app.{Notification, NotificationManager, Service}
-import android.content.{Context, Intent}
+import android.app.{Notification, Service}
+import android.content.Intent
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.models.Project
+import com.protogenefactory.ioiomaster.client.models.{Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
+import ioio.lib.api.PwmOutput
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
 import org.scaloid.common._
@@ -40,8 +41,6 @@ class ServerService extends LocalService with IOIOLooperProvider {
 
     /*
     // Start the IOIO helper
-    helper_.create()
-    startHelper()
 
     // Start the web server
     bobServer.start()
@@ -54,24 +53,26 @@ class ServerService extends LocalService with IOIOLooperProvider {
 
   }
 
-  var count = -1
-
   /**
    *
    * Create the "IOIO connected" notification and start the looper
    */
   def startIOIOLooper() {
+
     info("ServerService.startIOIOLooper")
-    notification("IOIO connected", "Touch for more information")
-    count = 0
+    helper_.create()
+    startHelper()
+
   }
 
-  def getIOIOStatus(): String = {
-    info("ServerService.getIOIOStatus")
-    count = count + 1
-    s"Status: $count"
+  def isIOIOStarted(): Boolean = {
+
+    info(s"ServerService.getIOIOStatus() connected=$started_")
+    started_
+
   }
 
+  /*
   def playProject(project: Project) {
 
     toast(s"ServerService.playProject($project)")
@@ -81,6 +82,7 @@ class ServerService extends LocalService with IOIOLooperProvider {
     mProject = project
 
   }
+  */
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
 
@@ -88,31 +90,9 @@ class ServerService extends LocalService with IOIOLooperProvider {
 
     info(s"ServerService.onStartCommand() intent=$intent, startId=$startId")
 
-    /*
-    if (intent != null && intent.getAction() == Actions.STOP) {
-
-      //TODO remove
-      toast("onStartCommand() Received stop action from the notification")
-      info("onStartCommand() Received stop action from the notification")
-
-      // User clicked the notification. Need to stop the service.
-      cancelNotifAndStop()
-
-    }
-    */
-
     // Don't stop on application exit
     Service.START_STICKY
 
-  }
-
-  private def cancelNotifAndStop() {
-    toast("ServiceServer.Cancel notif and stop")
-
-    val nm = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
-    nm.cancel(0)
-
-    stopSelf()
   }
 
   onDestroy {
@@ -125,8 +105,10 @@ class ServerService extends LocalService with IOIOLooperProvider {
     */
   }
 
-  /*
   private def startHelper(/*intent: Intent*/) {
+
+    info(s"ServerService.startHelper() started=$started_")
+
     if (!started_) {
       helper_.start()
       started_ = true
@@ -141,25 +123,29 @@ class ServerService extends LocalService with IOIOLooperProvider {
   }
 
   private def stopHelper() {
+
     if (started_) {
       helper_.stop()
       started_ = false
     }
+
   }
-  */
 
   override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
+    var ports: Vector[PwmOutput] = null
+
     override def setup() {
 
-      info(s"ServerService.IOIOLooper.setup() mProject=$mProject")
-      toast(s"ServerService.IOIOLooper.setup() mProject=$mProject")
+      info(s"ServerService.IOIOLooper.setup() Openning PWM port ${ServoConfig.PERIPHERAL_PORTS.mkString(", ")}")
+      toast(s"ServerService.IOIOLooper.setup() Openning PWM port ${ServoConfig.PERIPHERAL_PORTS.mkString(", ")}")
 
-      while (mProject == null) {
-        Thread.sleep(200)
-      }
+      ports = ServoConfig.PERIPHERAL_PORTS.map(pin =>
+        ioio_.openPwmOutput(pin, 50)
+      )
 
-      ioio_.openDigitalOutput(1)
+      notification("IOIO connected", "Touch for more information")
+
     }
 
     override def loop() {
@@ -172,25 +158,23 @@ class ServerService extends LocalService with IOIOLooperProvider {
     }
 
     override def disconnected() {
+
       info(s"ServerService.IOIOLooper.disconnected()")
       toast(s"ServerService.IOIOLooper.disconnected()")
-      /*
-      cancelNotifAndStop()
-      */
-      stopSelf()
+
+      stopHelper()
+      stopForeground(true)
+
     }
 
     override def incompatible() {
+
       alert("Incompatible board", "This app need a board with at least the V5 firmware")
-      /*
-      cancelNotifAndStop()
-      */
+
+      // getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager].cancel(0)
+
     }
 
-  }
-
-  override def onTaskRemoved(rootIntent: Intent) {
-    info("ServerService.onTaskRemoved")
   }
 
   private def notification(title: String, message: String) {
@@ -203,21 +187,10 @@ class ServerService extends LocalService with IOIOLooperProvider {
         .setTicker(title)
         .setContentTitle(title)
         .setContentText(message)
-        .setContentIntent(
-          // HACK: PendingIntent.FLAG_CANCEL_CURRENT needed to fix security permissions issues on KitKat as in
-          // https://code.google.com/p/android/issues/detail?id=61850
-          pendingActivity[StatusActivity]
-          /*
-          PendingIntent.getService(
-            this, /*requestCode=*/0 , new Intent(Actions.STOP, null, this, this.getClass), PendingIntent.FLAG_CANCEL_CURRENT
-          )
-          */
-        )
+        .setContentIntent(pendingActivity[StatusActivity])
         .build()
 
-      val id = new Random().nextInt
-
-      startForeground(id, notification)
+      startForeground(new Random().nextInt, notification)
 
     }
 
