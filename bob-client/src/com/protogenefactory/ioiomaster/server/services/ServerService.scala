@@ -8,7 +8,7 @@ import com.protogenefactory.ioiomaster.client.connections.Connection
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
-import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue}
+import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue, ChannelCuePwmPosition}
 import ioio.lib.api.{DigitalOutput, Sequencer}
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
@@ -126,15 +126,20 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
     mProject.synchronized {
 
+      //TODO check that project is already playing
+      /*
       if (mProject.project == null) {
+      */
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}'")
         toast(s"ServerService.playProject() project=[${project.id}] ${project.name}")
         mProject.setProject(project)
         mProject.notifyAll()
+      /*
       } else {
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}' Project already playing")
         toast("Project already playing!")
       }
+      */
 
     }
 
@@ -144,8 +149,42 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     throw new NotImplementedError()
   }
 
-  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
+  /*
+  override def createIOIOLooper(p1: String, p2: scala.Any): IOIOLooper = new BaseIOIOLooper {
 
+    var port2 : PwmOutput = null
+    var port3 : PwmOutput = null
+    var port4 : PwmOutput = null
+
+    override def setup() {
+      notification("IOIO connected", "Touch for more information")
+      toast("setup")
+      port2 = ioio_.openPwmOutput(2, 50)
+      port3 = ioio_.openPwmOutput(3, 50)
+      port4 = ioio_.openPwmOutput(4, 50)
+    }
+
+    override def loop() {
+      toast("1")
+      port2.setPulseWidth(1000)
+      port3.setPulseWidth(1000)
+      port4.setPulseWidth(1000)
+      Thread.sleep(500)
+      toast("2")
+      port2.setPulseWidth(1500)
+      port3.setPulseWidth(1500)
+      port4.setPulseWidth(1500)
+      Thread.sleep(500)
+      toast("3")
+      port2.setPulseWidth(2000)
+      port3.setPulseWidth(2000)
+      port4.setPulseWidth(2000)
+    }
+
+  }
+  */
+
+  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
     final val CLK     = Sequencer.Clock.CLK_2M; /* 0.5us periods */
     final val INITIAL = 3000; /* 1500 us * (1 / 0.5microseconds) */
@@ -157,9 +196,9 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
       new Sequencer.ChannelConfigPwmPosition(CLK, PERIOD, INITIAL, new DigitalOutput.Spec(pin))
     ).toArray
 
-    val channelCues = ServoConfig.PERIPHERAL_PORTS.map(pin =>
+    val channelCues : Array[ChannelCuePwmPosition] = ServoConfig.PERIPHERAL_PORTS.toArray.map(pin =>
       new Sequencer.ChannelCuePwmPosition()
-    ).toArray
+    )
 
     override def setup() /*throws ConnectionLostException, InterruptedException*/ {
 
@@ -197,25 +236,25 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       val slices = mProject.slices(currentSlice)
 
-//      info(s"SequencerLooper.push() slices=$slices")
+      //info(s"SequencerLooper.push() slices=$slices")
 
-      val cues = channelCues.zipWithIndex.map { case (channel, i) =>
+      channelCues.zipWithIndex.foreach { case (channel, i) =>
 
         if (i < slices.length) {
 
           val pulseWidth = slices(i)
-//          info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> $pulseWidth")
+          //info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> $pulseWidth")
           channel.pulseWidth = pulseWidth
-          channel.asInstanceOf[ChannelCue]
 
         } else {
-//          info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> default")
-          channel.asInstanceOf[ChannelCue]
+          //info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> default")
         }
 
       }
 
-      sequencer_.push(cues, SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
+      val channelCuesArray = channelCues.map(_.asInstanceOf[ChannelCue])
+
+      sequencer_.push(channelCuesArray, SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
 
       val now = SystemClock.elapsedRealtime()
 
@@ -235,6 +274,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
         mProject.synchronized {
 
           mProject.project = null
+          mProject.notifyAll()
 
           info("SequencerLooper.push() Sequence done, waiting for a new project")
           mProject.wait()
@@ -271,8 +311,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     override def incompatible() {
 
       alert("Incompatible board", "This app need a board with at least the V5 firmware")
-
-      // getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager].cancel(0)
+      stopForeground(true)
 
     }
 
