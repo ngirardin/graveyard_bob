@@ -2,7 +2,7 @@ import android.Keys._
 
 android.Plugin.androidBuild
 
-name := "ioio-master-control"
+name := "ioiomastercontrol"
 
 scalaVersion := "2.11.0"
 
