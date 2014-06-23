@@ -1,15 +1,18 @@
 package com.protogenefactory.ioiomaster.client.connections
 
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
+import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
 
-class LocalConnection extends Connection with TagUtil {
+class LocalConnection(serverService: LocalServiceConnection[ServerService]) extends Connection with TagUtil {
 
   override def playProject(project: Project) {
 
-    //TODO play local project
     info(s"playProject() project=${project.id}")
-    throw new NotImplementedError("LocalConnection.playProject")
+
+    serverService.run(s =>
+      s.playProject(project)
+    )
 
   }
 

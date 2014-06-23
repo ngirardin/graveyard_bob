@@ -6,6 +6,7 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.{AdapterView, ArrayAdapter, FrameLayout, ListView}
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
+import com.protogenefactory.ioiomaster.client.models.Project
 import org.scaloid.common._
 
 class PlayActivity extends SActivity {
@@ -40,12 +41,15 @@ class PlayActivity extends SActivity {
           STextView("Sequences")
             .gravity(Gravity.CENTER)
 
-          projects.map(p =>
+          projects.foreach(p =>
 
-            SButton(p.name, {
-              toast(s"Play project ${p.name}")
-            })
-              .textSize(12.dip)
+            this += new SButton(p.name) {
+              onClick({
+                application.connection.playProject(tag.asInstanceOf[Project])
+              })
+            }
+            .tag(p)
+            .textSize(12.dip)
 
           )
         }.<<.wrap.Weight(1.0f).>>

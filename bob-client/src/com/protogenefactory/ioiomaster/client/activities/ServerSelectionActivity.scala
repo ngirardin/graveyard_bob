@@ -40,12 +40,18 @@ class ServerSelectionActivity extends SActivity {
   lazy val buttonConnectLocal: SButton = new  SButton("Use local IOIO board") {
     onClick({
 
-      application.setLocalConnection()
+      application.setLocalConnection(serverService)
 
       startActivity[PlayActivity]
 
       // Remove itself from the stack
       finish()
+    })
+
+    serverService.run(s => {
+      val available = s.isIOIOStarted()
+      info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: $available")
+      enabled(available)
     })
   }
 

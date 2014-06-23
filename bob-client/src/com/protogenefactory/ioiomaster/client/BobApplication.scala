@@ -86,8 +86,6 @@ class BobApplication extends Application with SContext {
         Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
         Step( 500, Vector(100,   0,  60,  40,  80, 800,  60)),
         Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80)),
-        Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100)),
-
         Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0)),
         Step(1000, Vector(100,   0,  20,  80, 100,  60,  20)),
         Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
@@ -99,11 +97,9 @@ class BobApplication extends Application with SContext {
 
   }
 
-  def setLocalConnection() {
-
+  def setLocalConnection(serverService: LocalServiceConnection[ServerService]) {
     info("BobApplication.setLocalConnection()")
-    connection = new LocalConnection()
-
+    connection = new LocalConnection(serverService)
   }
 
   def setRemoteConnection(remoteIP: String) {

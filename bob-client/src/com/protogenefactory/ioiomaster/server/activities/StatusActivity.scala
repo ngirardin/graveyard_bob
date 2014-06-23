@@ -36,7 +36,6 @@ class StatusActivity extends SActivity {
           info("StatusActivity.onCreate() Asking the service to start the IOIO looper")
 
           serverService.run { s =>
-            toast("IOIO Connected, start looper")
             s.startIOIOLooper()
             // Don't show the activity, only the notification that the service creates
             finish()

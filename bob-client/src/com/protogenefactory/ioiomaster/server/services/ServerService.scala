@@ -2,17 +2,30 @@ package com.protogenefactory.ioiomaster.server.services
 
 import android.app.{Notification, Service}
 import android.content.Intent
+import android.os.SystemClock
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.models.{Project, ServoConfig}
+import com.protogenefactory.ioiomaster.client.connections.Connection
+import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
-import ioio.lib.api.PwmOutput
+import com.protogenefactory.ioiomaster.server.services.ServerService._
+import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue}
+import ioio.lib.api.{DigitalOutput, Sequencer}
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
 import org.scaloid.common._
 
 import scala.util.Random
 
-class ServerService extends LocalService with IOIOLooperProvider {
+object ServerService {
+
+  final val PERIOD = 20000 // microseconds (50hz = 0.02s = 20ms = 20.000us)
+  final val MIN = 1000 * 2 // periods      (1000us * 0.5us periods)
+  final val MAX = 2000 * 2 // periods      (2000us * 0.5us periods)
+  final val PERCENT = ((MAX - MIN).toFloat / 100f).intValue()
+
+}
+
+class ServerService extends LocalService with IOIOLooperProvider with Connection {
 
   override implicit val loggerTag = LoggerTag("Bob")
 
@@ -33,56 +46,12 @@ class ServerService extends LocalService with IOIOLooperProvider {
   /**
    * The project being played
    */
-  var mProject: Project = null
+  var mProject: ProjectLock = ProjectLock.empty
 
   onCreate {
-
     info(s"ServerService.onCreate()")
-
-    /*
-    // Start the IOIO helper
-
-    // Start the web server
-    bobServer.start()
-    */
-
-    /*
-    info("server.ServerService.onCreate() Waiting for a request to launch the helper...")
-    info(s"                                Listening on $ips")
-    */
-
   }
 
-  /**
-   *
-   * Create the "IOIO connected" notification and start the looper
-   */
-  def startIOIOLooper() {
-
-    info("ServerService.startIOIOLooper")
-    helper_.create()
-    startHelper()
-
-  }
-
-  def isIOIOStarted(): Boolean = {
-
-    info(s"ServerService.getIOIOStatus() connected=$started_")
-    started_
-
-  }
-
-  /*
-  def playProject(project: Project) {
-
-    toast(s"ServerService.playProject($project)")
-    info(s"ServerService.playProject($project)")
-
-    //TODO check config
-    mProject = project
-
-  }
-  */
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
 
@@ -105,6 +74,23 @@ class ServerService extends LocalService with IOIOLooperProvider {
     */
   }
 
+  /**
+   *
+   * Create the "IOIO connected" notification and start the looper
+   */
+  def startIOIOLooper() {
+
+    info("ServerService.startIOIOLooper")
+    helper_.create()
+    startHelper()
+
+  }
+
+  def isIOIOStarted(): Boolean = {
+    info(s"ServerService.getIOIOStatus() connected=$started_")
+    started_
+  }
+
   private def startHelper(/*intent: Intent*/) {
 
     info(s"ServerService.startHelper() started=$started_")
@@ -112,14 +98,18 @@ class ServerService extends LocalService with IOIOLooperProvider {
     if (!started_) {
       helper_.start()
       started_ = true
-      /*
     } else {
+      info(s"ServerService.startHelper() already started, restarting")
+      /*
       if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-        toast("start FLAG_ACTIVITY_NEW_TASK")
-        helper_.restart()
+      */
+      toast("ServerService.startHelper() Restaring helper")
+      helper_.restart()
+      /*
       }
-    */
+      */
     }
+
   }
 
   private def stopHelper() {
@@ -131,29 +121,140 @@ class ServerService extends LocalService with IOIOLooperProvider {
 
   }
 
-  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
-    var ports: Vector[PwmOutput] = null
+  override def playProject(project: Project) {
 
-    override def setup() {
+    mProject.synchronized {
 
-      info(s"ServerService.IOIOLooper.setup() Openning PWM port ${ServoConfig.PERIPHERAL_PORTS.mkString(", ")}")
-      toast(s"ServerService.IOIOLooper.setup() Openning PWM port ${ServoConfig.PERIPHERAL_PORTS.mkString(", ")}")
-
-      ports = ServoConfig.PERIPHERAL_PORTS.map(pin =>
-        ioio_.openPwmOutput(pin, 50)
-      )
-
-      notification("IOIO connected", "Touch for more information")
+      if (mProject.project == null) {
+        info(s"ServerService.playProject() project=[${project.id}] '${project.name}'")
+        toast(s"ServerService.playProject() project=[${project.id}] ${project.name}")
+        mProject.setProject(project)
+        mProject.notifyAll()
+      } else {
+        info(s"ServerService.playProject() project=[${project.id}] '${project.name}' Project already playing")
+        toast("Project already playing!")
+      }
 
     }
 
-    override def loop() {
+  }
 
-      info(s"ServerService.IOIOLooper.loop() mProject=$mProject")
-      toast(s"ServerService.IOIOLooper.loop() mProject=$mProject")
+  override def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
+    throw new NotImplementedError()
+  }
 
-      Thread.sleep(5000)
+  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
+
+
+    final val CLK     = Sequencer.Clock.CLK_2M; /* 0.5us periods */
+    final val INITIAL = 3000; /* 1500 us * (1 / 0.5microseconds) */
+    final val SLICE   =  PERIOD / 16; /* Slice duration in 16microseconds period */
+
+    var sequencer_ : Sequencer = null
+
+    val channelConfigs: Array[ChannelConfig] = ServoConfig.PERIPHERAL_PORTS.map(pin =>
+      new Sequencer.ChannelConfigPwmPosition(CLK, PERIOD, INITIAL, new DigitalOutput.Spec(pin))
+    ).toArray
+
+    val channelCues = ServoConfig.PERIPHERAL_PORTS.map(pin =>
+      new Sequencer.ChannelCuePwmPosition()
+    ).toArray
+
+    override def setup() /*throws ConnectionLostException, InterruptedException*/ {
+
+      info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
+
+      sequencer_ = ioio_.openSequencer(channelConfigs)
+
+      notification("IOIO connected", "Touch for more information")
+
+      mProject.synchronized {
+        info("SequencerLooper.setup() Waiting for a project")
+        mProject.wait()
+      }
+
+      info("SequencerLooper.setup() Got a project, pre-filling the sequencer")
+
+      sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
+      while (sequencer_.available() > 0)
+        push()
+
+      info("SequencerLooper.setup() Pre-filling done, starting the sequencer")
+
+      sequencer_.start()
+
+    }
+
+    override def loop() /* throws ConnectionLostException, InterruptedException */ {
+      push()
+    }
+
+    var lastLog      = 0l
+    var currentSlice = 0
+
+    private def push() /* throws ConnectionLostException, InterruptedException */ {
+
+      val slices = mProject.slices(currentSlice)
+
+//      info(s"SequencerLooper.push() slices=$slices")
+
+      val cues = channelCues.zipWithIndex.map { case (channel, i) =>
+
+        if (i < slices.length) {
+
+          val pulseWidth = slices(i)
+//          info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> $pulseWidth")
+          channel.pulseWidth = pulseWidth
+          channel.asInstanceOf[ChannelCue]
+
+        } else {
+//          info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> default")
+          channel.asInstanceOf[ChannelCue]
+        }
+
+      }
+
+      sequencer_.push(cues, SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
+
+      val now = SystemClock.elapsedRealtime()
+
+      if (now - lastLog > 100) {
+        lastLog = now
+        info(s"SequencerLooper.push() $currentSlice/${mProject.slices}")
+      }
+
+      currentSlice = currentSlice + 1
+
+      if (currentSlice == mProject.sliceCount) {
+
+        sequencer_.stop()
+
+        toast("Playing done")
+
+        mProject.synchronized {
+
+          mProject.project = null
+
+          info("SequencerLooper.push() Sequence done, waiting for a new project")
+          mProject.wait()
+
+          info(s"SequencerLooper.push() Got a new project: ${mProject.duration} ms, ${mProject.sliceCount} slices")
+          currentSlice = 0
+
+          info("SequencerLooper.push() Wait for sequencer to stop...")
+          sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
+
+          info("SequencerLooper.push() Prefilling the sequencer...")
+          while (sequencer_.available() > 0) {
+            push()
+          }
+
+          info("SequencerLooper.push() Starting the sequencer - before")
+          sequencer_.start()
+          info("SequencerLooper.push() Starting the sequencer - after")
+        }
+      }
 
     }
 
