@@ -1,15 +1,11 @@
-package com.protogenefactory.ioiomaster.client.communications
+package com.protogenefactory.ioiomaster.client.connections
 
 import java.io.{BufferedReader, InputStreamReader}
 import java.net.URLEncoder
 
-import android.app.Activity
-import android.content.Context
-import android.net.{ConnectivityManager, NetworkInfo}
 import com.protogenefactory.ioiomaster.client.BobApplication
-import com.protogenefactory.ioiomaster.client.activities.ProjectActivity
-import com.protogenefactory.ioiomaster.client.models.Project
 import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
+import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.{HttpResponse, HttpStatus}
@@ -19,12 +15,11 @@ import spray.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
+case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
   implicit override val loggerTag = LoggerTag("Bob")
 
-  implicit val context: Activity = projectActivity
-
+  /*
   private def isNetworkAvailable: Boolean = Option(context
     .getSystemService(Context.CONNECTIVITY_SERVICE)
     .asInstanceOf[ConnectivityManager]
@@ -35,25 +30,27 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
         ni.getType == ConnectivityManager.TYPE_WIFI
       )
   }
+  */
 
-  def send(serverIP: String, project: Project) {
+  def playProject(project: Project) {
 
-    info(s"BobCommunication.send(${project.id})")
+    info(s"RemoteConnection.playProject(${project.id})")
 
+    /*
     if (!isNetworkAvailable)
       alert("No network connection", "You need to be connected on a local network to play the project")
+    */
 
     val json = project.toJson.compactPrint
 
     def sendRequest() {
 
-      //TODO put request in body
-      val rootUrl = s"http://$serverIP:${BobApplication.Params.PORT}/play"
+      val rootUrl = s"http://$remoteIP:${BobApplication.Params.PORT}/play"
       val params  = s"project=" + URLEncoder.encode(json, "UTF-8")
 
       val url = s"$rootUrl?$params"
 
-      info(s"BobCommunication.send() > url=$url")
+      info(s"RemoteConnection.sendRequest() > url=$url")
 
       val httpClient = new DefaultHttpClient()
       val response   = httpClient.execute(new HttpGet(url))
@@ -69,10 +66,9 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
 
           val body: String = readLine(response)
 
-          info(s"BobCommunication.send() < body = $body")
+          info(s"RemoteConnection.sendRequest() < body = $body")
 
           if (body != "BOB") {
-            error("Invalid response")
             throw new RuntimeException("Invalid response: $body")
           }
 
@@ -84,11 +80,20 @@ case class BobCommunication(projectActivity: ProjectActivity) extends TagUtil {
     }
 
     Future {
-      info("BobCommunication.send() -- Before sending request")
+      info("RemoteConnection.sendRequest() -- Before sending request")
         sendRequest()
-        info("BobCommunication.send() -- After sending request")
-        info("BobCommunication.send() -- Dialog dismissed")
+        info("RemoteConnection.sendRequest() -- After sending request")
+        info("RemoteConnection.sendRequest() -- Dialog dismissed")
     }
+
+  }
+
+  def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
+
+    info(s"RemoteConnection.playPosition() boardConfig=$boardConfig, positions=$positions")
+
+    //TODO play position
+    throw new RuntimeException("TODO play position")
 
   }
 

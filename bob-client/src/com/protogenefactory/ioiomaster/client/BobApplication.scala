@@ -5,6 +5,7 @@ import java.util.UUID
 import android.app.Application
 import android.database.sqlite.SQLiteDatabase
 import com.protogenefactory.ioiomaster.client.BobApplication.Preferences
+import com.protogenefactory.ioiomaster.client.connections.{Connection, LocalConnection, RemoteConnection}
 import com.protogenefactory.ioiomaster.client.models.dao.{BoardConfigDao, ProjectDao}
 import com.protogenefactory.ioiomaster.client.models.helpers.BobSqliteOpenHelper
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig, Step}
@@ -33,6 +34,8 @@ class BobApplication extends Application with SContext {
 
   lazy val boardConfigDao   : BoardConfigDao      = new BoardConfigDao(sqliteDatabase)
   lazy val projectsDao      : ProjectDao          = new ProjectDao    (sqliteDatabase, boardConfigDao)
+
+  var connection: Connection = null
 
   override def onCreate() {
 
@@ -96,14 +99,26 @@ class BobApplication extends Application with SContext {
 
   }
 
-  def serverIP =
-    defaultSharedPreferences.getString(Preferences.SERVER_IP, "")
+  def setLocalConnection() {
 
-  def serverIP(serverIP: String) {
+    info("BobApplication.setLocalConnection()")
+    connection = new LocalConnection()
+
+  }
+
+  def setRemoteConnection(remoteIP: String) {
+
+    info(s"BobApplication.setRemoteConnection($remoteIP)")
+
     defaultSharedPreferences
       .edit
-      .putString(Preferences.SERVER_IP, serverIP)
+      .putString(Preferences.SERVER_IP, remoteIP)
       .apply()
+
+    connection = new RemoteConnection(remoteIP)
+
   }
+
+  def serverIP = defaultSharedPreferences.getString(Preferences.SERVER_IP, "")
 
 }

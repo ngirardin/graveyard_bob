@@ -31,26 +31,35 @@ class ServerSelectionActivity extends SActivity {
       if (!valid)
         setError("Invalid IP address")
 
-      buttonConnect.setEnabled(valid)
+      buttonConnectRemote.setEnabled(valid)
 
     })
 
   }
 
-  lazy val buttonConnect : SButton = new SButton("Connect") {
-
+  lazy val buttonConnectLocal: SButton = new  SButton("Use local IOIO board") {
     onClick({
 
-      application.serverIP(editTextIP.getText.toString)
+      application.setLocalConnection()
 
       startActivity[PlayActivity]
 
       // Remove itself from the stack
       finish()
-
     })
-
   }
+
+  lazy val buttonConnectRemote : SButton = new SButton("Connect") {
+    onClick({
+
+      application.setRemoteConnection(editTextIP.getText.toString)
+
+      startActivity[PlayActivity]
+
+      // Remove itself from the stack
+      finish()
+    })
+  }.enabled(false)
 
   onCreate {
 
@@ -58,27 +67,28 @@ class ServerSelectionActivity extends SActivity {
 
     contentView = new SVerticalLayout {
 
-      this += new SLinearLayout {
+      this += new SVerticalLayout {
 
-        this += new STextView("Server IP")
+        this += buttonConnectLocal.<<(250.dip, WRAP_CONTENT).>>
 
-        this += editTextIP.<<(150.dip, WRAP_CONTENT).>>
+        this += new SLinearLayout {
+          this += new STextView("Server IP")
+          this += editTextIP.<<(150.dip, WRAP_CONTENT).>>
+          this += buttonConnectRemote
+        }.wrap.>>
 
-      }.wrap.>>
+      }
+        .<<.Weight(1).>>
+        .gravity(Gravity.CENTER)
 
-      this += buttonConnect.<<(200.dip, WRAP_CONTENT).>>
+      val pm = getPackageManager().getPackageInfo(getPackageName(), 0)
+      val version = pm.versionName
+      val buildDate = new Date(pm.lastUpdateTime)
 
-      this += {
-        val pm = getPackageManager().getPackageInfo(getPackageName(), 0)
-        val version   = pm.versionName
-        val buildDate = new Date(pm.lastUpdateTime)
+      STextView(s"Version $version\nBuilt $buildDate")
+        .gravity(Gravity.CENTER_HORIZONTAL)
 
-        new STextView(s"Version $version\nBuilt $buildDate")
-          .marginTop(64)
-
-      }.wrap.>>
-
-    }.gravity(Gravity.CENTER)
+    }
 
   }
 

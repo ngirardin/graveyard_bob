@@ -13,7 +13,6 @@ import android.view.{Menu, MenuItem}
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.activities.ProjectActivity._
-import com.protogenefactory.ioiomaster.client.communications.BobCommunication
 import com.protogenefactory.ioiomaster.client.models.{Project, Step}
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
@@ -306,9 +305,7 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
       //TODO show play dialog
       // The communication layer with the server
-      val mCommunication: BobCommunication = new BobCommunication(this)
-
-      mCommunication.send(application.serverIP, project)
+      application.connection.playProject(project)
 
       val progress = new android.app.ProgressDialog(this)
       progress.setTitle("Playing the project...")
