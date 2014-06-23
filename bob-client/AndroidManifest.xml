@@ -58,6 +58,13 @@
             android:name=".client.activities.BoardConfigActivity"
             android:label="New board configuration" />
 
+        <activity
+            android:name=".client.activities.OffersActivity"
+            android:label="Our special offers" />
+
+        <activity
+            android:name=".client.activities.NewsActivity"
+            android:label="Latest news" />
 
         <!-- ****** SERVER ***** -->
 

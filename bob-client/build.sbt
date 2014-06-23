@@ -2,7 +2,7 @@ import android.Keys._
 
 android.Plugin.androidBuild
 
-name := "bob-client"
+name := "ioio-master-control"
 
 scalaVersion := "2.11.0"
 
