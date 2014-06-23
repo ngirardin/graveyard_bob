@@ -26,10 +26,6 @@ class PlayActivity extends SActivity {
 
     info("PlayActivity.onCreate()")
 
-    setTitle(s"$getTitle connected to $serverIP")
-
-//    createNavigationDrawer()
-
     val drawerLayout = layoutInflater.inflate(R.layout.drawerlayout, null).asInstanceOf[DrawerLayout]
 
     val contentFrame = drawerLayout.find[FrameLayout](R.id.content_frame).addView(
