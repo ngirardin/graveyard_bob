@@ -1,6 +1,6 @@
 package com.protogenefactory.ioiomaster.server.services
 
-import java.util.{Timer, TimerTask}
+import java.util.{Date, Timer, TimerTask}
 
 import android.app.{Notification, Service}
 import android.content.Intent
@@ -135,7 +135,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
       if (mProject.project == null) {
       */
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}'")
-        toast(s"ServerService.playProject() project=[${project.id}] ${project.name}")
+        toast(s"ServerService.playProject() ${project.name}")
         mProject.setProject(project)
         mProject.notifyAll()
       /*
@@ -153,13 +153,59 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     throw new NotImplementedError()
   }
 
-  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
+  override def createIOIOLooper(connectionType: String, extra: Object) =
+  //TODO LESS UGLY pleaaaaase
+  if (connectionType == "ioio.lib.impl.SocketIOIOConnection") {
+    // Don't create a looper for the socket connection
+    info("ServerService.createIOIOLooper() Socket IOIO Connection, don't create the looper")
+    null
+  } else new BaseIOIOLooper() {
 
-    final val CLK     = Sequencer.Clock.CLK_2M; /* 0.5us periods */
-    final val INITIAL = 3000; /* 1500 us * (1 / 0.5microseconds) */
-    final val SLICE   =  PERIOD / 16; /* Slice duration in 16microseconds period */
+
+    final val CLK = Sequencer.Clock.CLK_2M;
+    /* 0.5us periods */
+    final val INITIAL = 3000;
+    /* 1500 us * (1 / 0.5microseconds) */
+    final val SLICE = PERIOD / 16;
+
+    /* Slice duration in 16microseconds period */
+
+    def startIOIOConnectionStateTimer() {
+      new Timer().schedule(new TimerTask() {
+        override def run() {
+          if (ioio_.getState == IOIO.State.DEAD) {
+            info("ServerService.DeadTimer IOIO disconnected")
+            toast("IOIO board disconnected")
+            this.cancel()
+            stopForeground(true)
+          } else {
+            toast(s"IOIO: ${ioio_.getState}")
+          }
+        }
+      }, 0, 10 * 1000)
+    }
+
+    def startSequencerStateTimer() {
+      new Timer().schedule(new TimerTask {
+        override def run() {
+          val sequencerState = sequencer_ match {
+            case null => "null"
+            case _    => s"${sequencer_.getLastEvent.`type`}, numCuesStarted=${sequencer_.getLastEvent.numCuesStarted}, available=${sequencer_.available()}"
+          }
+//          toast(s"Sequencer: $sequencerState")
+          info(s"ServerSevice.SequencerWatcher state=$sequencerState")
+        }
+      }, 0, 500)
+    }
 
     var sequencer_ : Sequencer = null
+
+    info(s"ServerService.createIOIOLooper()")
+
+    /*
+    startIOIOConnectionStateTimer()
+    startSequencerStateTimer()
+    */
 
     val channelConfigs: Array[ChannelConfig] = ServoConfig.PERIPHERAL_PORTS.map(pin =>
       new Sequencer.ChannelConfigPwmPosition(CLK, PERIOD, INITIAL, new DigitalOutput.Spec(pin))
@@ -173,18 +219,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
 
-      new Timer().schedule(new TimerTask() {
-        override def run() {
-          if (ioio_.getState == IOIO.State.DEAD) {
-            info("ServerService.DeadTimer IOIO disconnected")
-            toast("IOIO board disconnected")
-            this.cancel()
-            stopForeground(true)
-          } else {
-            toast(s"IOIO: ${ioio_.getState}")
-          }
-        }
-      }, 0, 10 * 1000)
 
       sequencer_ = ioio_.openSequencer(channelConfigs)
 
@@ -242,44 +276,53 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       if (now - lastLog > 100) {
         lastLog = now
-        info(s"SequencerLooper.push() $currentSlice/${mProject.slices.length}")
+        info(s"ServerService.SequencerLooper.push() $currentSlice/${mProject.slices.length}")
       }
 
       currentSlice = currentSlice + 1
 
       if (currentSlice == mProject.sliceCount) {
 
+        toast("Project playing done")
+
+        info("ServerService.SequencerLooper.push() [1] Last slice, stopping sequencer")
+
+        /*
         sequencer_.stop()
 
-        toast("Playing done")
+        info("ServerService.SequencerLooper.push() [2] Waiting for the sequencer to stop...")
+        sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
+
+        info("ServerService.SequencerLooper.push() [3] Sequencer stopper, waiting for a new project")
+        */
 
         mProject.synchronized {
 
-          mProject.project = null
-          mProject.notifyAll()
-
-          info("SequencerLooper.push() Sequence done, waiting for a new project")
           mProject.wait()
 
-          info(s"SequencerLooper.push() Got a new project: ${mProject.duration} ms, ${mProject.sliceCount} slices")
+          info(s"ServerService.SequencerLooper.push() [4] Got a new project: ${mProject.duration} ms, ${mProject.sliceCount} slices")
           currentSlice = 0
 
-          info(s"1 ------ ${sequencer_.getLastEvent.`type`}")
-          info("SequencerLooper.push() Wait for sequencer to stop...")
-          sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
+          info(s"ServerService.SequencerLooper.push() [5] Prefilling the sequencer (available=${sequencer_.available})...")
 
-          info("SequencerLooper.push() Prefilling the sequencer...")
+          /*
+          while (true) {
+            info(s"available: ${sequencer_.available}")
+            Thread.sleep(500)
+          }
+          */
+        /*
           while (sequencer_.available() > 0) {
-            info(s"2 ------ ${sequencer_.getLastEvent.`type`}")
-            info("SequencerLooper.push() ...")
+            info(s"ServerService.SequencerLooper.push() [6]   prefilling (available ${sequencer_.available}...")
             push()
           }
+          */
 
-          info("SequencerLooper.push() Starting the sequencer - before")
-          info(s"3 ------ ${sequencer_.getLastEvent.`type`}")
+          info("ServerService.SequencerLooper.push() [7] Starting the sequencer - before")
+          /*
           sequencer_.start()
-          info(s"4 ------ ${sequencer_.getLastEvent.`type`}")
-          info("SequencerLooper.push() Starting the sequencer - after")
+          */
+          info("ServerService.SequencerLooper.push() [8] Starting the sequencer - after")
         }
       }
 
@@ -287,8 +330,8 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
     override def disconnected() {
 
-      info(s"ServerService.IOIOLooper.disconnected()")
-      toast(s"ServerService.IOIOLooper.disconnected()")
+      info(s"ServerService.SequencerLooper.disconnected()")
+      toast(s"ServerService.SerquencerLooper.disconnected()")
 
       stopHelper()
       stopForeground(true)
@@ -297,6 +340,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
     override def incompatible() {
 
+      error("ServerService.SequencerLooper.incompatible()")
       alert("Incompatible board", "This app need a board with at least the V5 firmware")
       stopForeground(true)
 
