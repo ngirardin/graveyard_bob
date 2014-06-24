@@ -178,6 +178,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
           if (ioio_.getState == IOIO.State.DEAD) {
             info("ServerService.DeadTimer IOIO disconnected")
             toast("IOIO board disconnected")
+            this.cancel()
             stopForeground(true)
           } else {
             toast(s"IOIO: ${ioio_.getState}")
