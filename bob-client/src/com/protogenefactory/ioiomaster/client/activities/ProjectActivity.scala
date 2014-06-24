@@ -14,6 +14,7 @@ import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.activities.ProjectActivity._
 import com.protogenefactory.ioiomaster.client.models.{Project, Step}
+import com.protogenefactory.ioiomaster.client.utils.PlayProgressDialog
 import org.scaloid.common._
 import org.scaloid.support.v4.{SFragmentActivity, SViewPager}
 
@@ -296,45 +297,12 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
   }
 
-  //TODO update
   def playProject() {
 
     info("ProjectActivity.playProject")
 
-    try {
-
-      //TODO show play dialog
-      // The communication layer with the server
-      application.connection.playProject(project)
-
-      val progress = new android.app.ProgressDialog(this)
-      progress.setTitle("Playing the project...")
-      progress.setMessage("Touch outside to cancel")
-      progress.setIndeterminate(true)
-      progress.setCancelable(true)
-      progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new OnClickListener {
-        override def onClick(dialog: DialogInterface, which: Int): Unit = dialog.cancel()
-      })
-      progress.setOnCancelListener(new DialogInterface.OnCancelListener {
-        override def onCancel(dialog: DialogInterface): Unit = {
-          dialog.cancel()
-          //TODO cancel the playing
-          alert("TODO","cancel")
-        }
-      })
-      progress.show()
-
-      new java.util.Timer().schedule(new java.util.TimerTask() {
-        override def run() {
-          progress.dismiss()
-        }
-      }, project.duration)
-
-    } catch {
-      case e: Throwable =>
-        alert("Network error", "Check that the server app is running and connected to the same network that this device.")
-        e.printStackTrace()
-    }
+    PlayProgressDialog.show(this, project)
+    application.connection.playProject(project)
 
   }
 

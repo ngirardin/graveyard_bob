@@ -1,5 +1,7 @@
 package com.protogenefactory.ioiomaster.server.services
 
+import java.util.{Timer, TimerTask}
+
 import android.app.{Notification, Service}
 import android.content.Intent
 import android.os.SystemClock
@@ -9,7 +11,7 @@ import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, Serv
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
 import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue, ChannelCuePwmPosition}
-import ioio.lib.api.{DigitalOutput, Sequencer}
+import ioio.lib.api.{IOIO, DigitalOutput, Sequencer}
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
 import org.scaloid.common._
@@ -49,7 +51,9 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
   var mProject: ProjectLock = ProjectLock.empty
 
   onCreate {
+
     info(s"ServerService.onCreate()")
+
   }
 
 
@@ -169,6 +173,18 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
 
+      new Timer().schedule(new TimerTask() {
+        override def run() {
+          if (ioio_.getState == IOIO.State.DEAD) {
+            info("ServerService.DeadTimer IOIO disconnected")
+            toast("IOIO board disconnected")
+            stopForeground(true)
+          } else {
+            toast(s"IOIO: ${ioio_.getState}")
+          }
+        }
+      }, 0, 10 * 1000)
+
       sequencer_ = ioio_.openSequencer(channelConfigs)
 
       notification("IOIO connected", "Touch for more information")
@@ -247,16 +263,21 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
           info(s"SequencerLooper.push() Got a new project: ${mProject.duration} ms, ${mProject.sliceCount} slices")
           currentSlice = 0
 
+          info(s"1 ------ ${sequencer_.getLastEvent.`type`}")
           info("SequencerLooper.push() Wait for sequencer to stop...")
           sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
 
           info("SequencerLooper.push() Prefilling the sequencer...")
           while (sequencer_.available() > 0) {
+            info(s"2 ------ ${sequencer_.getLastEvent.`type`}")
+            info("SequencerLooper.push() ...")
             push()
           }
 
           info("SequencerLooper.push() Starting the sequencer - before")
+          info(s"3 ------ ${sequencer_.getLastEvent.`type`}")
           sequencer_.start()
+          info(s"4 ------ ${sequencer_.getLastEvent.`type`}")
           info("SequencerLooper.push() Starting the sequencer - after")
         }
       }

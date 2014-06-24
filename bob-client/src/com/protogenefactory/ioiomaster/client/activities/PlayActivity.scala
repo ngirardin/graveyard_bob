@@ -7,6 +7,7 @@ import android.widget.{AdapterView, ArrayAdapter, FrameLayout, ListView}
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.models.Project
+import com.protogenefactory.ioiomaster.client.utils.PlayProgressDialog
 import org.scaloid.common._
 
 class PlayActivity extends SActivity {
@@ -45,7 +46,9 @@ class PlayActivity extends SActivity {
 
             this += new SButton(p.name) {
               onClick({
-                application.connection.playProject(tag.asInstanceOf[Project])
+                val project = tag.asInstanceOf[Project]
+                PlayProgressDialog.show(context, project)
+                application.connection.playProject(project)
               })
             }
             .tag(p)
