@@ -18,6 +18,24 @@ class ServerSelectionActivity extends SActivity {
 
   val serverService = new LocalServiceConnection[ServerService]
 
+  lazy val buttonConnectLocal: SButton = new  SButton("Use local IOIO board") {
+    onClick({
+
+      application.setLocalConnection(serverService)
+
+      startActivity[PlayActivity]
+
+      // Remove itself from the stack
+      finish()
+    })
+
+    serverService.run(s => {
+      val available = s.isIOIOStarted()
+      info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: $available")
+      enabled(available)
+    })
+  }
+
   lazy val editTextIP : SEditText = new SEditText("Server IP address") {
 
     hint("IP address")
@@ -37,35 +55,23 @@ class ServerSelectionActivity extends SActivity {
 
   }
 
-  lazy val buttonConnectLocal: SButton = new  SButton("Use local IOIO board") {
-    onClick({
-
-      application.setLocalConnection(serverService)
-
-      startActivity[PlayActivity]
-
-      // Remove itself from the stack
-      finish()
-    })
-
-    serverService.run(s => {
-      val available = s.isIOIOStarted()
-      info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: $available")
-      enabled(available)
-    })
-  }
-
   lazy val buttonConnectRemote : SButton = new SButton("Connect") {
     onClick({
 
-      application.setRemoteConnection(editTextIP.getText.toString)
+      val ip = editTextIP.getText.toString
 
-      startActivity[PlayActivity]
+      application.setRemoteConnection(ip)
 
-      // Remove itself from the stack
-      finish()
+      if (application.connection.ping()) {
+        startActivity[PlayActivity]
+        // Remove itself from the stack
+        finish()
+      } else {
+        alert(s"Can't connect to the app", s"Unable to connect to $ip, check that the IOIO is connected on the other device.")
+      }
+
     })
-  }.enabled(false)
+  }.enabled(!application.serverIP.isEmpty)
 
   onCreate {
 

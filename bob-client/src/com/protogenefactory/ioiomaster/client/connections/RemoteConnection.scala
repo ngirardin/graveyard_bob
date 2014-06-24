@@ -1,7 +1,7 @@
 package com.protogenefactory.ioiomaster.client.connections
 
 import java.io.{BufferedReader, InputStreamReader}
-import java.net.URLEncoder
+import java.net.{ConnectException, URLEncoder}
 
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
@@ -13,24 +13,13 @@ import org.scaloid.common._
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 
 case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
   implicit override val loggerTag = LoggerTag("Bob")
 
-  /*
-  private def isNetworkAvailable: Boolean = Option(context
-    .getSystemService(Context.CONNECTIVITY_SERVICE)
-    .asInstanceOf[ConnectivityManager]
-    .getActiveNetworkInfo
-  ).fold(false) {ni: NetworkInfo =>
-    ni.isConnected && (
-      ni.getType == ConnectivityManager.TYPE_ETHERNET ||
-        ni.getType == ConnectivityManager.TYPE_WIFI
-      )
-  }
-  */
+  final val rootUrl = s"http://$remoteIP:${BobApplication.Params.PORT}"
 
   def playProject(project: Project) {
 
@@ -45,10 +34,9 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
     def sendRequest() {
 
-      val rootUrl = s"http://$remoteIP:${BobApplication.Params.PORT}/play"
       val params  = s"project=" + URLEncoder.encode(json, "UTF-8")
 
-      val url = s"$rootUrl?$params"
+      val url = s"$rootUrl/play?$params"
 
       info(s"RemoteConnection.sendRequest() > url=$url")
 
@@ -80,20 +68,43 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
     }
 
     Future {
-      info("RemoteConnection.sendRequest() -- Before sending request")
-        sendRequest()
-        info("RemoteConnection.sendRequest() -- After sending request")
-        info("RemoteConnection.sendRequest() -- Dialog dismissed")
+      sendRequest()
     }
 
   }
 
+  //TODO implement play position
   def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
+    throw new NotImplementedError()
+  }
 
-    info(s"RemoteConnection.playPosition() boardConfig=$boardConfig, positions=$positions")
+  override def ping(): Boolean = {
 
-    //TODO play position
-    throw new RuntimeException("TODO play position")
+    import scala.concurrent.duration._
+
+    val result = Await.result[Boolean]({
+      Future {
+        val url = s"$rootUrl/ping"
+
+        info(s"RemoteConnection.ping() Ping URL=$url")
+
+        try {
+          val httpClient = new DefaultHttpClient()
+          val response = httpClient.execute(new HttpGet(url))
+
+          info(s"RemoteConnection.ping() Response=${response.getStatusLine.getStatusCode}")
+          response.getStatusLine.getStatusCode match {
+            case HttpStatus.SC_OK => true
+            case _ => false
+          }
+        } catch {
+          case e: ConnectException => false
+        }
+      }
+    }, 5.seconds)
+
+    info(s"RemoteConnection.ping() result=$result")
+    result
 
   }
 

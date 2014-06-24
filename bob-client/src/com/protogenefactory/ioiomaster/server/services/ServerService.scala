@@ -6,10 +6,11 @@ import android.app.{Notification, Service}
 import android.content.Intent
 import android.os.SystemClock
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.connections.Connection
+import com.protogenefactory.ioiomaster.client.connections.{Playable, Connection}
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
+import fr.dmconcept.bob.server.BobServer
 import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue, ChannelCuePwmPosition}
 import ioio.lib.api.{IOIO, DigitalOutput, Sequencer}
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
@@ -27,7 +28,7 @@ object ServerService {
 
 }
 
-class ServerService extends LocalService with IOIOLooperProvider with Connection {
+class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   override implicit val loggerTag = LoggerTag("Bob")
 
@@ -41,10 +42,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
    */
   private var started_ = false
 
-  /*
-  lazy val bobServer = new BobServer(p => playProject(p))
-  */
-
   /**
    * The project being played
    */
@@ -55,7 +52,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     info(s"ServerService.onCreate()")
 
   }
-
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
 
@@ -84,7 +80,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
    */
   def startIOIOLooper() {
 
-    info("ServerService.startIOIOLooper")
+    info("ServerService.startIOIOLooper()")
     helper_.create()
     startHelper()
 
@@ -130,6 +126,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
     mProject.synchronized {
 
+      //TODO check that ioio is started
       //TODO check that project is already playing
       /*
       if (mProject.project == null) {
@@ -154,6 +151,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
   }
 
   override def createIOIOLooper(connectionType: String, extra: Object) =
+
   //TODO LESS UGLY pleaaaaase
   if (connectionType == "ioio.lib.impl.SocketIOIOConnection") {
     // Don't create a looper for the socket connection
@@ -161,14 +159,9 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
     null
   } else new BaseIOIOLooper() {
 
-
-    final val CLK = Sequencer.Clock.CLK_2M;
-    /* 0.5us periods */
-    final val INITIAL = 3000;
-    /* 1500 us * (1 / 0.5microseconds) */
-    final val SLICE = PERIOD / 16;
-
-    /* Slice duration in 16microseconds period */
+    final val CLK = Sequencer.Clock.CLK_2M // 0.5us periods
+    final val INITIAL = 3000               // 1500 us * (1 / 0.5microseconds)
+    final val SLICE = PERIOD / 16          // Slice duration in 16microseconds period
 
     def startIOIOConnectionStateTimer() {
       new Timer().schedule(new TimerTask() {
@@ -200,7 +193,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
     var sequencer_ : Sequencer = null
 
-    info(s"ServerService.createIOIOLooper()")
+    info(s"ServerService.createIOIOLooper() $connectionType")
 
     /*
     startIOIOConnectionStateTimer()
@@ -219,6 +212,9 @@ class ServerService extends LocalService with IOIOLooperProvider with Connection
 
       info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
 
+      //TODO start server only when project connected
+      info(s"SequenceLooper.setup() Starting HTTP server")
+      new BobServer(p => playProject(p)).start()
 
       sequencer_ = ioio_.openSequencer(channelConfigs)
 

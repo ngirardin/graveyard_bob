@@ -62,12 +62,10 @@ class StatusActivity extends SActivity {
 
   }
 
-  /*
   override def onNewIntent(intent: Intent) {
     info(s"StatusActivity.onNewIntent() intent=$intent")
     toast(s"New intent\n$intent")
   }
-  */
 
   onDestroy {
     info("StatusActivity.onDestroy()")

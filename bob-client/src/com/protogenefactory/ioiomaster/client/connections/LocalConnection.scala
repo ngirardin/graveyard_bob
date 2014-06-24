@@ -24,4 +24,6 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   }
 
+  override def ping(): Boolean = true
+
 }

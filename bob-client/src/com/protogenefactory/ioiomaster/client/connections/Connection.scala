@@ -1,11 +1,7 @@
 package com.protogenefactory.ioiomaster.client.connections
 
-import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
+trait Connection extends Playable {
 
-trait Connection {
-
-  def playProject(project: Project)
-
-  def playPosition(boardConfig: BoardConfig, positions: Array[Int])
+  def ping(): Boolean
 
 }
