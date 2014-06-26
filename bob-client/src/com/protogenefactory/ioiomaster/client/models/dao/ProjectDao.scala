@@ -69,7 +69,7 @@ case class ProjectDao (
 
   }
 
-  def isEmpty(): Boolean = {
+  def isEmpty: Boolean = {
 
     val cursor = database.query(
       BobSqliteOpenHelper.PROJECT_TABLE,
@@ -81,7 +81,7 @@ case class ProjectDao (
       null
     )
 
-    val empty = cursor.getCount() == 0
+    val empty = cursor.getCount == 0
 
     cursor.close()
 

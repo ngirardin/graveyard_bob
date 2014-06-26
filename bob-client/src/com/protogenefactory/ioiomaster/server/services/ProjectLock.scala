@@ -104,7 +104,7 @@ class ProjectLock {
       throw new RuntimeException("Expecting " + sliceCount + " slices but got " + s.length)
     */
 
-    return s.toSeq
+    s.toSeq
 
   }
 

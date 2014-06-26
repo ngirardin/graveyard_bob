@@ -118,7 +118,7 @@ class PlayActivity extends SActivity {
           case 1 /* Project */ => startActivity[ProjectListActivity]
           case 2 /* News    */ => startActivity[NewsActivity       ]
           case 3 /* Offers  */ => startActivity[OffersActivity     ]
-          case _ => {}
+          case _ =>
         }
       }
     })

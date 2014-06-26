@@ -108,4 +108,6 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
   }
 
+  override def getSounds: Seq[String] = ???
+
 }

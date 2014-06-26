@@ -1,12 +1,12 @@
-package fr.dmconcept.bob.server;
+package com.protogenefactory.ioiomaster.server
 
 import android.util.Log
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.client.models.Project
+import com.protogenefactory.ioiomaster.server.BobServer._
 import fi.iki.elonen.NanoHTTPD
+import fi.iki.elonen.NanoHTTPD.{IHTTPSession, Method, Response}
 import org.json.JSONException
-import BobServer._
-import fi.iki.elonen.NanoHTTPD.{Response, Method, IHTTPSession}
 import spray.json._
 
 object BobServer {
@@ -29,16 +29,16 @@ class BobServer(onProject: Project => Unit) extends NanoHTTPD(PORT) {
 
   override def serve(session: IHTTPSession): Response = {
 
-    Log.i(TAG, s"serve() ${session.getMethod()} ${session.getUri()} ${session.getParms()}")
+    Log.i(TAG, s"serve() ${session.getMethod} ${session.getUri} ${session.getParms}")
 
-    session.getMethod() match {
+    session.getMethod match {
       case Method.GET =>
 
         session.getUri match {
 
           case ROOT_URL =>
 
-            val json = session.getParms().get(PROJECT_PARAM).parseJson
+            val json = session.getParms.get(PROJECT_PARAM).parseJson
 
             try {
 
@@ -57,8 +57,8 @@ class BobServer(onProject: Project => Unit) extends NanoHTTPD(PORT) {
         }
 
       case _ =>
-        Log.e(TAG, s"BobServer.serve() Invalid request: ${session.getMethod()} ${session.getUri()} ${session.getParms()}")
-        return new Response(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, RESPONSE_NOT_FOUND)
+        Log.e(TAG, s"BobServer.serve() Invalid request: ${session.getMethod} ${session.getUri} ${session.getParms}")
+        new Response(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, RESPONSE_NOT_FOUND)
 
     }
   }

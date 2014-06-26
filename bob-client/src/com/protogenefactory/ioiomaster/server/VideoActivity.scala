@@ -72,7 +72,7 @@ class VideoActivity extends SActivity {
 //      .setCallback(cb)
       .setSurfaceView(mSurfaceView)
       .setPreviewOrientation(90)
-      .setContext(getApplicationContext())
+      .setContext(getApplicationContext)
       .setAudioEncoder(SessionBuilder.AUDIO_NONE)
       .setVideoEncoder(SessionBuilder.VIDEO_H264)
       .setVideoQuality(new VideoQuality(640, 480, 30,4 * 500 * 1000))

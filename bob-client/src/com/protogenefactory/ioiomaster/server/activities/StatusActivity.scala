@@ -71,13 +71,13 @@ class StatusActivity extends SActivity {
     info("StatusActivity.onDestroy()")
   }
 
-  private def getIPs(): Seq[String] = {
+  private def getIPs: Seq[String] = {
 
-    NetworkInterface.getNetworkInterfaces().asScala.toSeq.map { intf =>
+    NetworkInterface.getNetworkInterfaces.asScala.toSeq.map { intf =>
 
-      intf.getInetAddresses().asScala.toSeq
+      intf.getInetAddresses.asScala.toSeq
         .filterNot(addr => addr.isLoopbackAddress)
-        .map(addr => addr.getHostAddress().toUpperCase)
+        .map(addr => addr.getHostAddress.toUpperCase)
         .filter{ sAddr => InetAddressUtils.isIPv4Address(sAddr) }
     }.flatten
 

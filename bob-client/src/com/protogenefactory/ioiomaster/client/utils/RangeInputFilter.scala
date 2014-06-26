@@ -28,7 +28,7 @@ trait RangeInputFilter extends InputFilter {
       case e: Throwable => Log.d("Bob", s"RangeInputFilter.filter() - Value $newVal is not an integer")
     }
 
-    return ""
+    ""
 
   }
 

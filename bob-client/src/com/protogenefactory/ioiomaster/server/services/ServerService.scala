@@ -1,18 +1,18 @@
 package com.protogenefactory.ioiomaster.server.services
 
-import java.util.{Date, Timer, TimerTask}
+import java.util.{Timer, TimerTask}
 
 import android.app.{Notification, Service}
 import android.content.Intent
-import android.os.SystemClock
+import android.os.{Environment, SystemClock}
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.connections.{Playable, Connection}
+import com.protogenefactory.ioiomaster.client.connections.Playable
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
+import com.protogenefactory.ioiomaster.server.BobServer
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
-import fr.dmconcept.bob.server.BobServer
 import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue, ChannelCuePwmPosition}
-import ioio.lib.api.{IOIO, DigitalOutput, Sequencer}
+import ioio.lib.api.{DigitalOutput, IOIO, Sequencer}
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
 import org.scaloid.common._
@@ -86,7 +86,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   }
 
-  def isIOIOStarted(): Boolean = {
+  def isIOIOStarted: Boolean = {
     info(s"ServerService.getIOIOStatus() connected=$started_")
     started_
   }
@@ -148,6 +148,10 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   override def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
     throw new NotImplementedError()
+  }
+
+  override def getSounds: Seq[String] = {
+    Seq("TODO", s"${Environment.getExternalStorageDirectory}/Ringtones", "TODO")
   }
 
   override def createIOIOLooper(connectionType: String, extra: Object) =
@@ -357,7 +361,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
         .setContentIntent(pendingActivity[StatusActivity])
         .build()
 
-      startForeground(new Random().nextInt, notification)
+      startForeground(new Random().nextInt(), notification)
 
     }
 

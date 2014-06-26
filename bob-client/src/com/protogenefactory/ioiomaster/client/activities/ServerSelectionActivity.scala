@@ -30,7 +30,7 @@ class ServerSelectionActivity extends SActivity {
     })
 
     serverService.run(s => {
-      val available = s.isIOIOStarted()
+      val available = s.isIOIOStarted
       info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: $available")
       enabled(available)
     })
@@ -93,7 +93,7 @@ class ServerSelectionActivity extends SActivity {
         .<<.Weight(1).>>
         .gravity(Gravity.CENTER)
 
-      val pm = getPackageManager().getPackageInfo(getPackageName(), 0)
+      val pm = getPackageManager.getPackageInfo(getPackageName, 0)
       val version = pm.versionName
       val buildDate = new Date(pm.lastUpdateTime)
 

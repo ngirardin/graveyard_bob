@@ -8,5 +8,6 @@ trait Playable {
 
   def playPosition(boardConfig: BoardConfig, positions: Array[Int])
 
+  def getSounds: Seq[String]
 
 }

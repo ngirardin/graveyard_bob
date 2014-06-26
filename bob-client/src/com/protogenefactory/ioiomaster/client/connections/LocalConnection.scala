@@ -26,4 +26,7 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   override def ping(): Boolean = true
 
+  override def getSounds: Seq[String] =
+    serverService(s => s.getSounds, throw new RuntimeException("Can't get the sounds"))
+
 }
