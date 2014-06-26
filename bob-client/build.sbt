@@ -14,7 +14,6 @@ proguardOptions in Android ++= Seq("-dontobfuscate", "-dontoptimize", "-dontwarn
 
 libraryDependencies += "org.scaloid" %% "scaloid" % "3.4-10"
 
-//TODO remove? use published lib
 libraryDependencies += "org.scaloid" %% "scaloid-support-v4" % "3.4-10"
 
 // Used for Fragments
