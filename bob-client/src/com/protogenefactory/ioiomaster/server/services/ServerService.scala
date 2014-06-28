@@ -154,14 +154,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
     Seq("TODO", s"${Environment.getExternalStorageDirectory}/Ringtones", "TODO")
   }
 
-  override def createIOIOLooper(connectionType: String, extra: Object) =
-
-  //TODO LESS UGLY pleaaaaase
-  if (connectionType == "ioio.lib.impl.SocketIOIOConnection") {
-    // Don't create a looper for the socket connection
-    info("ServerService.createIOIOLooper() Socket IOIO Connection, don't create the looper")
-    null
-  } else new BaseIOIOLooper() {
+  override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
     final val CLK = Sequencer.Clock.CLK_2M // 0.5us periods
     final val INITIAL = 3000               // 1500 us * (1 / 0.5microseconds)
@@ -222,7 +215,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
       sequencer_ = ioio_.openSequencer(channelConfigs)
 
-      notification("IOIO connected", "Touch for more information")
+      showNotification()
 
       mProject.synchronized {
         info("SequencerLooper.setup() Waiting for a project")
@@ -348,16 +341,16 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   }
 
-  private def notification(title: String, message: String) {
+  private def showNotification() {
 
     runOnUiThread {
 
       // Service starting. Create a notification.
       val notification = new Notification.Builder(this)
         .setSmallIcon(R.drawable.ic_launcher)
-        .setTicker(title)
-        .setContentTitle(title)
-        .setContentText(message)
+        .setTicker("IOIO connected")
+        .setContentTitle("IOIO connected")
+        .setContentText("Touch for more information")
         .setContentIntent(pendingActivity[StatusActivity])
         .build()
 

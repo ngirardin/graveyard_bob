@@ -69,10 +69,12 @@
 
         <!-- ****** SERVER ***** -->
         <service android:name=".server.services.ServerService" />
+        <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
 
         <activity
             android:name=".server.activities.StatusActivity"
             android:launchMode="singleInstance"
+            android:screenOrientation="landscape"
             android:label="@string/app_name">
 
             <intent-filter>
@@ -92,8 +94,6 @@
         </activity>
 
         <!--
-        <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
-
         <activity
             android:name=".server.VideoActivity"
             android:label="Remote video">
