@@ -4,7 +4,7 @@ import java.net.NetworkInterface
 
 import android.content.Intent
 import android.hardware.usb.{UsbAccessory, UsbManager}
-import android.view.Gravity
+import android.view.{Gravity, WindowManager}
 import com.protogenefactory.ioiomaster.server.services.ServerService
 import net.majorkernelpanic.streaming.SessionBuilder
 import net.majorkernelpanic.streaming.gl.SurfaceView
@@ -21,18 +21,19 @@ class StatusActivity extends SActivity {
 
   final val STREAM_WIDTH   = 320
   final val STREAM_HEIGHT  = 240
-  final val STREAM_FPS     = 30
-  final val STREAM_BITRATE = 2 * 500 * 1024
+  final val STREAM_FPS     = 15
+  final val STREAM_BITRATE = 96 * 1024
 
   lazy val serverService  = new LocalServiceConnection[ServerService]
 
-  lazy val mSurfaceView = new SurfaceView(this, null) {
-    toast(s"${this.width} * ${this.height} => ${this.height * 4 / 3}")
-  }
+  lazy val mSurfaceView = new SurfaceView(this, null)
 
   onCreate {
 
     info(s"StatusActivity.onCreate() $intent")
+
+    // Prevent the screen to lock
+    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
     intent.fold(throw new RuntimeException("StatusActivity launched without intent")) { i: Intent =>
 
