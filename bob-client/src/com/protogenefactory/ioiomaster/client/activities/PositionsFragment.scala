@@ -246,6 +246,7 @@ class PositionsFragment extends SFragment with TagUtil {
 
             // SeekBar position
             this += seekbarPositions(i)
+              .padding(16.dip, 8.dip, 24.dip, 0)
               .<<(MATCH_PARENT, WRAP_CONTENT).>>
 
           }
@@ -254,7 +255,7 @@ class PositionsFragment extends SFragment with TagUtil {
           .padding(
             0    , // left
             8.dip, // top
-            0    , // right
+            0,     // right
             0      // bottom
           )
         }
