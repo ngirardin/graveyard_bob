@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.view.inputmethod.EditorInfo
-import android.view.{Menu, MenuItem, View}
+import android.view.{Gravity, Menu, MenuItem, View}
 import android.widget._
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
@@ -73,7 +73,7 @@ class NewProjectActivity extends SActivity {
 
       this += editTextName
 
-      this += new SVerticalLayout {
+      this += new SLinearLayout {
 
         this += spinnerBoardConfig.<<.Weight(1).>>
 
@@ -82,16 +82,16 @@ class NewProjectActivity extends SActivity {
           onClick(
             startActivityForResult(SIntent[BoardConfigActivity], BoardConfigActivity.REQUEST_CODE)
           )
-        }.<<.wrap.>>
+        }
+        .marginLeft(16.dip)
+        .marginTop(8.dip)
+        .wrap.>>
 
-      }.orientation(HORIZONTAL)
+      }.padding(0, 24.dip, 0, 0)
 
-    }.padding(
-      32, // left
-      0, // top
-      32, // right
-      0 // bottom
-    )
+    }
+    .padding(32.dip, 0, 32.dip, 0)
+    .gravity(Gravity.CENTER)
 
   }
 
