@@ -1,6 +1,9 @@
 package com.protogenefactory.ioiomaster.client.activities
 
+import android.media.MediaPlayer
+import android.media.MediaPlayer.{OnErrorListener, OnPreparedListener}
 import android.support.v4.widget.DrawerLayout
+import android.view.ViewGroup.LayoutParams
 import android.view.{Gravity, View}
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.{AdapterView, ArrayAdapter, FrameLayout, ListView}
@@ -14,11 +17,28 @@ class PlayActivity extends SActivity {
 
   implicit override val loggerTag = LoggerTag("Bob")
 
+  final val BUTTON_TEXT_SIZE = /* tablet 20 */ 16/* phone */
+  final val HEADER_PADDING   = 8
+  final val VIDEO_WIDTH      = /* tablet 320 */ 240
+
   val joysticks = Seq("Wheels", "Head", "Arm")
 
   val mp3s = Seq("Hello!", "Bye-bye!", "Hi, I'm Bob!")
 
   lazy val application = getApplication.asInstanceOf[BobApplication]
+
+  lazy val buttonsJoystick: Seq[SToggleButton] = joysticks.map(j => new SToggleButton(j) {
+    /*
+    onClick({t: SToggleButton =>
+      buttonsJoystick.foreach(b => b.checked(b == t))
+    })
+    */
+    textOff(j)
+    textOn(j)
+  })
+
+  lazy val videoView       = new SVideoView()
+  lazy val videoViewStatus = new STextView("Connecting...")
 
   lazy val serverIP = application.serverIP
 
@@ -41,6 +61,7 @@ class PlayActivity extends SActivity {
 
           STextView("Sequences")
             .gravity(Gravity.CENTER)
+            .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
 
           projects.foreach(p =>
 
@@ -52,7 +73,7 @@ class PlayActivity extends SActivity {
               })
             }
             .tag(p)
-            .textSize(12.dip)
+            .textSize(BUTTON_TEXT_SIZE.sp)
 
           )
         }.<<.wrap.Weight(1.0f).>>
@@ -60,20 +81,19 @@ class PlayActivity extends SActivity {
         /**
          * Joysticks column
          */
-        /*
         this += new SVerticalLayout {
 
           STextView("Joysticks")
             .gravity(Gravity.CENTER)
+            .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
 
-          joysticks.map(j =>
-            SToggleButton(j, toast("TODO joysticks"))
-              .textOff(j)
-              .textOn(j)
-              .fill
+          buttonsJoystick.foreach(t =>
+            this += t
+              .textSize(BUTTON_TEXT_SIZE.sp)
+              .fill.>>
           )
+
         }.<<.wrap.Weight(1.0f).>>
-        */
 
         /**
          * Sounds column
@@ -82,10 +102,11 @@ class PlayActivity extends SActivity {
 
           STextView("Sounds")
             .gravity(Gravity.CENTER)
+            .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
 
           mp3s.map(m =>
             SButton(m, toast(s"Play sound $m"))
-              .textSize(12.dip)
+              .textSize(BUTTON_TEXT_SIZE.sp)
           )
         }.<<.wrap.Weight(1.0f).>>
 
@@ -94,12 +115,17 @@ class PlayActivity extends SActivity {
          */
         this += new SVerticalLayout {
 
-          SButton("VIDEO")
-            .<<(MATCH_PARENT, 100.dip).>>
+          this += videoViewStatus
+            .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
+            .gravity(Gravity.CENTER_HORIZONTAL)
+            .wrap.>>
 
-          STextView("Touch to disable video")
+          this += videoView
+            .<<(VIDEO_WIDTH.dip, LayoutParams.WRAP_CONTENT).>>
 
-        }.<<.wrap.Weight(2.0f).>>
+        }
+        .gravity(Gravity.CENTER_HORIZONTAL)
+        .<<(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).Weight(2.0f).>>
 
       }
 
@@ -122,6 +148,52 @@ class PlayActivity extends SActivity {
         }
       }
     })
+
+    // Display the remote stream if any
+    def whatToString(what: Int) = what match {
+      case MediaPlayer.MEDIA_INFO_UNKNOWN               => "Unknown error"
+      case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING   => "Video track lagging"
+      case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START => "Rendering start"
+      case MediaPlayer.MEDIA_INFO_BUFFERING_START       => "Buffering start"
+      case MediaPlayer.MEDIA_INFO_BUFFERING_END         => "Buffering end"
+      case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING      => "Bad interleaving"
+      case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE          => "Not seekable"
+      case MediaPlayer.MEDIA_INFO_METADATA_UPDATE       => "Metadata update"
+      case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE  => "Unsupported subtitle"
+      case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT    => "Timed out"
+    }
+    // ---- TODO use remote IP
+    videoView.setOnErrorListener(new OnErrorListener {
+      override def onError(mp: MediaPlayer, what: Int, extra: Int): Boolean = {
+        val whatString = whatToString(what)
+        videoViewStatus.text(s"Streaming error: $whatString")
+        toast(s"Player error: what=$whatString, extra=$extra")
+        error(s"PlayActivity.videoView.onInfoListener() what=$whatString, extra=$extra")
+        true // The method has handled the error
+      }
+    })
+
+    /*
+    videoView.setOnInfoListener(new OnInfoListener {
+      override def onInfo(mp: MediaPlayer, what: Int, extra: Int): Boolean = {
+        toast(s"Play info: what=$what, extra=$extra")
+        info(s"PlayActivity.videoView.onInfoListener() what=$what, extra=$extra")
+        true // The method has handled the info
+      }
+    })
+    */
+
+    videoView.setOnPreparedListener(new OnPreparedListener {
+      override def onPrepared(mp: MediaPlayer) {
+        videoViewStatus.text("Remote video")
+        info(s"PlayActivity.videoView.onPreparedListener() Ready for playback")
+      }
+    })
+
+//    videoView.setVideoURI("rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov")
+//    videoView.setVideoURI("rtsp://192.168.0.43:8086/")
+    videoView.setVideoURI("/sdcard/DCIM/Camera/VID_20140630_110902.mp4")
+    videoView.start()
 
     contentView = drawerLayout
 
