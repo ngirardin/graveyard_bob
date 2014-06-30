@@ -67,25 +67,28 @@ class BoardConfigActivity extends SActivity {
     if (savedInstanceState != null)
       restoreState(savedInstanceState)
 
-    contentView = new SVerticalLayout {
+    contentView = new SScrollView() {
 
-      this += editTextName.<<(FILL_PARENT, WRAP_CONTENT).>>
+      this += new SVerticalLayout {
 
-      spinners.zipWithIndex.foreach { case (spinner: SSpinner, i: Int) =>
+        this += editTextName.<<(FILL_PARENT, WRAP_CONTENT).>>
 
-        this += new SVerticalLayout {
-          STextView(s"Servo ${i + 1} connected to") .wrap
-          this += spinner.<<.wrap.>>
-        }.orientation(HORIZONTAL)
+        spinners.zipWithIndex.foreach { case (spinner: SSpinner, i: Int) =>
 
-      }
+          this += new SVerticalLayout {
+            STextView(s"Servo ${i + 1} connected to").wrap
+            this += spinner.<<.wrap.>>
+          }.orientation(HORIZONTAL)
 
-    }.padding(
-      32, // left
-       0, // top
-      32, // right
-       0 // bottom
-    )
+        }
+
+      }.padding(
+          32, // left
+          0, // top
+          32, // right
+          0 // bottom
+        )
+    }
 
   }
 
