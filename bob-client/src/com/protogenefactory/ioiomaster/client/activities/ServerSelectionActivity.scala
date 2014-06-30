@@ -4,6 +4,7 @@ import java.util.Date
 import java.util.regex.Pattern
 
 import android.view.Gravity
+import android.view.inputmethod.EditorInfo
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
@@ -37,6 +38,9 @@ class ServerSelectionActivity extends SActivity {
   }
 
   lazy val editTextIP : SEditText = new SEditText("Server IP address") {
+
+    // Avoid full screen keyboard on landscape
+    setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI)
 
     hint("IP address")
 
