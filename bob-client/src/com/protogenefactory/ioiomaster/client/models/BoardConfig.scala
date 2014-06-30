@@ -1,7 +1,8 @@
 package com.protogenefactory.ioiomaster.client.models
 
-import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
 import java.util.UUID
+
+import com.protogenefactory.ioiomaster.client.models.json.BobJsonProtocol._
 import spray.json._
 
 object BoardConfig {
@@ -9,7 +10,7 @@ object BoardConfig {
   /**
    * Max quantity of servo per board
    */
-  final val MAX_SERVOS = 7
+  final val MAX_SERVOS = ServoConfig.PERIPHERAL_PORTS.length
 
   def apply(name: String, servoConfigs: Seq[ServoConfig]): BoardConfig = {
     BoardConfig(UUID.randomUUID.toString, name, servoConfigs)
