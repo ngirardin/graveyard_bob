@@ -164,9 +164,20 @@ class NewProjectActivity extends SActivity {
     info(s"NewProjectActivity.onActivityResult(resultCode=RESULT_OK) boardConfigID=$id")
 
     // Update the spinners
-    adapter.notifyDataSetChanged()
+    // HACK should is notifyDataSetChanged() instead
+    val boardConfigs = boardConfigDao.findAll()
 
-    //TODO select the board config in the spinner
+    spinnerBoardConfig.setAdapter(SArrayAdapter(boardConfigs.map(_.name).toArray)
+      .dropDownViewResource(android.R.layout.simple_spinner_dropdown_item))
+
+    // Select the return board config
+    spinnerBoardConfig.selection(
+      boardConfigs
+        .zipWithIndex
+        .filter { case (boardConfig, index) => boardConfig.id == id }
+        .ensuring(_.size == 1)
+        (0)._2
+    )
 
   }
 
