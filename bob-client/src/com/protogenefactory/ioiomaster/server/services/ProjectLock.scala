@@ -8,17 +8,27 @@ import scala.collection.mutable.ArrayBuffer
 
 object ProjectLock {
 
+  /**
+   * The period duration in ms
+   */
   final val PERIOD_MILLI = ServerService.PERIOD / 1000
 
+  /**
+   * @return a new empty ProjectLock
+   */
   def empty: ProjectLock = new ProjectLock
 
 }
 
 class ProjectLock {
 
-  var project    : Project = null
-  var duration   : Int     = 0
-  var sliceCount : Int     = 0
+  /**
+   * The project being played
+   */
+  private var project    : Project = null
+
+  var duration   : Int = 0
+  var sliceCount : Int = 0
 
   var slices: Seq[Seq[Int]] = null
 
@@ -33,7 +43,7 @@ class ProjectLock {
 
     var duration = 0
 
-    for (step <-  project.steps)
+    for (step <- project.steps)
       duration = duration + step.duration
 
     duration
@@ -61,6 +71,11 @@ class ProjectLock {
       for (sliceIndex <- 0 to stepSliceCount) {
 
 //        Log.i("~~~~~~~~~~~~~~~~", s"  Slice $sliceIndex/$stepSliceCount")
+
+        //!!!!!
+        /*
+        val interpolatedPositions = (0 until BoardConfig.MAX_SERVOS).map { i =>
+        */
 
         val interpolatedPositions = step.positions.zipWithIndex.map { case (initialPosition, positionIndex) =>
 

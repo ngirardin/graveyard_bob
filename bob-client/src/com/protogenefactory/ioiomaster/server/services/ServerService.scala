@@ -1,5 +1,6 @@
 package com.protogenefactory.ioiomaster.server.services
 
+import java.net.BindException
 import java.util.{Timer, TimerTask}
 
 import android.app.{Notification, Service}
@@ -212,40 +213,64 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
     override def setup() /*throws ConnectionLostException, InterruptedException*/ {
 
-      info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
+      info(s"SequencerLooper.setup() Openning ports")
 
-      startIOIOConnectionStateTimer()
       /*
+      startIOIOConnectionStateTimer()
       startSequencerStateTimer()
       */
 
-      //TODO start server only when project connected
       info(s"SequenceLooper.setup() Starting HTTP server")
-      httpServer.start()
-
-      sequencer_ = ioio_.openSequencer(channelConfigs)
-
-      showNotification()
-
-      mProject.synchronized {
-        info("SequencerLooper.setup() Waiting for a project")
-        mProject.wait()
+      try {
+        httpServer.start()
+      } catch {
+        case be: BindException =>
+          error("Address already in user")
+          stopSelf()
       }
 
-      info("SequencerLooper.setup() Got a project, pre-filling the sequencer")
+      info(s"SequenceLooper.setup() Openning sequencer")
+      sequencer_ = ioio_.openSequencer(channelConfigs)
 
+      info(s"SequenceLooper.setup() Displaying notification")
+      showNotification()
+
+      /*
+      mProject.synchronized {
+        info("SequencerLooper.setup() mProject.wait() - before")
+        mProject.wait()
+        info("SequencerLooper.setup() mProject.wait() - after")
+      }
+      */
+
+      info("SequencerLooper.setup() Waiting for sequencer to stop - before")
       sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
-      while (sequencer_.available() > 0)
+      info("SequencerLooper.setup() Waiting for sequencer to stop - after")
+
+      info(s"SequencerLooper.setup() Pre-filling ${sequencer_.available} slices...")
+      while (sequencer_.available() > 0) {
+        info("SequencerLooper.setup() prefill")
+        //XXX
+        sequencer_.push(channelCues.map(_.asInstanceOf[ChannelCue]), SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
+        //XXX
+        /*
         push()
+        */
+      }
 
-      info("SequencerLooper.setup() Pre-filling done, starting the sequencer")
+      info("SequencerLooper.setup() Pre-filling done")
 
+      info("SequencerLooper.setup() sequencer_.start()")
       sequencer_.start()
 
     }
 
     override def loop() /* throws ConnectionLostException, InterruptedException */ {
+      /*
       push()
+      */
+      info("SequencerLooper.loop()")
+      Thread.sleep(1000)
     }
 
     var lastLog      = 0l
@@ -334,7 +359,13 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       info(s"ServerService.SequencerLooper.disconnected()")
       toast(s"ServerService.SerquencerLooper.disconnected()")
 
+      info("ServerServer.SequencerLooper.disconnected() Stopping HTTP server")
+      httpServer.stop()
+
+      info("ServerServer.SequencerLooper.disconnected() Stopping helper")
       stopHelper()
+
+      info("ServerServer.SequencerLooper.disconnected() Stopping service")
       stopForeground(true)
 
     }
