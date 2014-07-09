@@ -94,8 +94,8 @@ class ServerSelectionActivity extends SActivity {
         }.wrap.>>
 
       }
-        .<<.Weight(1).>>
-        .gravity(Gravity.CENTER)
+      .<<.Weight(1).>>
+      .gravity(Gravity.CENTER)
 
       val pm = getPackageManager.getPackageInfo(getPackageName, 0)
       val version = pm.versionName

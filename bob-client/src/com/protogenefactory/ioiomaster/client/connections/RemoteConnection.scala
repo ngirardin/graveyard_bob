@@ -78,6 +78,8 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
     throw new NotImplementedError()
   }
 
+  override def hasVideo(): Boolean = true
+
   override def ping(): Boolean = {
 
     import scala.concurrent.duration._

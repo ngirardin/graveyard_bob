@@ -24,6 +24,8 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   }
 
+  override def hasVideo(): Boolean = false
+
   override def ping(): Boolean = true
 
   override def getSounds: Seq[String] =
