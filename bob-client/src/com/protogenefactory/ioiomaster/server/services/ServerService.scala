@@ -50,7 +50,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
   /**
    * The project being played
    */
-  var mProject: ProjectLock = ProjectLock.empty
+  var mProject = ProjectLock.empty
 
   onCreate {
 
@@ -211,73 +211,64 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       new Sequencer.ChannelCuePwmPosition()
     )
 
-    override def setup() /*throws ConnectionLostException, InterruptedException*/ {
+    override def setup() {
 
-      info(s"SequencerLooper.setup() Openning ports")
+      throwExceptionOnMainThread {
 
-      /*
-      startIOIOConnectionStateTimer()
-      startSequencerStateTimer()
-      */
+        info(s"SequencerLooper.setup() Openning ports")
 
-      info(s"SequenceLooper.setup() Starting HTTP server")
-      try {
-        httpServer.start()
-      } catch {
-        case be: BindException =>
-          error("Address already in user")
-          stopSelf()
-      }
+        info(s"Setting thread excecption handler")
 
-      info(s"SequenceLooper.setup() Openning sequencer")
-      sequencer_ = ioio_.openSequencer(channelConfigs)
-
-      info(s"SequenceLooper.setup() Displaying notification")
-      showNotification()
-
-      /*
-      mProject.synchronized {
-        info("SequencerLooper.setup() mProject.wait() - before")
-        mProject.wait()
-        info("SequencerLooper.setup() mProject.wait() - after")
-      }
-      */
-
-      info("SequencerLooper.setup() Waiting for sequencer to stop - before")
-      sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
-      info("SequencerLooper.setup() Waiting for sequencer to stop - after")
-
-      info(s"SequencerLooper.setup() Pre-filling ${sequencer_.available} slices...")
-      while (sequencer_.available() > 0) {
-        info("SequencerLooper.setup() prefill")
-        //XXX
-        sequencer_.push(channelCues.map(_.asInstanceOf[ChannelCue]), SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
-        //XXX
         /*
-        push()
+        startIOIOConnectionStateTimer()
+        startSequencerStateTimer()
         */
+
+        info(s"SequenceLooper.setup() Starting HTTP server")
+        try {
+          httpServer.start()
+        } catch {
+          case be: BindException =>
+            error("Address already in user")
+            stopSelf()
+        }
+
+        info(s"SequenceLooper.setup() Openning sequencer")
+        sequencer_ = ioio_.openSequencer(channelConfigs)
+
+        info(s"SequenceLooper.setup() Displaying notification")
+        showNotification()
+
+        info("SequencerLooper.setup() Waiting for sequencer to stop - before")
+        sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
+        info("SequencerLooper.setup() Waiting for sequencer to stop - after")
+
+        // Pre-fill the sequencer
+        info(s"SequencerLooper.setup() Pre-filling ${sequencer_.available} empty slices...")
+        while (sequencer_.available() > 0)
+          push()
+        info("SequencerLooper.setup() Pre-filling done")
+
+        info("SequencerLooper.setup() Starting sequencer - before")
+        sequencer_.start()
+        info("SequencerLooper.setup() Starting sequencer - after")
+
       }
-
-      info("SequencerLooper.setup() Pre-filling done")
-
-      info("SequencerLooper.setup() sequencer_.start()")
-      sequencer_.start()
 
     }
 
-    override def loop() /* throws ConnectionLostException, InterruptedException */ {
-      /*
-      push()
-      */
-      info("SequencerLooper.loop()")
-      Thread.sleep(1000)
+    override def loop() {
+      throwExceptionOnMainThread {
+        push()
+      }
     }
 
     var lastLog      = 0l
     var currentSlice = 0
 
-    private def push() /* throws ConnectionLostException, InterruptedException */ {
+    private def push() {
 
+      /*
       val slices = mProject.slices(currentSlice)
 
       //info(s"SequencerLooper.push() slices=$slices")
@@ -296,6 +287,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
       }
 
+      */
       val channelCuesArray = channelCues.map(_.asInstanceOf[ChannelCue])
 
       sequencer_.push(channelCuesArray, SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
@@ -307,6 +299,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
         info(s"ServerService.SequencerLooper.push() $currentSlice/${mProject.slices.length}")
       }
 
+      /*
       currentSlice = currentSlice + 1
 
       if (currentSlice == mProject.sliceCount) {
@@ -351,22 +344,25 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
           info("ServerService.SequencerLooper.push() [8] Starting the sequencer - after")
         }
       }
+      */
 
     }
 
     override def disconnected() {
 
-      info(s"ServerService.SequencerLooper.disconnected()")
-      toast(s"ServerService.SerquencerLooper.disconnected()")
+      throwExceptionOnMainThread {
+        info(s"ServerService.SequencerLooper.disconnected()")
+        toast(s"ServerService.SerquencerLooper.disconnected()")
 
-      info("ServerServer.SequencerLooper.disconnected() Stopping HTTP server")
-      httpServer.stop()
+        info("ServerServer.SequencerLooper.disconnected() Stopping HTTP server")
+        httpServer.stop()
 
-      info("ServerServer.SequencerLooper.disconnected() Stopping helper")
-      stopHelper()
+        info("ServerServer.SequencerLooper.disconnected() Stopping helper")
+        stopHelper()
 
-      info("ServerServer.SequencerLooper.disconnected() Stopping service")
-      stopForeground(true)
+        info("ServerServer.SequencerLooper.disconnected() Stopping service")
+        stopForeground(true)
+      }
 
     }
 
@@ -397,6 +393,21 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
     }
 
+  }
+
+  /**
+   * Catch the exceptions that the code block may produce and forward
+   * them to the UI thread to make the app crash instead of throwing
+   * a silent UncaughtException
+   *
+   * @param code The code block on which to catch exceptions
+   */
+  private def throwExceptionOnMainThread(code: => Unit): Unit= {
+    try {
+      code
+    } catch {
+      case e : Throwable => runOnUiThread(throw e)
+    }
   }
 
 }
