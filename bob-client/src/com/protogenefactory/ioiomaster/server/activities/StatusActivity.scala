@@ -22,7 +22,7 @@ class StatusActivity extends SActivity {
   final val STREAM_WIDTH   = 320
   final val STREAM_HEIGHT  = 240
   final val STREAM_FPS     = 15
-  final val STREAM_BITRATE = 96 * 1024
+  final val STREAM_BITRATE = 128 * 1024
 
   lazy val serverService  = new LocalServiceConnection[ServerService]
 
