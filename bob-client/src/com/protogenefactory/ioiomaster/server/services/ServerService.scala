@@ -42,6 +42,10 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
    */
   private var started_ = false
 
+  lazy val httpServer = new BobServer(p =>
+    playProject(p)
+  )
+
   /**
    * The project being played
    */
@@ -67,11 +71,17 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
   onDestroy {
 
     //TODO remove
-    info("##################### ServiceServer.onDestroy() ##################")
+    info("ServerService.onDestroy()")
     /*
     stopHelper()
     helper_.destroy()
     */
+  }
+
+  onUnregister {
+    //TODO remove
+    toast("*************** unregister **************")
+    info("ServerService.unregister() **************")
   }
 
   /**
@@ -103,6 +113,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       /*
       if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
       */
+      //TODO remove
       toast("ServerService.startHelper() Restaring helper")
       helper_.restart()
       /*
@@ -132,7 +143,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       if (mProject.project == null) {
       */
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}'")
-        toast(s"ServerService.playProject() ${project.name}")
         mProject.setProject(project)
         mProject.notifyAll()
       /*
@@ -192,11 +202,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
     info(s"ServerService.createIOIOLooper() $connectionType")
 
-    /*
-    startIOIOConnectionStateTimer()
-    startSequencerStateTimer()
-    */
-
     val channelConfigs: Array[ChannelConfig] = ServoConfig.PERIPHERAL_PORTS.map(pin =>
       new Sequencer.ChannelConfigPwmPosition(CLK, PERIOD, INITIAL, new DigitalOutput.Spec(pin))
     ).toArray
@@ -209,9 +214,14 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
       info(s"SequencerLooper.setup() Openning ports ${ServoConfig.PERIPHERAL_PORTS}")
 
+      startIOIOConnectionStateTimer()
+      /*
+      startSequencerStateTimer()
+      */
+
       //TODO start server only when project connected
       info(s"SequenceLooper.setup() Starting HTTP server")
-      new BobServer(p => playProject(p)).start()
+      httpServer.start()
 
       sequencer_ = ioio_.openSequencer(channelConfigs)
 
@@ -275,8 +285,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       currentSlice = currentSlice + 1
 
       if (currentSlice == mProject.sliceCount) {
-
-        toast("Project playing done")
 
         info("ServerService.SequencerLooper.push() [1] Last slice, stopping sequencer")
 
