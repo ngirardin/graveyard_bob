@@ -1,11 +1,6 @@
 package com.protogenefactory.ioiomaster.client.activities
 
-import java.util.{Timer, TimerTask}
-
-import android.media.MediaPlayer
-import android.media.MediaPlayer.{OnErrorListener, OnPreparedListener}
 import android.support.v4.widget.DrawerLayout
-import android.view.ViewGroup.LayoutParams
 import android.view.{Gravity, View}
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.{AdapterView, ArrayAdapter, FrameLayout, ListView}
@@ -21,14 +16,22 @@ class PlayActivity extends SActivity {
 
   final val BUTTON_TEXT_SIZE = /* tablet 20 */ 16/* phone */
   final val HEADER_PADDING   = 8
+
+  /* VIDEO
   final val VIDEO_WIDTH      = /* tablet 320 */ 240
+  */
 
+  /* JOYSTICKS
   val joysticks = Seq("Wheels", "Head", "Arm")
+   */
 
+  /* MP3
   val mp3s = Seq("Hello!", "Bye-bye!", "Hi, I'm Bob!")
+  */
 
   lazy val application = getApplication.asInstanceOf[BobApplication]
 
+  /* JOSYTICKS
   lazy val buttonsJoystick: Seq[SToggleButton] = joysticks.map(j => new SToggleButton(j) {
     /*
     onClick({t: SToggleButton =>
@@ -38,9 +41,12 @@ class PlayActivity extends SActivity {
     textOff(j)
     textOn(j)
   })
+  */
 
+  /* VIDEO
   lazy val videoView       = new SVideoView()
   lazy val videoViewStatus = new STextView("Connecting...")
+  */
 
   lazy val serverIP = application.serverIP
 
@@ -59,32 +65,31 @@ class PlayActivity extends SActivity {
         /**
          * Projects column
          */
-        this += new SScrollView {
-          new SVerticalLayout {
+        this += new SVerticalLayout {
 
-            STextView("Sequences")
-              .gravity(Gravity.CENTER)
-              .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
+          STextView("Sequences")
+            .gravity(Gravity.CENTER)
+            .padding(0, HEADER_PADDING, 0, HEADER_PADDING)
 
-            projects.foreach(p =>
+          projects.foreach(p =>
 
-              this += new SButton(p.name) {
-                onClick({
-                  val project = tag.asInstanceOf[Project]
-                  PlayProgressDialog.show(context, project)
-                  application.connection.playProject(project)
-                })
-              }
-                .tag(p)
-                .textSize(BUTTON_TEXT_SIZE.sp)
+            this += new SButton(p.name) {
+              onClick({
+                val project = tag.asInstanceOf[Project]
+                PlayProgressDialog.show(context, project)
+                application.connection.playProject(project)
+              })
+            }
+              .tag(p)
+              .textSize(BUTTON_TEXT_SIZE.sp)
 
-            )
-          }.<<.wrap.Weight(1.0f).>>
-        }
+          )
+        }.<<.wrap.Weight(1.0f).>>
 
         /**
          * Joysticks column
          */
+        /* JOYSTICK
         this += new SVerticalLayout {
 
           STextView("Joysticks")
@@ -98,10 +103,12 @@ class PlayActivity extends SActivity {
           )
 
         }.<<.wrap.Weight(1.0f).>>
+        */
 
         /**
          * Sounds column
          */
+        /* MP3
         this += new SScrollView {
           new SVerticalLayout {
 
@@ -115,10 +122,12 @@ class PlayActivity extends SActivity {
             )
           }.<<.wrap.Weight(1.0f).>>
         }
+        */
 
         /**
          * Video column
          */
+        /* VIDEO
         this += new SScrollView {
           new SVerticalLayout {
 
@@ -134,6 +143,7 @@ class PlayActivity extends SActivity {
             .gravity(Gravity.CENTER_HORIZONTAL)
             .<<(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).Weight(2.0f).>>
         }
+        */
 
       }
 
@@ -157,6 +167,7 @@ class PlayActivity extends SActivity {
       }
     })
 
+    /* VIDEO
     if (application.connection.hasVideo) {
 
       // Display the remote stream if any
@@ -219,6 +230,7 @@ class PlayActivity extends SActivity {
     } else {
       videoViewStatus.text("Remote video only available\nduring remote connection")
     }
+    */
 
     contentView = drawerLayout
 
