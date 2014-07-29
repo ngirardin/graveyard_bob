@@ -12,6 +12,9 @@
   > run
 ```
 
+When the app compiles but crash at runtime that a class is not found, running `sbt clean` can come handy.
+
+
 ## IOIO Lib
 
 The IOIOLib has been modified and recompiled in the following ways:
