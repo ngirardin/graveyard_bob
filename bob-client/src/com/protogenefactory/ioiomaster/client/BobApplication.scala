@@ -60,8 +60,8 @@ class BobApplication extends Application with SContext {
     }.toVector
 
     val configs = List(
-      BoardConfig("Servos on pins 3 and 4", servoConfigs(List(3, 4)               )),
-      BoardConfig("Servos on pins 1 to 7" , servoConfigs(List(1, 2, 3, 4, 5, 6, 7)))
+      BoardConfig("Servos on 2 first pins", servoConfigs(List(3, 4)               )),
+      BoardConfig("Servos on all pins"    , servoConfigs(List(3, 4, 5, 6, 7, 10, 11, 12, 13)))
     )
 
     configs.foreach(boardConfigDao.create)
@@ -71,27 +71,27 @@ class BobApplication extends Application with SContext {
     // Project 1
     projectsDao.create(
       Project(UUID.randomUUID.toString, "Simple demo project", configs(0), Vector(
-        Step(4000, Vector( 1, 50)),
-        Step(2000, Vector(99, 50)),
-        Step(4000, Vector(50, 50)),
-        Step(0   , Vector( 1, 50))
+        Step(4000, Vector( 1, 100)),
+        Step(2000, Vector(99, 1)),
+        Step(4000, Vector(50, 100)),
+        Step(0   , Vector( 1, 1))
       ))
     )
 
     // Project 2
     projectsDao.create(
       Project(UUID.randomUUID.toString, "Bob demo project", configs(1), Vector(
-        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0)),
-        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20)),
-        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
-        Step( 500, Vector(100,   0,  60,  40,  80, 800,  60)),
-        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80)),
-        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0)),
-        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20)),
-        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40)),
-        Step( 500, Vector(100,   0,  60,  40,  80, 800,  60)),
-        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80)),
-        Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100))
+        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0,  0,  40)),
+        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20, 20,  60)),
+        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40, 40,  20)),
+        Step( 500, Vector(100,   0,  60,  40,  80,  80,  60, 60,  80)),
+        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80, 80,   0)),
+        Step( 500, Vector(  0, 100,   0, 100,   0,  40,   0,  0,  40)),
+        Step(1000, Vector(100,   0,  20,  80, 100,  60,  20, 20,  60)),
+        Step( 200, Vector(  0, 100,  40,  60,  20,  20,  40, 40,  20)),
+        Step( 500, Vector(100,   0,  60,  40,  80,  80,  60, 60,  80)),
+        Step( 200, Vector(  0, 100,  80,  20,  40,   0,  80, 80,   0)),
+        Step(  0 , Vector(100,   0, 100,   0,  60, 100, 100,  0, 100))
       ))
     )
 
