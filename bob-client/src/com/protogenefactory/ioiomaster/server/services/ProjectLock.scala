@@ -132,9 +132,9 @@ class ProjectLock(
    *
    * @return the slice positions for all the servos
    */
-  def getSlice(): Seq[Int] = {
+  def getSlice: Seq[Int] = {
 
-    Log.i("Bob", s"ProjectLock.getSlice() $currentSlice/$sliceCount")
+    //Log.i("Bob", s"ProjectLock.getSlice() $currentSlice/$sliceCount")
 
     if (currentSlice < sliceCount) {
 
