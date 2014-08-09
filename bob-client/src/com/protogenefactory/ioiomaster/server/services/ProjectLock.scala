@@ -1,128 +1,164 @@
 package com.protogenefactory.ioiomaster.server.services
 
 import android.util.Log
-import com.protogenefactory.ioiomaster.client.models.Project
+import com.protogenefactory.ioiomaster.client.models.{Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.services.ProjectLock._
-
-import scala.collection.mutable.ArrayBuffer
 
 object ProjectLock {
 
   /**
-   * The period duration in ms
+   * The min and maximum servo positions in ms
    */
-  final val PERIOD_MILLI = ServerService.PERIOD / 1000
+  final val MIN = 1000 // us
+  final val MAX = 2500 // us
 
   /**
-   * @return a new empty ProjectLock
+   * The duration of one percent of the servo amplitude in ms
    */
-  def empty: ProjectLock = new ProjectLock
+  final val PERCENT = ((MAX - MIN).toFloat / 100f).intValue()
 
 }
 
-class ProjectLock {
+class ProjectLock(
+  // The slice duration in ms
+  period: Int
+) {
 
   /**
    * The project being played
    */
-  private var project    : Project = null
+  private var project : Project = null
 
+  /**
+   * The pins index for the project
+   */
+  var pinsIndexes: Seq[Int] = Seq()
+
+  /**
+   * The project duration in ms
+   */
   var duration   : Int = 0
+
+  /**
+   * The project slices count
+   */
   var sliceCount : Int = 0
 
-  var slices: Seq[Seq[Int]] = null
+  /**
+   * The project slices, one for each period
+   */
+  private var slices: Seq[Seq[Int]] = null
+
+  var currentSlice = 0
+
+  def hasProject = project != null
 
   def setProject(p: Project) {
-    project    = p
-    duration   = projectDuration
-    sliceCount = this.duration / PERIOD_MILLI
-    slices     = sliceSteps()
-  }
+    project = p
+    pinsIndexes = p.boardConfig.servoConfigs.map(c => ServoConfig.PERIPHERAL_PORTS.indexOf(c.pin))
+    duration = project.steps.map(_.duration).sum
+    slices = sliceSteps()
+    sliceCount = slices(0).length
+    //Log.i("*******", slices.mkString("\n"))
+    currentSlice = 0
 
-  private def projectDuration: Int =  {
+    /**
+     * Convet a percentage position to its timing
+     *
+     * @param position the position in percentage
+     * @return the timing in ms
+     */
+    def toTiming(position: Int) = {
+      MIN + position * PERCENT
+    }
 
-    var duration = 0
+    def sliceSteps(): Seq[Seq[Int]] = {
 
-    for (step <- project.steps)
-      duration = duration + step.duration
 
-    duration
+      Log.i("Bob", s"ProjectLock.sliceSteps() Pins  : ${project.boardConfig.servoConfigs.map(_.pin)}")
 
-  }
+      Log.i("Bob", s"ProjectLock.sliceSteps() Steps :")
+      project.steps.foreach(step =>
+        Log.i("Bob", s"ProjectLock.sliceSteps()   $step -> ${step.positions.map(toTiming)}")
+      )
 
-  private def sliceSteps() : Seq[Seq[Int]] = {
+      val slicedSteps = project.steps.zip(project.steps.tail).map { case (step, nextStep) =>
 
-    val s = ArrayBuffer[Seq[Int]]()
+        // Compute the slices count from the duration
+        val slices = step.duration / period
 
-    Log.i("Bob", s"ProjectLock.sliceSteps() Steps:")
-    project.steps.foreach(step =>
-      Log.i("Bob", s"ProjectLock.sliceSteps()   $step")
-    )
+        //Log.i("----------", s"${step.duration}ms ($slices slices) for $step -> $nextStep")
 
-    for (i <-  0 until project.steps.length - 1) {
+        step.positions.zip(nextStep.positions).map { case (position, nextPosition) =>
 
-      val step     = project.steps(i    )
-      val nextStep = project.steps(i + 1)
+          // Convert the start and end position to their timing
+          val start = toTiming(position)
+          val end = toTiming(nextPosition)
 
-      val stepSliceCount: Int = step.duration / PERIOD_MILLI
+          // Compute the position delta between each slice
+          val delta = (end - start).toFloat / slices
 
-      Log.i("Bob", s"ProjectLock.sliceSteps() Step $i/${project.steps.length}: duration=${step.duration} ms, slices=$stepSliceCount")
-
-      for (sliceIndex <- 0 to stepSliceCount) {
-
-//        Log.i("~~~~~~~~~~~~~~~~", s"  Slice $sliceIndex/$stepSliceCount")
-
-        //!!!!!
-        /*
-        val interpolatedPositions = (0 until BoardConfig.MAX_SERVOS).map { i =>
-        */
-
-        val interpolatedPositions = step.positions.zipWithIndex.map { case (initialPosition, positionIndex) =>
-
-//          Log.i("~~~~~~~~~~~~~~~~", s"    Position $positionIndex/${step.positions.length}")
-
-          /*
-          val initialPosition = step.positions(positionIndex)
-          */
-          val endPosition     = nextStep.positions(positionIndex)
-
-          // Interpolate the position
-          val deltaPosition : Float = endPosition - initialPosition
-          val deltaPerSlice : Float = deltaPosition / stepSliceCount
-
-          //                    if (sliceIndex == 0)
-          //                        Log.i("~~~~~~~~~~~~~~~~", "S" + positionIndex + " [" + initialPosition + " -> " + endPosition + "] delta: " + deltaPosition + ", deltaPerSlice: " + deltaPerSlice);
-
-          val interpolatedPercentage : Float = initialPosition + deltaPerSlice * sliceIndex
-          val interpolatedPosition   : Float = ServerService.MIN + interpolatedPercentage * ServerService.PERCENT
-
-          /*
-          interpolatedPositions.add(interpolatedPosition.intValue())
-          */
-          interpolatedPosition.intValue()
+          // Compute the value for each slice
+          (0 until slices).map { slice =>
+            //Log.i("---", s"start ($start) + slice ($slice) * delta ($delta) = ${start + slice * delta}")
+            (start + slice * delta).toInt
+          }
 
         }
 
-        if (sliceIndex % 10 == 0)
-          Log.i("Bob", s"ProjectLock.sliceSteps()   slice $sliceIndex: $interpolatedPositions")
-
-        s.+=(interpolatedPositions)
       }
 
-      Log.i("Bob", "ProjectLock.sliceSteps() ----------------------")
+      // Group the sliced steps by servos
+      val flattenSlicesSteps = (0 until project.boardConfig.servoConfigs.length).map { i =>
+
+        slicedSteps.zipWithIndex.map { case (step, si) =>
+          step(i)
+        }.flatten
+        // Append the last position
+
+      }.zipWithIndex.map { case (steps, servo) =>
+        steps :+ toTiming(project.steps.last.positions(servo))
+      }
+
+      Log.i("Bob", s"ProjectLock.sliceSteps() Slices length par servo: ${flattenSlicesSteps.map(_.length)}")
+
+      flattenSlicesSteps
 
     }
+  }
 
-    //TODO ********** check slice count difference!!!
-    /*
-    if (s.length != sliceCount)
-      throw new RuntimeException("Expecting " + sliceCount + " slices but got " + s.length)
-    */
+  /**
+   * Get the next slice. When at the last slice call #clear().
+   *
+   * @return the slice positions for all the servos
+   */
+  def getSlice(): Seq[Int] = {
 
-    s.toSeq
+    Log.i("Bob", s"ProjectLock.getSlice() $currentSlice/$sliceCount")
+
+    if (currentSlice < sliceCount) {
+
+      currentSlice = currentSlice + 1
+
+      slices.map { servo =>
+        servo(currentSlice - 1)
+      }
+
+    } else {
+      // All slices read
+      clear()
+      Seq()
+    }
 
   }
 
-}
+  private def clear() {
+    project      = null
+    duration     = 0
+    sliceCount   = 0
+    slices       = null
+    currentSlice = 0
+  }
 
+}
 

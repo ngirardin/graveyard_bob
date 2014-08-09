@@ -1,19 +1,17 @@
 package com.protogenefactory.ioiomaster.server.services
 
 import java.net.BindException
-import java.util.{Timer, TimerTask}
 
 import android.app.{Notification, Service}
 import android.content.Intent
-import android.os.{Environment, SystemClock}
+import android.os.Environment
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.connections.Playable
 import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.BobServer
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
-import ioio.lib.api.Sequencer.{ChannelConfig, ChannelCue, ChannelCuePwmPosition}
-import ioio.lib.api.{DigitalOutput, IOIO, Sequencer}
+import ioio.lib.api.PwmOutput
 import ioio.lib.util.android.IOIOAndroidApplicationHelper
 import ioio.lib.util.{BaseIOIOLooper, IOIOLooperProvider}
 import org.scaloid.common._
@@ -22,10 +20,10 @@ import scala.util.Random
 
 object ServerService {
 
-  final val PERIOD = 20000 // microseconds (50hz = 0.02s = 20ms = 20.000us)
-  final val MIN = 1000 * 2 // periods      (1000us * 0.5us periods)
-  final val MAX = 2000 * 2 // periods      (2000us * 0.5us periods)
-  final val PERCENT = ((MAX - MIN).toFloat / 100f).intValue()
+  /**
+   * The slice duration at which the servo position is played
+   */
+  final val PERIOD : Int = (1f / ServoConfig.FREQUENCY * 1000 * 2).toInt // 20ms * 2 = 40ms
 
 }
 
@@ -48,14 +46,12 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
   )
 
   /**
-   * The project being played
+   * The project lock storing the slices
    */
-  var mProject = ProjectLock.empty
+  var mProject = new ProjectLock(PERIOD)
 
   onCreate {
-
     info(s"ServerService.onCreate()")
-
   }
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
@@ -167,10 +163,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {
 
-    final val CLK = Sequencer.Clock.CLK_2M // 0.5us periods
-    final val INITIAL = 3000               // 1500 us * (1 / 0.5microseconds)
-    final val SLICE = PERIOD / 16          // Slice duration in 16microseconds period
-
+    /*
     def startIOIOConnectionStateTimer() {
       new Timer().schedule(new TimerTask() {
         override def run() {
@@ -185,175 +178,86 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
         }
       }, 0, 10 * 1000)
     }
-
-    def startSequencerStateTimer() {
-      new Timer().schedule(new TimerTask {
-        override def run() {
-          val sequencerState = sequencer_ match {
-            case null => "null"
-            case _    => s"${sequencer_.getLastEvent.`type`}, numCuesStarted=${sequencer_.getLastEvent.numCuesStarted}, available=${sequencer_.available()}"
-          }
-//          toast(s"Sequencer: $sequencerState")
-          info(s"ServerSevice.SequencerWatcher state=$sequencerState")
-        }
-      }, 0, 500)
-    }
-
-    var sequencer_ : Sequencer = null
+    */
 
     info(s"ServerService.createIOIOLooper() $connectionType")
 
-    val channelConfigs: Array[ChannelConfig] = ServoConfig.PERIPHERAL_PORTS.map(pin =>
-      new Sequencer.ChannelConfigPwmPosition(CLK, PERIOD, INITIAL, new DigitalOutput.Spec(pin))
-    ).toArray
+    var pins: Seq[PwmOutput] = null
 
-    val channelCues : Array[ChannelCuePwmPosition] = ServoConfig.PERIPHERAL_PORTS.toArray.map(pin =>
-      new Sequencer.ChannelCuePwmPosition()
-    )
-
+    /**
+     * Called when the IOIO board is connected. Open all the PWM ports
+     */
     override def setup() {
 
       throwExceptionOnMainThread {
 
-        info(s"SequencerLooper.setup() Openning ports")
+        info(s"SequencerLooper.setup() Openning the ports")
 
-        info(s"Setting thread excecption handler")
+        pins = ServoConfig.PERIPHERAL_PORTS.map(pin =>
+          ioio_.openPwmOutput(pin, ServoConfig.FREQUENCY)
+        )
 
-        /*
-        startIOIOConnectionStateTimer()
-        startSequencerStateTimer()
-        */
-
-        info(s"SequenceLooper.setup() Starting HTTP server")
         try {
+          info(s"SequenceLooper.setup() Starting HTTP server")
           httpServer.start()
         } catch {
           case be: BindException =>
-            error("Address already in user")
+            error("Address already in use")
             stopSelf()
         }
 
-        info(s"SequenceLooper.setup() Openning sequencer")
-        sequencer_ = ioio_.openSequencer(channelConfigs)
-
         info(s"SequenceLooper.setup() Displaying notification")
+
+        // Display the app notification
         showNotification()
 
-        info("SequencerLooper.setup() Waiting for sequencer to stop - before")
-        sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
-        info("SequencerLooper.setup() Waiting for sequencer to stop - after")
-
-        // Pre-fill the sequencer
-        info(s"SequencerLooper.setup() Pre-filling ${sequencer_.available} empty slices...")
-        while (sequencer_.available() > 0)
-          push()
-        info("SequencerLooper.setup() Pre-filling done")
-
-        info("SequencerLooper.setup() Starting sequencer - before")
-        sequencer_.start()
-        info("SequencerLooper.setup() Starting sequencer - after")
-
       }
 
     }
+
+    var lastLog = 0
 
     override def loop() {
+
       throwExceptionOnMainThread {
-        push()
-      }
-    }
-
-    var lastLog      = 0l
-    var currentSlice = 0
-
-    private def push() {
-
-      /*
-      val slices = mProject.slices(currentSlice)
-
-      //info(s"SequencerLooper.push() slices=$slices")
-
-      channelCues.zipWithIndex.foreach { case (channel, i) =>
-
-        if (i < slices.length) {
-
-          val pulseWidth = slices(i)
-          //info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> $pulseWidth")
-          channel.pulseWidth = pulseWidth
-
-        } else {
-          //info(s"SequencerLooper.push()   i=$i ${channel.pulseWidth} -> default")
-        }
-
-      }
-
-      */
-      val channelCuesArray = channelCues.map(_.asInstanceOf[ChannelCue])
-
-      sequencer_.push(channelCuesArray, SLICE /* 20ms */); // Unit value is 16microseconds, 62500 = 1 s
-
-      val now = SystemClock.elapsedRealtime()
-
-      if (now - lastLog > 100) {
-        lastLog = now
-        info(s"ServerService.SequencerLooper.push() $currentSlice/${mProject.slices.length}")
-      }
-
-      /*
-      currentSlice = currentSlice + 1
-
-      if (currentSlice == mProject.sliceCount) {
-
-        info("ServerService.SequencerLooper.push() [1] Last slice, stopping sequencer")
-
-        /*
-        sequencer_.stop()
-
-        info("ServerService.SequencerLooper.push() [2] Waiting for the sequencer to stop...")
-        sequencer_.waitEventType(Sequencer.Event.Type.STOPPED)
-
-        info("ServerService.SequencerLooper.push() [3] Sequencer stopper, waiting for a new project")
-        */
 
         mProject.synchronized {
 
-          mProject.wait()
+          // Wait for a project
+          if (mProject.hasProject) {
 
-          info(s"ServerService.SequencerLooper.push() [4] Got a new project: ${mProject.duration} ms, ${mProject.sliceCount} slices")
-          currentSlice = 0
+            ioio_.beginBatch()
 
-          info(s"ServerService.SequencerLooper.push() [5] Prefilling the sequencer (available=${sequencer_.available})...")
+            mProject.pinsIndexes.zip(mProject.getSlice()).foreach { case (pinIndex, slice) =>
+                //info(s"Pin: $pinIndex, slice: $slice")
+                pins(pinIndex).setPulseWidth(slice)
+            }
 
-          /*
-          while (true) {
-            info(s"available: ${sequencer_.available}")
-            Thread.sleep(500)
+            ioio_.endBatch()
+          } else {
+
+            if (lastLog > 10) {
+              lastLog = 0
+              info("ServerService.SequencerLooper.loop() no project")
+              lastLog = lastLog + 1
+            }
+
           }
-          */
-        /*
-          while (sequencer_.available() > 0) {
-            info(s"ServerService.SequencerLooper.push() [6]   prefilling (available ${sequencer_.available}...")
-            push()
-          }
-          */
-
-          info("ServerService.SequencerLooper.push() [7] Starting the sequencer - before")
-          /*
-          sequencer_.start()
-          */
-          info("ServerService.SequencerLooper.push() [8] Starting the sequencer - after")
         }
+
+        // Sleep till the next cycle
+        Thread.sleep(PERIOD)
+
       }
-      */
 
     }
 
     override def disconnected() {
 
-      throwExceptionOnMainThread {
-        info(s"ServerService.SequencerLooper.disconnected()")
-        toast(s"ServerService.SerquencerLooper.disconnected()")
+      info(s"ServerService.SequencerLooper.disconnected()")
+      toast(s"ServerService.SerquencerLooper.disconnected()")
 
+      throwExceptionOnMainThread {
         info("ServerServer.SequencerLooper.disconnected() Stopping HTTP server")
         httpServer.stop()
 
