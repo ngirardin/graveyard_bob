@@ -134,20 +134,14 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
     mProject.synchronized {
 
-      //TODO check that ioio is started
-      //TODO check that project is already playing
-      /*
-      if (mProject.project == null) {
-      */
+      if (!mProject.hasProject) {
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}'")
         mProject.setProject(project)
         mProject.notifyAll()
-      /*
       } else {
         info(s"ServerService.playProject() project=[${project.id}] '${project.name}' Project already playing")
         toast("Project already playing!")
       }
-      */
 
     }
 
@@ -228,7 +222,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
             ioio_.beginBatch()
 
-            mProject.pinsIndexes.zip(mProject.getSlice()).foreach { case (pinIndex, slice) =>
+            mProject.pinsIndexes.zip(mProject.getSlice).foreach { case (pinIndex, slice) =>
                 //info(s"Pin: $pinIndex, slice: $slice")
                 pins(pinIndex).setPulseWidth(slice)
             }
