@@ -1,12 +1,12 @@
 package com.protogenefactory.ioiomaster.client.connections
 
-import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
+import com.protogenefactory.ioiomaster.client.models.Project
 
 trait Playable {
 
   def playProject(project: Project)
 
-  def playPosition(boardConfig: BoardConfig, positions: Array[Int])
+  def playStep(project: Project, stepIndex: Int)
 
   def getSounds: Seq[String]
 

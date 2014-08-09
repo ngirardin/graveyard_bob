@@ -3,8 +3,6 @@ package com.protogenefactory.ioiomaster.client.activities
 import android.app
 import android.app.ActionBar.{Tab, TabListener}
 import android.app.{ActionBar, Activity}
-import android.content.DialogInterface
-import android.content.DialogInterface.OnClickListener
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentStatePagerAdapter}
 import android.support.v4.view.PagerAdapter
@@ -38,6 +36,8 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
   // The bob application
   lazy val application: BobApplication = getApplication.asInstanceOf[BobApplication]
+
+  var autoplay = defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
 
   var project: Project = null
 
@@ -152,6 +152,11 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
     application.projectsDao.updateSteps(project)
 
+    if (autoplay) {
+      //TODO remove
+      toast("Autoplay duration")
+    }
+
   }
 
   override def onStepPositionChanged(stepIndex: Int, servoIndex: Int, newPosition: Int) {
@@ -169,6 +174,11 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
     project = project.copy(steps = newSteps)
 
     application.projectsDao.updateSteps(project)
+
+    if (autoplay) {
+      //TODO remove
+      toast("Autoplay position")
+    }
 
   }
 
@@ -307,6 +317,8 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
   }
 
   def onAutoplayChanged(checked: Boolean) {
+
+    autoplay = checked
 
     // Save the autoplay status to the preferences
     defaultSharedPreferences

@@ -7,7 +7,7 @@ import android.content.Intent
 import android.os.Environment
 import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.connections.Playable
-import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project, ServoConfig}
+import com.protogenefactory.ioiomaster.client.models.{Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.BobServer
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
 import com.protogenefactory.ioiomaster.server.services.ServerService._
@@ -41,9 +41,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
    */
   private var started_ = false
 
-  lazy val httpServer = new BobServer(p =>
-    playProject(p)
-  )
+  lazy val httpServer = new BobServer(this)
 
   /**
    * The project lock storing the slices
@@ -63,22 +61,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
     // Don't stop on application exit
     Service.START_STICKY
 
-  }
-
-  onDestroy {
-
-    //TODO remove
-    info("ServerService.onDestroy()")
-    /*
-    stopHelper()
-    helper_.destroy()
-    */
-  }
-
-  onUnregister {
-    //TODO remove
-    toast("*************** unregister **************")
-    info("ServerService.unregister() **************")
   }
 
   /**
@@ -107,15 +89,8 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
       started_ = true
     } else {
       info(s"ServerService.startHelper() already started, restarting")
-      /*
-      if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-      */
-      //TODO remove
-      toast("ServerService.startHelper() Restaring helper")
+      toast("IOIO board reconnected")
       helper_.restart()
-      /*
-      }
-      */
     }
 
   }
@@ -128,7 +103,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
     }
 
   }
-
 
   override def playProject(project: Project) {
 
@@ -147,8 +121,21 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
   }
 
-  override def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
-    throw new NotImplementedError()
+  override def playStep(project: Project, stepIndex: Int) {
+
+    mProject.synchronized {
+
+      if (!mProject.hasProject) {
+        info(s"ServerService.playPosition() project=[${project.id}] '${project.name}' step: $stepIndex")
+        mProject.setProject(project.copy(steps = project.steps.slice(stepIndex, stepIndex + 1)))
+        mProject.notifyAll()
+      } else {
+        info(s"ServerService.playPosition() project=[${project.id}] '${project.name}' Project already playing")
+        toast("Project already playing!")
+      }
+
+    }
+
   }
 
   override def getSounds: Seq[String] = {

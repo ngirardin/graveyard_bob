@@ -2,6 +2,7 @@ package com.protogenefactory.ioiomaster.server
 
 import android.util.Log
 import com.protogenefactory.ioiomaster.client.BobApplication
+import com.protogenefactory.ioiomaster.client.connections.Playable
 import com.protogenefactory.ioiomaster.client.models.Project
 import com.protogenefactory.ioiomaster.server.BobServer._
 import fi.iki.elonen.NanoHTTPD
@@ -18,12 +19,13 @@ object BobServer {
   final val ROOT_URL      = "/play"
   final val PING_URL      = "/ping"
   final val PROJECT_PARAM = "project"
+  final val STEP_PARAM    = "step"
   final val RESPONSE_OK   = "BOB"
   final val RESPONSE_NOT_FOUND = "Not found"
 
 }
 
-class BobServer(onProject: Project => Unit) extends NanoHTTPD(PORT) {
+class BobServer(playable: Playable) extends NanoHTTPD(PORT) {
 
   Log.i("Bob", "BobServer()")
 
@@ -38,12 +40,21 @@ class BobServer(onProject: Project => Unit) extends NanoHTTPD(PORT) {
 
           case ROOT_URL =>
 
-            val json = session.getParms.get(PROJECT_PARAM).parseJson
+            val json      = session.getParms.get(PROJECT_PARAM).parseJson
+            val stepIndex = session.getParms.get(STEP_PARAM) match {
+              case null => None
+              case s    => Some(s.toInt)
+            }
 
             try {
 
               val project = Project.deserialize(json)
-              onProject(project)
+
+              stepIndex match {
+                case None    => playable.playProject(project)
+                case Some(s) => playable.playStep(project, s)
+              }
+
               new Response(Response.Status.OK, NanoHTTPD.MIME_PLAINTEXT, RESPONSE_OK);
 
             } catch {

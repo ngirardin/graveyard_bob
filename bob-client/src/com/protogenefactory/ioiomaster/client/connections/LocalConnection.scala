@@ -1,6 +1,6 @@
 package com.protogenefactory.ioiomaster.client.connections
 
-import com.protogenefactory.ioiomaster.client.models.{BoardConfig, Project}
+import com.protogenefactory.ioiomaster.client.models.Project
 import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
 
@@ -8,7 +8,7 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   override def playProject(project: Project) {
 
-    info(s"playProject() project=${project.id}")
+    info(s"LocalConnection.playProject() project=${project.id}")
 
     serverService.run(s =>
       s.playProject(project)
@@ -16,15 +16,17 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   }
 
-  override def playPosition(boardConfig: BoardConfig, positions: Array[Int]) {
+  override def playStep(project: Project, stepIndex: Int) {
 
-    //TODO play local position
-    info(s"LocalPosition.playPosition() boardConfig=$boardConfig, positions=$positions")
-    throw new NotImplementedError("LocalConnection.playPosition")
+    info(s"LocalPosition.playPosition() project=${project.id}, stepIndex=$stepIndex")
+
+    serverService.run(s =>
+      s.playStep(project, stepIndex)
+    )
 
   }
 
-  override def hasVideo(): Boolean = false
+  override def hasVideo: Boolean = false
 
   override def ping(): Boolean = true
 
