@@ -37,7 +37,7 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
   // The bob application
   lazy val application: BobApplication = getApplication.asInstanceOf[BobApplication]
 
-  var autoplay = false
+  var autoplay = true
 
   var project: Project = null
 
@@ -56,7 +56,7 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
     createTabs()
 
     // Get the autoplay from the preferences
-    autoplay = defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
+    autoplay = defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, true)
 
     // Need to create the tabs before selected the saved one
     if (savedInstanceState != null) {
