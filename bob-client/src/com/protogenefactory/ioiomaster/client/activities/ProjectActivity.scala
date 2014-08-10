@@ -122,6 +122,12 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
         val position = tab.getPosition
         // Select the positions view pager for this step
         viewPager.setCurrentItem(position)
+
+        if (autoplay) {
+          info(s"ProjectActivity.newTab().onTabSelected() position=$position - Autoplaying step")
+          playStep(position)
+        }
+
       }
 
       override def onTabReselected(tab: Tab, ft: app.FragmentTransaction): Unit = {}
@@ -155,12 +161,6 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
     application.projectsDao.updateSteps(project)
 
-    if (autoplay) {
-//TODO remove
-toast("Autoplay duration")
-      playStep(stepIndex)
-    }
-
   }
 
   override def onStepPositionChanged(stepIndex: Int, servoIndex: Int, newPosition: Int) {
@@ -180,8 +180,7 @@ toast("Autoplay duration")
     application.projectsDao.updateSteps(project)
 
     if (autoplay) {
-//TODO remove
-toast("Autoplay position")
+      info(s"ProjectActivity.onStepPositionChanged() Autoplaying step")
       playStep(stepIndex)
     }
 
