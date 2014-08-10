@@ -74,7 +74,6 @@
         <activity
             android:name=".server.activities.StatusActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="landscape"
             android:label="@string/app_name">
 
             <intent-filter>

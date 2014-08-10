@@ -6,10 +6,8 @@ import android.content.Intent
 import android.hardware.usb.{UsbAccessory, UsbManager}
 import android.view.{Gravity, WindowManager}
 import com.protogenefactory.ioiomaster.server.services.ServerService
-import net.majorkernelpanic.streaming.SessionBuilder
 import net.majorkernelpanic.streaming.gl.SurfaceView
 import net.majorkernelpanic.streaming.rtsp.RtspServer
-import net.majorkernelpanic.streaming.video.VideoQuality
 import org.apache.http.conn.util.InetAddressUtils
 import org.scaloid.common._
 
@@ -33,7 +31,7 @@ class StatusActivity extends SActivity {
     info(s"StatusActivity.onCreate() $intent")
 
     // Prevent the screen to lock
-    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    getWindow.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
     intent.fold(throw new RuntimeException("StatusActivity launched without intent")) { i: Intent =>
 
@@ -77,6 +75,7 @@ class StatusActivity extends SActivity {
 
           }.gravity(Gravity.CENTER)
 
+          /*
           // Configure the stream
           SessionBuilder.getInstance()
             // Surface view needed for now by libstreaming
@@ -89,6 +88,7 @@ class StatusActivity extends SActivity {
 
           // Start the streaming service
           startService[RtspServer]
+          */
 
       }
 
