@@ -126,9 +126,17 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
     mProject.synchronized {
 
       if (!mProject.hasProject) {
+
         info(s"ServerService.playPosition() project=[${project.id}] '${project.name}' step: $stepIndex")
-        mProject.setProject(project.copy(steps = project.steps.slice(stepIndex, stepIndex + 1)))
+
+        val startStep = project.steps(stepIndex).copy(duration = 100)
+        val endStep   = project.steps(stepIndex).copy(duration = 0  )
+
+        mProject.setProject(project.copy(
+          steps = Vector(startStep, endStep)
+        ))
         mProject.notifyAll()
+
       } else {
         info(s"ServerService.playPosition() project=[${project.id}] '${project.name}' Project already playing")
         toast("Project already playing!")
@@ -236,7 +244,7 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
     override def disconnected() {
 
       info(s"ServerService.SequencerLooper.disconnected()")
-      toast(s"ServerService.SerquencerLooper.disconnected()")
+      toast(s"IOIO disconnected")
 
       throwExceptionOnMainThread {
         info("ServerServer.SequencerLooper.disconnected() Stopping HTTP server")

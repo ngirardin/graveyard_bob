@@ -37,7 +37,7 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
   // The bob application
   lazy val application: BobApplication = getApplication.asInstanceOf[BobApplication]
 
-  var autoplay = defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
+  var autoplay = false
 
   var project: Project = null
 
@@ -54,6 +54,9 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
     // Create the timeline tabs
     createTabs()
+
+    // Get the autoplay from the preferences
+    autoplay = defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
 
     // Need to create the tabs before selected the saved one
     if (savedInstanceState != null) {
@@ -153,8 +156,9 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
     application.projectsDao.updateSteps(project)
 
     if (autoplay) {
-      //TODO remove
-      toast("Autoplay duration")
+//TODO remove
+toast("Autoplay duration")
+      playStep(stepIndex)
     }
 
   }
@@ -176,8 +180,9 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
     application.projectsDao.updateSteps(project)
 
     if (autoplay) {
-      //TODO remove
-      toast("Autoplay position")
+//TODO remove
+toast("Autoplay position")
+      playStep(stepIndex)
     }
 
   }
@@ -205,11 +210,9 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
     )
 
     // Check the autoplay checkbox according to the preferences
-    menu.findItem(R.id.action_autoplay).setChecked(
-      defaultSharedPreferences.getBoolean(BobApplication.Preferences.AUTOPLAY, false)
-    )
-
+    menu.findItem(R.id.action_autoplay).setChecked(autoplay)
     true
+
   }
 
   override def onOptionsItemSelected(item: MenuItem) : Boolean = {
@@ -313,6 +316,14 @@ class ProjectActivity extends SFragmentActivity with TagUtil with PositionsFragm
 
     PlayProgressDialog.show(this, project)
     application.connection.playProject(project)
+
+  }
+
+  def playStep(stepIndex: Int) {
+
+    info("ProjectActivity.playStep")
+
+    application.connection.playStep(project, stepIndex)
 
   }
 
