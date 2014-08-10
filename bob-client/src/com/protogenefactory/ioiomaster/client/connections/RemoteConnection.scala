@@ -56,7 +56,7 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
     val json = project.toJson.compactPrint
 
-    val params  = s"project=" + URLEncoder.encode(json, "UTF-8") + stepIndex.fold(){ s => s"&step=$s" }
+    val params  = s"project=" + URLEncoder.encode(json, "UTF-8") + stepIndex.fold(""){ s => s"&step=$s" }
 
     val url = s"$rootUrl/play?$params"
 
