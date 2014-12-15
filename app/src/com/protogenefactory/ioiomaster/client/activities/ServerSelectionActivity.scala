@@ -29,12 +29,6 @@ class ServerSelectionActivity extends SActivity {
       // Remove itself from the stack
       finish()
     })
-
-    serverService.run(s => {
-      val available = s.isIOIOStarted
-      info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: $available")
-      enabled(available)
-    })
   }
 
   lazy val editTextIP : SEditText = new SEditText("Server IP address") {
@@ -77,32 +71,49 @@ class ServerSelectionActivity extends SActivity {
     })
   }.enabled(!application.serverIP.isEmpty)
 
+  lazy val layoutConnectRemote = new SLinearLayout {
+    this += new STextView("Remote IP")
+    this += editTextIP.<<(150.dip, WRAP_CONTENT).>>
+    this += buttonConnectRemote
+  }
+    .gravity(Gravity.CENTER_HORIZONTAL)
+
   onCreate {
 
     info("ServerSelectionActivity.onCreate()")
 
     contentView = new SVerticalLayout {
 
-      this += new SVerticalLayout {
+      serverService.run(service => {
 
-        this += buttonConnectLocal.<<(250.dip, WRAP_CONTENT).>>
+        info(s"ServerSelectionActivity.buttonConnectLocal Local connection available: ${service.isIOIOStarted}")
 
-        this += new SLinearLayout {
-          this += new STextView("Server IP")
-          this += editTextIP.<<(150.dip, WRAP_CONTENT).>>
-          this += buttonConnectRemote
-        }.wrap.>>
+        if (service.isIOIOStarted) {
 
-      }
-      .<<.Weight(1).>>
-      .gravity(Gravity.CENTER)
+          this += new SVerticalLayout {
+            this += buttonConnectLocal.<<(250.dip, WRAP_CONTENT).>>
+          }
+            .<<.Weight(1).>>
+            .gravity(Gravity.CENTER)
 
-      val pm = getPackageManager.getPackageInfo(getPackageName, 0)
-      val version = pm.versionName
-      val buildDate = new Date(pm.lastUpdateTime)
+        } else {
 
-      STextView(s"Version $version\nBuilt $buildDate")
-        .gravity(Gravity.CENTER_HORIZONTAL)
+          this += new SVerticalLayout {
+            this += layoutConnectRemote.wrap.>>
+          }
+            .<<.Weight(1).>>
+            .gravity(Gravity.CENTER)
+
+        }
+
+        val pm        = getPackageManager.getPackageInfo(getPackageName, 0)
+        val version   = pm.versionName
+        val buildDate = new Date(pm.lastUpdateTime)
+
+        STextView(s"Version $version\nBuilt $buildDate")
+          .gravity(Gravity.CENTER_HORIZONTAL)
+
+      })
 
     }
 
