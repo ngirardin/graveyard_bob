@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.protogenefactory.ioiomaster"
-	android:versionCode="16"
-	android:versionName="1.1">
+	android:versionCode="17"
+	android:versionName="1.2">
 
     <!-- Client permissions -->
     <uses-permission android:name="android.permission.INTERNET"             />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Server permissions -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <!--<uses-permission android:name="android.permission.CAMERA" />-->
+    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+    <!--<uses-feature android:name="android.hardware.camera" />-->
+    <!--<uses-feature android:name="android.hardware.camera.autofocus" />-->
     <uses-feature android:name="android.hardware.usb.accessory" android:required="false" /> <!-- open accessory -->
 
     <!-- API 14 = Android 4.0 from 2011 -->
@@ -68,7 +68,7 @@
 
         <!-- ****** SERVER ***** -->
         <service android:name=".server.services.ServerService" />
-        <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
+        <!--<service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>-->
 
         <activity
             android:name=".server.activities.StatusActivity"
