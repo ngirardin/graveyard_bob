@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Server permissions -->
-    <!--<uses-permission android:name="android.permission.CAMERA" />-->
-    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
-    <!--<uses-feature android:name="android.hardware.camera" />-->
-    <!--<uses-feature android:name="android.hardware.camera.autofocus" />-->
     <uses-feature android:name="android.hardware.usb.accessory" android:required="false" /> <!-- open accessory -->
 
     <!-- API 14 = Android 4.0 from 2011 -->
@@ -68,7 +64,6 @@
 
         <!-- ****** SERVER ***** -->
         <service android:name=".server.services.ServerService" />
-        <!--<service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>-->
 
         <activity
             android:name=".server.activities.StatusActivity"
@@ -84,13 +79,6 @@
                 android:resource="@xml/accessory_filter" />
 
         </activity>
-
-        <!--
-        <activity
-            android:name=".server.VideoActivity"
-            android:label="Remote video">
-        </activity>
-        -->
 
     </application>
 

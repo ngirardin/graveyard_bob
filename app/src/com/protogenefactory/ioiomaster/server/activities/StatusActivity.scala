@@ -6,8 +6,6 @@ import android.content.Intent
 import android.hardware.usb.{UsbAccessory, UsbManager}
 import android.view.{Gravity, WindowManager}
 import com.protogenefactory.ioiomaster.server.services.ServerService
-import net.majorkernelpanic.streaming.gl.SurfaceView
-import net.majorkernelpanic.streaming.rtsp.RtspServer
 import org.apache.http.conn.util.InetAddressUtils
 import org.scaloid.common._
 
@@ -17,14 +15,7 @@ class StatusActivity extends SActivity {
 
   override implicit val loggerTag = LoggerTag("Bob")
 
-  final val STREAM_WIDTH   = 320
-  final val STREAM_HEIGHT  = 240
-  final val STREAM_FPS     = 15
-  final val STREAM_BITRATE = 128 * 1024
-
   lazy val serverService  = new LocalServiceConnection[ServerService]
-
-  lazy val mSurfaceView = new SurfaceView(this, null)
 
   onCreate {
 
@@ -66,25 +57,7 @@ class StatusActivity extends SActivity {
               .gravity(Gravity.CENTER_HORIZONTAL)
               .textSize(18.sp)
 
-            this += mSurfaceView
-              .<<((STREAM_WIDTH / 2).dip, (STREAM_HEIGHT / 2).dip).>>
-
           }.gravity(Gravity.CENTER)
-
-          /*
-          // Configure the stream
-          SessionBuilder.getInstance()
-            // Surface view needed for now by libstreaming
-            .setSurfaceView(mSurfaceView)
-//            .setPreviewOrientation(90)
-            .setContext(getApplicationContext)
-            .setAudioEncoder(SessionBuilder.AUDIO_NONE)
-            .setVideoEncoder(SessionBuilder.VIDEO_H264)
-            .setVideoQuality(new VideoQuality(STREAM_WIDTH, STREAM_HEIGHT, STREAM_FPS, STREAM_BITRATE))
-
-          // Start the streaming service
-          startService[RtspServer]
-          */
 
       }
 
@@ -95,11 +68,6 @@ class StatusActivity extends SActivity {
   override def onNewIntent(intent: Intent) {
     info(s"StatusActivity.onNewIntent() intent=$intent")
     //toast(s"New intent\n$intent")
-  }
-
-  onStop {
-    // Stop the streaming server
-    stopService[RtspServer]
   }
 
   onDestroy {
