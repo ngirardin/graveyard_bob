@@ -62,11 +62,7 @@ class StatusActivity extends SActivity {
               .textSize(24.sp)
               .padding(0, 0, 0, 32.dip) // left, top, right, bottom
 
-            STextView(s"Remote connection IP${getIPs.mkString("\n")}")
-              .gravity(Gravity.CENTER_HORIZONTAL)
-              .textSize(18.sp)
-
-            STextView("Keep this window open for streaming")
+            STextView(s"This device IP address is:\n${getIPs.mkString("\n")}")
               .gravity(Gravity.CENTER_HORIZONTAL)
               .textSize(18.sp)
 
@@ -98,7 +94,7 @@ class StatusActivity extends SActivity {
 
   override def onNewIntent(intent: Intent) {
     info(s"StatusActivity.onNewIntent() intent=$intent")
-    toast(s"New intent\n$intent")
+    //toast(s"New intent\n$intent")
   }
 
   onStop {
