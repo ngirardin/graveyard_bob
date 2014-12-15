@@ -2,7 +2,7 @@ package com.protogenefactory.ioiomaster.server
 
 import android.util.Log
 import com.protogenefactory.ioiomaster.client.BobApplication
-import com.protogenefactory.ioiomaster.client.connections.Playable
+import com.protogenefactory.ioiomaster.client.connections.{Playable, Connection}
 import com.protogenefactory.ioiomaster.client.models.Project
 import com.protogenefactory.ioiomaster.server.BobServer._
 import fi.iki.elonen.NanoHTTPD

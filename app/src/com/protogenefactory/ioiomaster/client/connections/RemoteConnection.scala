@@ -21,7 +21,6 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
   final val rootUrl = s"http://$remoteIP:${BobApplication.Params.PORT}"
 
-
   def playProject(project: Project) {
 
     info(s"RemoteConnection.playProject() project=${project.id}")
@@ -84,38 +83,32 @@ case class RemoteConnection(remoteIP: String) extends Connection with TagUtil {
 
   }
 
-  override def hasVideo: Boolean = true
+  override def ping(): Future[Boolean] = {
 
-  override def ping(): Boolean = {
+    Future {
 
-    import scala.concurrent.duration._
+      val url = s"$rootUrl/ping"
 
-    val result = Await.result[Boolean]({
-      Future {
-        val url = s"$rootUrl/ping"
+      info(s"RemoteConnection.ping() Ping URL=$url")
 
-        info(s"RemoteConnection.ping() Ping URL=$url")
+      try {
+        val httpClient = new DefaultHttpClient()
+        val response = httpClient.execute(new HttpGet(url))
 
-        try {
-          val httpClient = new DefaultHttpClient()
-          val response = httpClient.execute(new HttpGet(url))
-
-          info(s"RemoteConnection.ping() Response=${response.getStatusLine.getStatusCode}")
-          response.getStatusLine.getStatusCode match {
-            case HttpStatus.SC_OK => true
-            case _ => false
-          }
-        } catch {
-          case e: ConnectException => false
+        info(s"RemoteConnection.ping() Response=${response.getStatusLine.getStatusCode}")
+        response.getStatusLine.getStatusCode match {
+          case HttpStatus.SC_OK => true
+          case _                => false
         }
-      }
-    }, 5.seconds)
 
-    info(s"RemoteConnection.ping() result=$result")
-    result
+      } catch {
+        case e: ConnectException =>
+          info(s"RemoteConnection.ping() Timeout")
+          false
+      }
+
+    }
 
   }
-
-  override def getSounds: Seq[String] = ???
 
 }

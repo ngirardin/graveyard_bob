@@ -15,6 +15,7 @@ import com.protogenefactory.ioiomaster.R
 import com.protogenefactory.ioiomaster.client.BobApplication
 import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ServerSelectionActivity extends SActivity {
 
@@ -114,14 +115,22 @@ class ServerSelectionActivity extends SActivity {
 
       application.setRemoteConnection(ip)
 
-      if (application.connection.ping()) {
-        startActivity[PlayActivity]
-        // Remove itself from the stack
-        finish()
-      } else {
-        alert(s"Can't connect to the app", s"Unable to connect to $ip, check that the IOIO is connected on the other device.")
-        // Re-enable the Connect button
-        buttonConnectRemote.setEnabled(true)
+      application.connection.ping().map { result =>
+
+        if (result) {
+
+          startActivity[PlayActivity]
+          // Remove itself from the stack
+          finish()
+
+        } else {
+
+          alert(s"Can't connect to the app", s"Unable to connect to $ip, check that the IOIO is connected on the other device.")
+          // Re-enable the Connect button
+          buttonConnectRemote.setEnabled(true)
+
+        }
+
       }
 
     }

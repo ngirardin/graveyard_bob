@@ -6,7 +6,7 @@ import android.app.{Notification, Service}
 import android.content.Intent
 import android.os.Environment
 import com.protogenefactory.ioiomaster.R
-import com.protogenefactory.ioiomaster.client.connections.Playable
+import com.protogenefactory.ioiomaster.client.connections.{Playable, Connection}
 import com.protogenefactory.ioiomaster.client.models.{Project, ServoConfig}
 import com.protogenefactory.ioiomaster.server.BobServer
 import com.protogenefactory.ioiomaster.server.activities.StatusActivity
@@ -144,10 +144,6 @@ class ServerService extends LocalService with IOIOLooperProvider with Playable {
 
     }
 
-  }
-
-  override def getSounds: Seq[String] = {
-    Seq("TODO", s"${Environment.getExternalStorageDirectory}/Ringtones", "TODO")
   }
 
   override def createIOIOLooper(connectionType: String, extra: Object) = new BaseIOIOLooper() {

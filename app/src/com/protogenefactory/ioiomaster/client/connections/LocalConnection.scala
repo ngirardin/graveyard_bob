@@ -1,8 +1,12 @@
 package com.protogenefactory.ioiomaster.client.connections
 
 import com.protogenefactory.ioiomaster.client.models.Project
+
 import com.protogenefactory.ioiomaster.server.services.ServerService
 import org.scaloid.common._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class LocalConnection(serverService: LocalServiceConnection[ServerService]) extends Connection with TagUtil {
 
@@ -26,11 +30,6 @@ class LocalConnection(serverService: LocalServiceConnection[ServerService]) exte
 
   }
 
-  override def hasVideo: Boolean = false
-
-  override def ping(): Boolean = true
-
-  override def getSounds: Seq[String] =
-    serverService(s => s.getSounds, throw new RuntimeException("Can't get the sounds"))
+  override def ping(): Future[Boolean] = Future(true)
 
 }

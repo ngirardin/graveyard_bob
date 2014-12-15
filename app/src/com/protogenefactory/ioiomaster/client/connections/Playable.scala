@@ -8,6 +8,4 @@ trait Playable {
 
   def playStep(project: Project, stepIndex: Int)
 
-  def getSounds: Seq[String]
-
 }
