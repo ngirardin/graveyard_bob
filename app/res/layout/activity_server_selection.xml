@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="0dp"
+                  android:layout_weight="1" android:paddingTop="60dp" android:id="@+id/layoutLocal"
+                  android:visibility="gone">
+        <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Connect to the local IOIO board" android:id="@+id/buttonConnectLocal"
+                android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp" android:layout_weight="1" android:paddingTop="60dp"
+            android:id="@+id/layoutRemote" android:visibility="invisible">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remote IP address"
+                android:id="@+id/textView" android:layout_gravity="center_horizontal"/>
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/editTextIP" android:layout_gravity="center_horizontal" android:width="150dp"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect"
+                android:id="@+id/buttonConnectRemote" android:layout_gravity="center_horizontal"
+                android:enabled="false"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="{version}"
+            android:id="@+id/textViewVersion" android:gravity="center_horizontal"/>
+</LinearLayout>
