@@ -16,6 +16,13 @@ To run the project on a device, run:
   > run
 ```
 
+To build it run:
+
+```
+  $ sbt
+  > android:packageRelease
+```
+
 When the app compiles but crash at runtime that a class is not found, running `sbt clean` can come handy.
 
 
